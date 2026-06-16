@@ -1,1 +1,1067 @@
-
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0d1117">
+<title>ElecBill Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;--card:#161b27;--card2:#1c2333;--border:#252d40;--border2:#2e3a52;
+  --blue:#3b82f6;--bdim:rgba(59,130,246,.13);--bglow:rgba(59,130,246,.2);
+  --green:#22c55e;--gdim:rgba(34,197,94,.13);
+  --yellow:#f59e0b;--ydim:rgba(245,158,11,.13);
+  --red:#ef4444;--rdim:rgba(239,68,68,.13);
+  --wa:#25d366;--wadim:rgba(37,211,102,.12);
+  --text:#f0f4ff;--t2:#8b9ab5;--t3:#5a6a85;
+  --font:'Inter',system-ui,sans-serif;
+  --r:14px;--rl:20px;--rxl:26px;
+}
+html[lang="ar"]{--font:'Cairo',system-ui,sans-serif;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;padding-bottom:84px;-webkit-tap-highlight-color:transparent;}
+button,input,select,textarea{font-family:var(--font);border:none;outline:none;}
+button{cursor:pointer;}
+::-webkit-scrollbar{width:0;height:0;}
+/* ── SPLASH ── */
+#splash{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:32px 24px;transition:opacity .4s;}
+#splash.hide{opacity:0;pointer-events:none;}
+.sp-logo{font-size:56px;margin-bottom:14px;}
+.sp-title{font-size:28px;font-weight:900;letter-spacing:-.6px;margin-bottom:6px;text-align:center;}
+.sp-sub{font-size:14px;color:var(--t3);margin-bottom:44px;text-align:center;}
+.sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:320px;}
+.sp-btn{padding:24px 12px;border-radius:var(--rxl);border:2px solid var(--border2);background:var(--card);display:flex;flex-direction:column;align-items:center;gap:9px;transition:transform .12s,border-color .2s;}
+.sp-btn:active{transform:scale(.95);}
+.sp-en{border-color:var(--blue);}
+.sp-ar{border-color:var(--yellow);}
+.sp-flag{font-size:38px;}
+.sp-lname{font-size:19px;font-weight:900;}
+.sp-en .sp-lname{color:var(--blue);}
+.sp-ar .sp-lname{color:var(--yellow);font-family:'Cairo',sans-serif;}
+.sp-hint{font-size:11px;color:var(--t3);}
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:80;background:rgba(13,17,23,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.hbrand{display:flex;align-items:center;gap:10px;}
+.hicon{width:34px;height:34px;background:var(--blue);border-radius:9px;font-size:17px;display:flex;align-items:center;justify-content:center;}
+.htitle{font-size:17px;font-weight:900;letter-spacing:-.4px;}
+.hsub{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-top:1px;}
+html[lang="ar"] .hsub{text-transform:none;letter-spacing:0;font-size:10px;}
+.hright{display:flex;align-items:center;gap:7px;}
+.hlang{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--t2);}
+.hdb{font-size:11px;font-weight:700;}
+.hdate{font-size:11px;color:var(--t3);background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;}
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 12px 0;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 6px;text-align:center;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;}
+.s1::before{background:var(--blue);} .s2::before{background:var(--yellow);}
+.s3::before{background:var(--red);} .s4::before{background:var(--green);}
+.sv{font-size:21px;font-weight:900;line-height:1;letter-spacing:-.5px;}
+.s1 .sv{color:var(--blue);} .s2 .sv{color:var(--yellow);}
+.s3 .sv{color:var(--red);}  .s4 .sv{color:var(--green);}
+.sl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+html[lang="ar"] .sl{text-transform:none;letter-spacing:0;font-size:10px;}
+/* ── TABS ── */
+.tabs{display:flex;margin:10px 12px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:3px;}
+.tab{flex:1;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;color:var(--t3);background:transparent;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.tab .ti{font-size:18px;}
+.tab.on{background:var(--blue);color:#fff;}
+html[lang="ar"] .tab{font-size:12px;}
+/* ── PAGES ── */
+.pg{display:none;padding:12px;animation:fu .18s ease;}
+.pg.on{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+/* ── SEARCH ROW ── */
+.srow{display:flex;gap:8px;margin-bottom:10px;}
+.sbox{flex:1;position:relative;}
+.sbox input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px 12px 40px;color:var(--text);font-size:15px;transition:border-color .2s;}
+html[lang="ar"] .sbox input{padding:12px 40px 12px 14px;text-align:right;}
+.sbox input::placeholder{color:var(--t3);}
+.sbox input:focus{border-color:var(--blue);}
+.sico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none;}
+html[lang="ar"] .sico{left:auto;right:13px;}
+.addbtn{width:48px;height:48px;background:var(--blue);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0;box-shadow:0 3px 12px var(--bglow);transition:transform .12s;}
+.addbtn:active{transform:scale(.91);}
+/* ── CHIPS ── */
+.chips{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px;}
+.chip{flex-shrink:0;padding:6px 14px;border-radius:50px;font-size:12px;font-weight:600;border:1.5px solid var(--border);color:var(--t3);background:var(--card);white-space:nowrap;transition:all .18s;}
+html[lang="ar"] .chip{font-size:13px;}
+.chip.on-b{background:var(--bdim);border-color:var(--blue);color:var(--blue);}
+.chip.on-y{background:var(--ydim);border-color:var(--yellow);color:var(--yellow);}
+.chip.on-r{background:var(--rdim);border-color:var(--red);color:var(--red);}
+.chip.on-g{background:var(--gdim);border-color:var(--green);color:var(--green);}
+/* ── CLIENT CARD ── */
+.cc{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rl);padding:15px;margin-bottom:9px;cursor:pointer;position:relative;overflow:hidden;transition:transform .1s;-webkit-user-select:none;user-select:none;}
+.cc::before{content:'';position:absolute;top:0;bottom:0;width:3.5px;}
+html[dir="ltr"] .cc::before{left:0;}
+html[dir="rtl"] .cc::before{right:0;left:auto;}
+.cc.sp::before{background:var(--yellow);} .cc.so::before{background:var(--red);}
+.cc.sd::before{background:var(--green);}  .cc.sn::before{background:var(--border2);}
+.cc:active{transform:scale(.984);}
+.cc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.cc-name{font-size:16px;font-weight:700;line-height:1.2;}
+.cc-meter{font-family:monospace;font-size:10px;color:var(--t3);background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0;}
+.cc-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:50px;}
+html[lang="ar"] .badge{font-size:11px;}
+.bp{background:var(--ydim);color:var(--yellow);border:1px solid rgba(245,158,11,.3);}
+.bo{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.bd{background:var(--gdim);color:var(--green);border:1px solid rgba(34,197,94,.3);}
+.bn{background:var(--card2);color:var(--t3);border:1px solid var(--border);}
+.cc-amt{font-family:monospace;font-size:13px;font-weight:800;color:var(--blue);}
+.cc-phone{font-size:11px;color:var(--wa);margin-top:6px;}
+.cc-nophone{font-size:11px;color:var(--red);margin-top:5px;}
+/* ── ACTION BUTTONS ── */
+.abtn{width:100%;padding:15px;border-radius:var(--r);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .1s;margin-top:8px;}
+.abtn:first-child{margin-top:0;}
+.abtn:active{transform:scale(.97);}
+html[lang="ar"] .abtn{font-size:16px;}
+.a-blue{background:var(--blue);color:#fff;box-shadow:0 3px 12px var(--bglow);}
+.a-wa{background:var(--wa);color:#fff;box-shadow:0 3px 12px rgba(37,211,102,.28);}
+.a-ghost{background:var(--card2);color:var(--t2);border:1.5px solid var(--border2);}
+.a-danger{background:var(--rdim);color:var(--red);border:1.5px solid rgba(239,68,68,.3);}
+/* ── DETAIL ── */
+.backbtn{display:flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:14px;font-weight:600;color:var(--t2);margin-bottom:14px;}
+.profile{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rxl);padding:18px;margin-bottom:14px;}
+.pname{font-size:22px;font-weight:900;margin-bottom:5px;letter-spacing:-.4px;}
+.prow{display:flex;align-items:center;gap:7px;margin-top:6px;font-size:13px;color:var(--t2);}
+.prow strong{color:var(--text);font-weight:600;}
+.totals{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0;}
+.tbox{border-radius:var(--r);padding:13px;text-align:center;}
+.tu{background:var(--rdim);border:1px solid rgba(239,68,68,.2);}
+.tp{background:var(--gdim);border:1px solid rgba(34,197,94,.2);}
+.tv{font-family:monospace;font-size:20px;font-weight:900;}
+.tu .tv{color:var(--red);} .tp .tv{color:var(--green);}
+.tl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-top:3px;}
+html[lang="ar"] .tl{text-transform:none;letter-spacing:0;font-size:10px;}
+.sechead{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin:15px 0 9px;display:flex;align-items:center;gap:8px;}
+html[lang="ar"] .sechead{text-transform:none;letter-spacing:0;font-size:12px;}
+.sechead::after{content:'';flex:1;height:1px;background:var(--border);}
+/* ── BILL CARD ── */
+.bc{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rl);padding:15px;margin-bottom:9px;}
+.bc.bcp{border-color:rgba(34,197,94,.22);} .bc.bco{border-color:rgba(239,68,68,.22);} .bc.bcn{border-color:rgba(245,158,11,.18);}
+.bc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+.bc-period{font-size:16px;font-weight:800;}
+.bc-amt{font-family:monospace;font-size:20px;font-weight:900;color:var(--blue);}
+.bc-amt span{font-size:12px;color:var(--t3);font-weight:600;}
+.bc-dates{font-size:11px;color:var(--t3);margin-bottom:6px;line-height:1.8;}
+.bc-desc{font-size:12px;color:var(--t2);background:var(--card2);border-radius:7px;padding:7px 11px;margin-bottom:10px;font-style:italic;line-height:1.5;}
+.bc-acts{display:flex;gap:7px;}
+.bca{flex:1;padding:9px 6px;border-radius:9px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;transition:transform .1s;}
+html[lang="ar"] .bca{font-size:13px;}
+.bca:active{transform:scale(.95);}
+.bca-pay{background:var(--gdim);color:var(--green);border:1.5px solid rgba(34,197,94,.3);}
+.bca-unp{background:var(--ydim);color:var(--yellow);border:1.5px solid rgba(245,158,11,.3);}
+.bca-wa{background:var(--wadim);color:var(--wa);border:1.5px solid rgba(37,211,102,.3);}
+.bca-del{background:var(--rdim);color:var(--red);border:1.5px solid rgba(239,68,68,.3);max-width:44px;}
+/* ── ALL BILLS PAGE ── */
+.abl{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rl);padding:14px;margin-bottom:9px;}
+.abl-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;}
+.abl-name{font-size:15px;font-weight:700;}
+.abl-sub{font-size:10px;color:var(--t3);margin-top:2px;font-family:monospace;}
+.abl-amt{font-family:monospace;font-size:16px;font-weight:900;color:var(--blue);text-align:right;}
+.abl-due{font-size:10px;color:var(--t3);text-align:right;margin-top:2px;}
+.abl-foot{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px;}
+.abl-wa{background:var(--wadim);color:var(--wa);border:1.5px solid rgba(37,211,102,.3);border-radius:7px;padding:5px 11px;font-size:12px;font-weight:700;margin-left:auto;}
+html[lang="ar"] .abl-wa{margin-left:0;margin-right:auto;}
+/* ── SUMMARY ── */
+.scard{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rxl);padding:18px;margin-bottom:11px;}
+.scard-t{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:13px;}
+html[lang="ar"] .scard-t{text-transform:none;letter-spacing:0;font-size:12px;}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.sr:last-child{border-bottom:none;}
+.sr-l{font-size:14px;color:var(--t2);font-weight:500;}
+.sr-v{font-family:monospace;font-size:15px;font-weight:800;}
+.prog{margin-top:13px;}
+.prog-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:5px;}
+.prog-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .5s ease;}
+.drow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.drow:last-child{border-bottom:none;}
+.dname{font-size:14px;font-weight:600;} .dmt{font-size:10px;color:var(--t3);font-family:monospace;margin-top:1px;}
+.drv{display:flex;align-items:center;gap:9px;}
+.damt{font-family:monospace;font-size:14px;font-weight:800;color:var(--red);}
+.dwa{background:var(--wadim);border:1.5px solid rgba(37,211,102,.3);color:var(--wa);border-radius:7px;padding:5px 9px;font-size:13px;font-weight:700;}
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:80;background:rgba(13,17,23,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));}
+.nb{flex:1;padding:9px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:8px;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;transition:all .18s;background:none;}
+html[lang="ar"] .nb{text-transform:none;letter-spacing:0;font-size:11px;}
+.nb .ni{font-size:19px;}
+.nb.on{color:var(--blue);background:var(--bdim);}
+/* ── OVERLAYS / SHEETS ── */
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.68);backdrop-filter:blur(6px);align-items:flex-end;justify-content:center;}
+.ov.on{display:flex;}
+.sheet{background:var(--card);border:1px solid var(--border2);border-radius:26px 26px 0 0;padding:18px 18px calc(28px + env(safe-area-inset-bottom,0px));width:100%;max-width:520px;max-height:93dvh;overflow-y:auto;animation:sup .26s cubic-bezier(.22,1,.36,1);}
+@keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sh{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
+.stitle{font-size:19px;font-weight:900;margin-bottom:16px;letter-spacing:-.4px;}
+.stitle span{color:var(--blue);}
+/* ── FORM ── */
+.fg{margin-bottom:12px;}
+.fl{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:5px;margin-bottom:5px;}
+html[lang="ar"] .fl{text-transform:none;letter-spacing:0;font-size:12px;}
+.freq{color:var(--red);}
+.fi{width:100%;background:var(--bg);border:1.5px solid var(--border2);border-radius:var(--r);padding:13px 14px;color:var(--text);font-size:15px;font-family:var(--font);transition:border-color .2s;}
+html[lang="ar"] .fi{text-align:right;}
+.fi::placeholder{color:var(--t3);}
+.fi:focus{border-color:var(--blue);}
+select.fi{appearance:none;-webkit-appearance:none;}
+.fhint{font-size:11px;color:var(--t3);margin-top:4px;line-height:1.4;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.dlbl{font-size:11px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.9px;margin:15px 0 10px;padding:7px 12px;background:var(--bdim);border-radius:7px;border-left:3px solid var(--blue);}
+html[lang="ar"] .dlbl{text-transform:none;letter-spacing:0;font-size:12px;border-left:none;border-right:3px solid var(--blue);}
+.fixbox{background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);padding:12px;margin-bottom:4px;display:none;}
+.fixrow{font-size:12px;color:var(--t2);line-height:1.9;}
+.fixrow .fxl{color:var(--t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+html[lang="ar"] .fixrow .fxl{text-transform:none;letter-spacing:0;font-size:11px;}
+.fixrow .fxv{color:var(--text);font-weight:600;font-family:monospace;font-size:12px;}
+.fixrow .fxw{color:var(--wa);}
+/* ── WA PREVIEW BOX ── */
+.wabox{background:#0b1f14;border:1.5px solid rgba(37,211,102,.28);border-radius:var(--r);padding:13px;margin-bottom:13px;}
+.wabox-hd{font-size:10px;font-weight:800;color:var(--wa);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
+.wabox-txt{font-size:13px;color:#d1fae5;line-height:1.75;white-space:pre-wrap;word-break:break-word;}
+/* ── TOAST ── */
+.toast{position:fixed;top:66px;left:11px;right:11px;z-index:500;background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;transform:translateY(-110px);opacity:0;transition:all .28s cubic-bezier(.22,1,.36,1);box-shadow:0 6px 24px rgba(0,0,0,.5);pointer-events:none;}
+.toast.on{transform:translateY(0);opacity:1;}
+.ti{font-size:20px;flex-shrink:0;}
+.tt{font-size:14px;font-weight:700;}
+.tm{font-size:12px;color:var(--t3);margin-top:1px;}
+/* ── EMPTY / LOADING ── */
+.empty{text-align:center;padding:50px 16px;}
+.ei{font-size:46px;opacity:.4;margin-bottom:11px;}
+.et{font-size:16px;font-weight:700;color:var(--t2);margin-bottom:5px;}
+.es{font-size:13px;color:var(--t3);line-height:1.5;}
+.ldg{display:flex;flex-direction:column;align-items:center;padding:50px 16px;gap:11px;}
+.spin{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:sp .8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<!-- SPLASH / LANG PICKER -->
+<div id="splash">
+  <div class="sp-logo">⚡</div>
+  <div class="sp-title">ElecBill Pro</div>
+  <div class="sp-sub">Choose your language / اختر لغتك</div>
+  <div class="sp-grid">
+    <button class="sp-btn sp-en" onclick="boot('en')">
+      <span class="sp-flag">🇬🇧</span>
+      <span class="sp-lname">English</span>
+      <span class="sp-hint">English</span>
+    </button>
+    <button class="sp-btn sp-ar" onclick="boot('ar')">
+      <span class="sp-flag">🇩🇿</span>
+      <span class="sp-lname">عربي</span>
+      <span class="sp-hint">Arabic</span>
+    </button>
+  </div>
+</div>
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hbrand">
+    <div class="hicon">⚡</div>
+    <div><div class="htitle">ElecBill Pro</div><div class="hsub" id="h_sub">Billing</div></div>
+  </div>
+  <div class="hright">
+    <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
+    <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
+    <div class="hdate" id="h_date"></div>
+  </div>
+</header>
+<!-- STATS -->
+<div class="stats">
+  <div class="stat s1"><div class="sv" id="sc">0</div><div class="sl" id="sl1">Clients</div></div>
+  <div class="stat s2"><div class="sv" id="sp">0</div><div class="sl" id="sl2">Pending</div></div>
+  <div class="stat s3"><div class="sv" id="so">0</div><div class="sl" id="sl3">Overdue</div></div>
+  <div class="stat s4"><div class="sv" id="sd">0</div><div class="sl" id="sl4">Paid</div></div>
+</div>
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" id="tab-c" onclick="gp('c')"><span class="ti">👥</span><span id="nt1">Clients</span></button>
+  <button class="tab"    id="tab-b" onclick="gp('b')"><span class="ti">📋</span><span id="nt2">Bills</span></button>
+  <button class="tab"    id="tab-s" onclick="gp('s')"><span class="ti">📊</span><span id="nt3">Summary</span></button>
+</div>
+<!-- PAGE: CLIENTS -->
+<div class="pg on" id="pg-c">
+  <div style="height:12px"></div>
+  <div class="srow">
+    <div class="sbox"><span class="sico">🔍</span><input type="search" id="cs" oninput="rC()" autocomplete="off"></div>
+    <button class="addbtn" onclick="openSh('sh-ac')">+</button>
+  </div>
+  <div class="chips" id="cchips">
+    <button class="chip on-b" onclick="cf('all',this)">—</button>
+    <button class="chip"      onclick="cf('pending',this)">—</button>
+    <button class="chip"      onclick="cf('overdue',this)">—</button>
+    <button class="chip"      onclick="cf('paid',this)">—</button>
+    <button class="chip"      onclick="cf('none',this)">—</button>
+  </div>
+  <div id="clist"><div class="ldg"><div class="spin"></div></div></div>
+</div>
+<!-- PAGE: BILLS -->
+<div class="pg" id="pg-b">
+  <div style="height:12px"></div>
+  <div class="srow">
+    <div class="sbox"><span class="sico">🔍</span><input type="search" id="bs" oninput="rB()" autocomplete="off"></div>
+  </div>
+  <div class="chips" id="bchips">
+    <button class="chip on-b" onclick="bf('all',this)">—</button>
+    <button class="chip"      onclick="bf('unpaid',this)">—</button>
+    <button class="chip"      onclick="bf('overdue',this)">—</button>
+    <button class="chip"      onclick="bf('paid',this)">—</button>
+  </div>
+  <div id="blist"><div class="ldg"><div class="spin"></div></div></div>
+</div>
+<!-- PAGE: SUMMARY -->
+<div class="pg" id="pg-s">
+  <div style="height:12px"></div>
+  <div class="scard">
+    <div class="scard-t" id="s_fin">💰 Overview</div>
+    <div class="sr"><span class="sr-l" id="s_tb_l">Total Billed</span><span class="sr-v" id="s_tb" style="color:var(--blue)">—</span></div>
+    <div class="sr"><span class="sr-l" id="s_tc_l">Collected</span><span class="sr-v" id="s_tc" style="color:var(--green)">—</span></div>
+    <div class="sr"><span class="sr-l" id="s_to_l">Outstanding</span><span class="sr-v" id="s_to" style="color:var(--red)">—</span></div>
+    <div class="prog"><div class="prog-lbl"><span id="s_rl">Collection Rate</span><span id="s_rate">0%</span></div><div class="prog-track"><div class="prog-fill" id="s_bar" style="width:0%"></div></div></div>
+  </div>
+  <div class="scard">
+    <div class="scard-t" id="s_cnt">📋 Bills</div>
+    <div class="sr"><span class="sr-l" id="s_bt_l">Total</span><span class="sr-v" id="s_bt">0</span></div>
+    <div class="sr"><span class="sr-l" id="s_bp_l">Paid</span><span class="sr-v" id="s_bp" style="color:var(--green)">0</span></div>
+    <div class="sr"><span class="sr-l" id="s_bu_l">Unpaid</span><span class="sr-v" id="s_bu" style="color:var(--yellow)">0</span></div>
+    <div class="sr"><span class="sr-l" id="s_bo_l">Overdue</span><span class="sr-v" id="s_bo" style="color:var(--red)">0</span></div>
+  </div>
+  <div class="scard"><div class="scard-t" id="s_top">🔴 Top Unpaid</div><div id="topd"></div></div>
+  <div class="scard">
+    <div class="scard-t" id="s_bk_t">📲 Bulk WhatsApp</div>
+    <p style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:13px" id="s_bk_d">Send reminders to all unpaid clients at once.</p>
+    <button class="abtn a-wa" onclick="bulkWa()" style="margin-top:0"><span>📲</span><span id="s_bk_btn">Send to All Unpaid</span></button>
+  </div>
+</div>
+<!-- PAGE: DETAIL -->
+<div class="pg" id="pg-d">
+  <div style="height:12px"></div>
+  <button class="backbtn" id="back_btn" onclick="goBack()">← Back</button>
+  <div id="detail"></div>
+</div>
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="nb on" id="nb-c" onclick="gp('c')"><span class="ni">👥</span><span id="nb1">Clients</span></button>
+  <button class="nb"    id="nb-b" onclick="gp('b')"><span class="ni">📋</span><span id="nb2">Bills</span></button>
+  <button class="nb"    id="nb-s" onclick="gp('s')"><span class="ni">📊</span><span id="nb3">Summary</span></button>
+</nav>
+<!-- SHEET: ADD CLIENT -->
+<div class="ov" id="sh-ac">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="stitle" id="ac_t">Add <span>Client</span></div>
+    <div class="dlbl" id="ac_fl">🔒 Fixed Info — saved permanently</div>
+    <div class="fg"><div class="fl" id="ac_nl">Name <span class="freq">*</span></div><input class="fi" id="ac_name" type="text" autocomplete="off"></div>
+    <div class="fg"><div class="fl" id="ac_ml">Meter Serial # <span class="freq">*</span></div><input class="fi" id="ac_meter" type="text" autocomplete="off"></div>
+    <div class="fg">
+      <div class="fl" id="ac_pl">📱 WhatsApp # <span class="freq">*</span></div>
+      <input class="fi" id="ac_phone" type="tel" autocomplete="off">
+      <div class="fhint" id="ac_ph">Algeria: 213 then number without 0. Example: 213550123456</div>
+    </div>
+    <div class="fg"><div class="fl" id="ac_al">Address</div><input class="fi" id="ac_addr" type="text" autocomplete="off"></div>
+    <div style="height:12px"></div>
+    <button class="abtn a-blue" id="ac_sv" onclick="saveClient()" style="margin-top:0">✅ Save Client</button>
+    <button class="abtn a-ghost" id="ac_cn" onclick="closeSh('sh-ac')">Cancel</button>
+  </div>
+</div>
+<!-- SHEET: EDIT CLIENT -->
+<div class="ov" id="sh-ec">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="stitle" id="ec_t">Edit <span>Client</span></div>
+    <div class="dlbl" id="ec_fl">🔒 Fixed Info</div>
+    <div class="fg"><div class="fl" id="ec_nl">Name <span class="freq">*</span></div><input class="fi" id="ec_name" type="text" autocomplete="off"></div>
+    <div class="fg"><div class="fl" id="ec_ml">Meter Serial # <span class="freq">*</span></div><input class="fi" id="ec_meter" type="text" autocomplete="off"></div>
+    <div class="fg"><div class="fl" id="ec_pl">📱 WhatsApp #</div><input class="fi" id="ec_phone" type="tel" autocomplete="off"><div class="fhint">213XXXXXXXXX</div></div>
+    <div class="fg"><div class="fl" id="ec_al">Address</div><input class="fi" id="ec_addr" type="text" autocomplete="off"></div>
+    <input type="hidden" id="ec_id">
+    <div style="height:12px"></div>
+    <button class="abtn a-blue" id="ec_sv" onclick="updClient()" style="margin-top:0">💾 Save Changes</button>
+    <button class="abtn a-ghost" id="ec_cn" onclick="closeSh('sh-ec')">Cancel</button>
+  </div>
+</div>
+<!-- SHEET: ADD BILL -->
+<div class="ov" id="sh-ab">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="stitle" id="ab_t">Add <span>Bill</span></div>
+    <div class="dlbl" id="ab_fl">🔒 Fixed Info</div>
+    <div class="fg">
+      <div class="fl" id="ab_cl">Client <span class="freq">*</span></div>
+      <select class="fi" id="ab_client" onchange="onBC()"><option value="" id="ab_sel_ph">— Select —</option></select>
+    </div>
+    <div class="fixbox" id="ab_fix">
+      <div class="fixrow"><span class="fxl" id="ab_fm_l">Meter</span><br><span class="fxv" id="ab_fm">—</span></div>
+      <div class="fixrow" style="margin-top:5px"><span class="fxl" id="ab_fp_l">WhatsApp</span><br><span class="fxw" id="ab_fp">—</span></div>
+    </div>
+    <div class="dlbl" id="ab_vl">📝 Variable Info</div>
+    <div class="fg"><div class="fl" id="ab_ml">Period <span class="freq">*</span></div><input class="fi" id="ab_month" type="text" oninput="rPrev()" autocomplete="off"></div>
+    <div class="frow">
+      <div class="fg"><div class="fl" id="ab_al">Amount ($) <span class="freq">*</span></div><input class="fi" id="ab_amt" type="number" min="0" oninput="rPrev()"></div>
+      <div class="fg"><div class="fl" id="ab_dl">Due Date <span class="freq">*</span></div><input class="fi" id="ab_due" type="date" oninput="rPrev()"></div>
+    </div>
+    <div class="fg"><div class="fl" id="ab_il">Issue Date</div><input class="fi" id="ab_date" type="date" oninput="rPrev()"></div>
+    <div class="fg"><div class="fl" id="ab_nl2">Note</div><input class="fi" id="ab_desc" type="text" oninput="rPrev()" autocomplete="off"></div>
+    <div class="dlbl" id="ab_pvl">📲 WhatsApp Preview</div>
+    <div class="wabox"><div class="wabox-hd">📱 <span id="ab_pvh">Message preview</span></div><div class="wabox-txt" id="ab_prev">—</div></div>
+    <button class="abtn a-blue" id="ab_sv"   onclick="saveBill(false)" style="margin-top:0">💾 Save Bill Only</button>
+    <button class="abtn a-wa"   id="ab_svw"  onclick="saveBill(true)"><span>📲</span><span id="ab_svwl">Save &amp; Send WhatsApp</span></button>
+    <button class="abtn a-ghost" id="ab_cn"  onclick="closeSh('sh-ab')">Cancel</button>
+  </div>
+</div>
+<!-- SHEET: WHATSAPP SEND -->
+<div class="ov" id="sh-wa">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="stitle" id="wa_t">📲 <span>WhatsApp</span></div>
+    <div class="wabox" style="margin-bottom:13px"><div class="wabox-hd">📱 <span id="wa_mh">Message</span></div><div class="wabox-txt" id="wa_prev">—</div></div>
+    <div class="fg">
+      <div class="fl" id="wa_pl">Phone Number</div>
+      <input class="fi" id="wa_phone" type="tel" placeholder="213XXXXXXXXX">
+      <div class="fhint" id="wa_hint">You can edit before sending.</div>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:12px;font-size:12px;color:var(--t2);line-height:1.6" id="wa_info">ℹ️ WhatsApp opens with the message ready. Just tap <strong>Send</strong>.</div>
+    <button class="abtn a-wa" id="wa_snd" onclick="doWa()" style="margin-top:0"><span>📲</span><span id="wa_sl">Open WhatsApp</span></button>
+    <button class="abtn a-ghost" id="wa_cn" onclick="closeSh('sh-wa')">Cancel</button>
+  </div>
+</div>
+<!-- TOAST -->
+<div class="toast" id="toast"><div class="ti" id="t_i">✅</div><div><div class="tt" id="t_t"></div><div class="tm" id="t_m"></div></div></div>
+<!-- FIREBASE + APP LOGIC -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+/* ── FIREBASE CONFIG (your real credentials) ── */
+const app = initializeApp({
+  apiKey:            "AIzaSyAYCnRk--CmpA7lb1Qh3D0eBw3IqJvva_s",
+  authDomain:        "elecbill1-ff6cd.firebaseapp.com",
+  projectId:         "elecbill1-ff6cd",
+  storageBucket:     "elecbill1-ff6cd.firebasestorage.app",
+  messagingSenderId: "448569501513",
+  appId:             "1:448569501513:web:9378445a4b2e6d980bdc98"
+});
+const db = getFirestore(app);
+/* ── LIVE LISTENERS ── */
+window.__C = []; window.__B = [];
+onSnapshot(query(collection(db,"clients"), orderBy("name")), snap => {
+  window.__C = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  window.__render && window.__render();
+}, err => { console.error(err); showDbErr(); });
+onSnapshot(query(collection(db,"bills"), orderBy("createdAt","desc")), snap => {
+  window.__B = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  window.__render && window.__render();
+}, err => { console.error(err); });
+function showDbErr() {
+  const el = document.getElementById("h_db");
+  el.textContent = "⚠️ offline"; el.style.color = "var(--yellow)";
+}
+document.getElementById("h_db").textContent = "☁️";
+document.getElementById("h_db").style.color = "var(--green)";
+/* ── DB OPERATIONS ── */
+window.DB = {
+  addClient:    d  => addDoc(collection(db,"clients"), {...d, createdAt:serverTimestamp()}),
+  updateClient: (id,d) => updateDoc(doc(db,"clients",id), d),
+  deleteClient: async id => {
+    const batch = writeBatch(db);
+    batch.delete(doc(db,"clients",id));
+    (window.__B||[]).filter(b=>b.clientId===id).forEach(b => batch.delete(doc(db,"bills",b.id)));
+    await batch.commit();
+  },
+  addBill:    d  => addDoc(collection(db,"bills"), {...d, createdAt:serverTimestamp()}),
+  updateBill: (id,d) => updateDoc(doc(db,"bills",id), d),
+  deleteBill: id => deleteDoc(doc(db,"bills",id))
+};
+</script>
+<script>
+/* ════════════════════════════════════════════
+   TRANSLATIONS
+════════════════════════════════════════════ */
+const TX = {
+en: {
+  h_sub:"Billing Management", h_lang:"عربي",
+  sl1:"Clients", sl2:"Pending", sl3:"Overdue", sl4:"Paid Bills",
+  nt1:"Clients", nt2:"Bills",   nt3:"Summary",
+  nb1:"Clients", nb2:"Bills",   nb3:"Summary",
+  cs_ph:"Search by name or meter #…", bs_ph:"Search bills…",
+  cc_all:"All", cc_pend:"⏳ Pending", cc_over:"🔴 Overdue", cc_paid:"✅ Paid", cc_none:"No Bills",
+  bc_all:"All", bc_un:"⏳ Unpaid",    bc_ov:"🔴 Overdue",   bc_pd:"✅ Paid",
+  s_fin:"💰 Financial Overview", s_tb_l:"Total Billed", s_tc_l:"Total Collected", s_to_l:"Outstanding", s_rl:"Collection Rate",
+  s_cnt:"📋 Bills Count", s_bt_l:"Total Bills", s_bp_l:"Paid", s_bu_l:"Unpaid", s_bo_l:"Overdue",
+  s_top:"🔴 Top Unpaid Clients",
+  s_bk_t:"📲 Bulk WhatsApp", s_bk_d:"Send reminders to all clients with unpaid bills.", s_bk_btn:"Send to All Unpaid",
+  ac_t:"Add <span>Client</span>",    ac_fl:"🔒 Fixed Info — saved permanently",
+  ac_nl:"Full Name", ac_ml:"Watt-Meter Serial #", ac_pl:"📱 WhatsApp #",
+  ac_ph:"Algeria: 213 then number without leading 0. Example: 213550123456",
+  ac_al:"Address",   ac_sv:"✅ Save Client",       ac_cn:"Cancel",
+  ac_name_ph:"e.g. Ahmed Benali", ac_meter_ph:"e.g. WM-2024-001", ac_phone_ph:"213XXXXXXXXX", ac_addr_ph:"Street, district…",
+  ec_t:"Edit <span>Client</span>",   ec_fl:"🔒 Fixed Info",
+  ec_nl:"Full Name", ec_ml:"Watt-Meter Serial #", ec_pl:"📱 WhatsApp #", ec_al:"Address",
+  ec_sv:"💾 Save Changes", ec_cn:"Cancel",
+  ab_t:"Add <span>Bill</span>",      ab_fl:"🔒 Fixed Info — from client record",
+  ab_cl:"Client",   ab_sel_ph:"— Select client —", ab_fm_l:"Meter #", ab_fp_l:"WhatsApp",
+  ab_vl:"📝 Variable Info — changes every bill",
+  ab_ml:"Billing Period",  ab_al:"Amount ($)", ab_dl:"Due Date", ab_il:"Issue Date", ab_nl2:"Note / Description",
+  ab_pvl:"📲 WhatsApp Preview", ab_pvh:"Message that will be sent",
+  ab_month_ph:"e.g. January 2025 or Jan–Feb 2025", ab_desc_ph:"e.g. includes penalty, 2 months…",
+  ab_sv:"💾 Save Bill Only", ab_svwl:"Save &amp; Send WhatsApp", ab_cn:"Cancel",
+  wa_t:"📲 <span>WhatsApp</span>", wa_mh:"Message", wa_pl:"Phone Number",
+  wa_hint:"You can edit the number before opening WhatsApp.",
+  wa_info:"ℹ️ WhatsApp opens with the message ready. Just tap <strong>Send</strong>.",
+  wa_sl:"Open WhatsApp &amp; Send", wa_cn:"Cancel",
+  back:"← Back",
+  bp_t:"⏳ Pending", bo_t:"🔴 Overdue", bd_t:"✅ Paid", bn_t:"No Bills",
+  add_bill:"➕ Add New Bill", send_reminder:"📲 Send Payment Reminder",
+  edit_client:"✏️ Edit Client Info", del_client:"🗑 Delete Client",
+  da_unpaid:"$ Unpaid", da_paid:"$ Paid",
+  mark_paid:"✅ Paid", mark_unpaid:"↩ Unpaid", wa_btn:"📲 WA", del_btn:"🗑",
+  issued:"Issued:", due_lbl:"Due:", no_wa_warn:"⚠️ No WhatsApp number — tap Edit to add.",
+  bill_s:"bill", bills_s:"bills", no_phone_c:"⚠️ No WhatsApp number",
+  no_bills_t:"No bills yet", no_bills_s:"Tap Add New Bill above.",
+  empty_c_t:"No clients found", empty_c_s:"Add a new client with the + button.",
+  empty_b_t:"No bills here",    empty_b_s:"Open a client and tap Add New Bill.",
+  all_paid:"🎉 All clients are up to date!",
+  t_name_req:["⚠️","Name required","Enter the client's full name."],
+  t_meter_req:["⚠️","Meter # required","Enter the watt-meter serial number."],
+  t_saved:["✅","Saved","Client added successfully."],
+  t_updated:["✅","Updated","Client info saved."],
+  t_deleted:["🗑","Deleted","Client and all bills removed."],
+  t_no_c:["⚠️","No Client","Please select a client."],
+  t_bad_a:["⚠️","Invalid Amount","Enter a valid amount in $."],
+  t_no_due:["⚠️","Due Date Required","Set the payment due date."],
+  t_no_per:["⚠️","Period Required","Enter the billing period (e.g. January 2025)."],
+  t_bill_sv:["✅","Bill Saved",""],
+  t_wa:["📲","WhatsApp Opening","Message ready — just tap Send."],
+  t_no_ph:["⚠️","No Phone","Bill saved but this client has no WhatsApp number."],
+  t_paid:["✅","Marked Paid","Bill updated."],
+  t_unpaid:["↩","Marked Unpaid","Bill reverted."],
+  t_bdel:["🗑","Bill Deleted",""],
+  t_no_wa:["⚠️","No Phone","No WhatsApp number. Edit client to add it."],
+  t_all_pd:["✅","All Paid","No unpaid bills for this client."],
+  t_no_snd:["✅","Nothing to Send","All clients are up to date."],
+  t_done:["🎉","All Done!",""],
+  t_no_num:["⚠️","Enter Number","Enter a phone number."],
+  t_err:["❌","Error",""],
+  conf_del_c:"Delete this client and ALL their bills?\n\nThis cannot be undone.",
+  conf_del_b:"Delete this bill?",
+  conf_next:"✅ Sent to {n}.\n\nNext: {x}\n\nOpen WhatsApp for them?",
+},
+ar: {
+  h_sub:"إدارة الفواتير", h_lang:"English",
+  sl1:"العملاء", sl2:"معلق", sl3:"متأخر", sl4:"مدفوع",
+  nt1:"العملاء", nt2:"الفواتير", nt3:"الملخص",
+  nb1:"العملاء", nb2:"الفواتير", nb3:"الملخص",
+  cs_ph:"ابحث بالاسم أو رقم العداد…", bs_ph:"ابحث في الفواتير…",
+  cc_all:"الكل", cc_pend:"⏳ معلق", cc_over:"🔴 متأخر", cc_paid:"✅ مدفوع", cc_none:"بدون فواتير",
+  bc_all:"الكل", bc_un:"⏳ غير مدفوع", bc_ov:"🔴 متأخر", bc_pd:"✅ مدفوع",
+  s_fin:"💰 النظرة المالية", s_tb_l:"إجمالي المطالبات", s_tc_l:"إجمالي المحصّل", s_to_l:"المتبقي", s_rl:"نسبة التحصيل",
+  s_cnt:"📋 عدد الفواتير", s_bt_l:"الإجمالي", s_bp_l:"مدفوعة", s_bu_l:"غير مدفوعة", s_bo_l:"متأخرة",
+  s_top:"🔴 أكثر العملاء ديناً",
+  s_bk_t:"📲 واتساب جماعي", s_bk_d:"أرسل تذكيراً لكل عميل لديه فواتير غير مدفوعة.", s_bk_btn:"إرسال للجميع",
+  ac_t:"إضافة <span>عميل</span>",   ac_fl:"🔒 معلومات ثابتة — تُحفظ بشكل دائم",
+  ac_nl:"الاسم الكامل", ac_ml:"رقم تسلسل العداد", ac_pl:"📱 رقم الواتساب",
+  ac_ph:"الجزائر: 213 ثم الرقم بدون الصفر الأول. مثال: 213550123456",
+  ac_al:"العنوان", ac_sv:"✅ حفظ العميل", ac_cn:"إلغاء",
+  ac_name_ph:"مثال: أحمد بن علي", ac_meter_ph:"مثال: WM-2024-001", ac_phone_ph:"213XXXXXXXXX", ac_addr_ph:"الشارع، الحي…",
+  ec_t:"تعديل <span>العميل</span>",  ec_fl:"🔒 المعلومات الثابتة",
+  ec_nl:"الاسم الكامل", ec_ml:"رقم تسلسل العداد", ec_pl:"📱 رقم الواتساب", ec_al:"العنوان",
+  ec_sv:"💾 حفظ التغييرات", ec_cn:"إلغاء",
+  ab_t:"إضافة <span>فاتورة</span>",  ab_fl:"🔒 معلومات ثابتة — من ملف العميل",
+  ab_cl:"العميل", ab_sel_ph:"— اختر عميلاً —", ab_fm_l:"رقم العداد", ab_fp_l:"واتساب",
+  ab_vl:"📝 معلومات متغيرة — تتغير مع كل فاتورة",
+  ab_ml:"فترة الفاتورة", ab_al:"المبلغ ($)", ab_dl:"تاريخ السداد", ab_il:"تاريخ الإصدار", ab_nl2:"ملاحظة",
+  ab_pvl:"📲 معاينة رسالة الواتساب", ab_pvh:"الرسالة التي ستُرسل",
+  ab_month_ph:"مثال: جانفي 2025 أو جانفي–فيفري 2025", ab_desc_ph:"مثال: تشمل غرامة، شهرين…",
+  ab_sv:"💾 حفظ الفاتورة فقط", ab_svwl:"حفظ وإرسال عبر الواتساب", ab_cn:"إلغاء",
+  wa_t:"📲 <span>واتساب</span>", wa_mh:"الرسالة", wa_pl:"رقم الهاتف",
+  wa_hint:"يمكنك تعديل الرقم قبل الإرسال.",
+  wa_info:"ℹ️ سيفتح الواتساب والرسالة جاهزة. اضغط إرسال.",
+  wa_sl:"فتح الواتساب وإرسال", wa_cn:"إلغاء",
+  back:"→ رجوع",
+  bp_t:"⏳ معلق", bo_t:"🔴 متأخر", bd_t:"✅ مدفوع", bn_t:"بدون فواتير",
+  add_bill:"➕ إضافة فاتورة جديدة", send_reminder:"📲 إرسال تذكير بالدفع",
+  edit_client:"✏️ تعديل بيانات العميل", del_client:"🗑 حذف العميل",
+  da_unpaid:"$ غير مدفوع", da_paid:"$ مدفوع",
+  mark_paid:"✅ مدفوع", mark_unpaid:"↩ غير مدفوع", wa_btn:"📲 واتساب", del_btn:"🗑",
+  issued:"الإصدار:", due_lbl:"الاستحقاق:", no_wa_warn:"⚠️ لا يوجد رقم واتساب — اضغط تعديل.",
+  bill_s:"فاتورة", bills_s:"فواتير", no_phone_c:"⚠️ لا يوجد رقم واتساب",
+  no_bills_t:"لا توجد فواتير بعد", no_bills_s:"اضغط إضافة فاتورة جديدة.",
+  empty_c_t:"لا يوجد عملاء", empty_c_s:"أضف عميلاً جديداً بزر +.",
+  empty_b_t:"لا توجد فواتير", empty_b_s:"افتح عميلاً واضغط إضافة فاتورة.",
+  all_paid:"🎉 جميع العملاء ليس لديهم متأخرات!",
+  t_name_req:["⚠️","الاسم مطلوب","يرجى إدخال الاسم الكامل."],
+  t_meter_req:["⚠️","رقم العداد مطلوب","يرجى إدخال رقم تسلسل العداد."],
+  t_saved:["✅","تم الحفظ","تمت إضافة العميل بنجاح."],
+  t_updated:["✅","تم التحديث","تم حفظ بيانات العميل."],
+  t_deleted:["🗑","تم الحذف","تم حذف العميل وجميع فواتيره."],
+  t_no_c:["⚠️","لم يتم اختيار عميل","يرجى اختيار عميل."],
+  t_bad_a:["⚠️","مبلغ غير صحيح","يرجى إدخال مبلغ صحيح بالدولار."],
+  t_no_due:["⚠️","تاريخ السداد مطلوب","يرجى تحديد تاريخ السداد."],
+  t_no_per:["⚠️","الفترة مطلوبة","يرجى إدخال فترة الفاتورة."],
+  t_bill_sv:["✅","تم حفظ الفاتورة",""],
+  t_wa:["📲","فتح الواتساب","الرسالة جاهزة — اضغط إرسال."],
+  t_no_ph:["⚠️","لا يوجد هاتف","تم حفظ الفاتورة لكن لا يوجد رقم واتساب."],
+  t_paid:["✅","تم الدفع","تم تحديث الفاتورة."],
+  t_unpaid:["↩","تم التحديد كغير مدفوع","تمت إعادة الفاتورة."],
+  t_bdel:["🗑","تم حذف الفاتورة",""],
+  t_no_wa:["⚠️","لا يوجد رقم","لا يوجد رقم واتساب. اضغط تعديل."],
+  t_all_pd:["✅","كل شيء مدفوع","لا توجد فواتير غير مدفوعة."],
+  t_no_snd:["✅","لا يوجد ما يُرسَل","جميع العملاء محدّثون."],
+  t_done:["🎉","اكتمل الإرسال!",""],
+  t_no_num:["⚠️","أدخل رقماً","يرجى إدخال رقم هاتف."],
+  t_err:["❌","خطأ",""],
+  conf_del_c:"هل تريد حذف هذا العميل وجميع فواتيره؟\n\nلا يمكن التراجع.",
+  conf_del_b:"هل تريد حذف هذه الفاتورة؟",
+  conf_next:"✅ تم الإرسال لـ {n}.\n\nالتالي: {x}\n\nهل تفتح الواتساب؟",
+}};
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+let L="en", T=TX.en;
+let cF="all", bF="all";
+let curP="c", prevP="c", detId=null;
+let waBuf="", bulkQ=[], bulkI=0;
+const gC = () => window.__C||[];
+const gB = () => window.__B||[];
+const v  = id => (document.getElementById(id)?.value||"").trim();
+const $  = id => document.getElementById(id);
+const esc = s => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const fmt = n => Number(n||0).toLocaleString("en-US");
+const fmtD = d => {
+  if(!d) return "—";
+  try { return new Date(d).toLocaleDateString(L==="ar"?"ar-DZ":"en-GB",{day:"2-digit",month:"short",year:"numeric"}); } catch(e){ return d; }
+};
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2);
+/* ════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════ */
+function boot(lang) {
+  L = lang; T = TX[lang];
+  localStorage.setItem("eb_lang", lang);
+  $("splash").classList.add("hide");
+  setTimeout(() => $("splash").style.display="none", 420);
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = lang==="ar" ? "rtl" : "ltr";
+  applyTx();
+  window.__render = renderAll;
+  renderAll();
+}
+function switchLang() {
+  boot(L==="en"?"ar":"en");
+}
+window.addEventListener("DOMContentLoaded", () => {
+  // Set date
+  $("h_date").textContent = new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+  $("ab_date").value = new Date().toISOString().split("T")[0];
+  // Overlay close on tap outside
+  document.querySelectorAll(".ov").forEach(o => o.addEventListener("click", e => { if(e.target===o) closeSh(o.id); }));
+  // Check saved lang
+  const sl = localStorage.getItem("eb_lang");
+  if(sl) { boot(sl); } else { /* show splash */ }
+});
+/* ════════════════════════════════════════════
+   TRANSLATIONS APPLY
+════════════════════════════════════════════ */
+function applyTx() {
+  const ids = ["h_sub","h_lang","sl1","sl2","sl3","sl4",
+    "nt1","nt2","nt3","nb1","nb2","nb3",
+    "s_fin","s_tb_l","s_tc_l","s_to_l","s_rl",
+    "s_cnt","s_bt_l","s_bp_l","s_bu_l","s_bo_l",
+    "s_top","s_bk_t","s_bk_d","s_bk_btn",
+    "ac_nl","ac_ml","ac_pl","ac_ph","ac_al","ac_sv","ac_cn",
+    "ec_nl","ec_ml","ec_pl","ec_al","ec_sv","ec_cn",
+    "ab_cl","ab_sel_ph","ab_fm_l","ab_fp_l",
+    "ab_ml","ab_al","ab_dl","ab_il","ab_nl2",
+    "ab_pvl","ab_pvh","ab_sv","ab_svwl","ab_cn",
+    "wa_mh","wa_pl","wa_hint","wa_info","wa_sl","wa_cn"
+  ];
+  ids.forEach(id => { const el=$(id); if(!el||T[id]===undefined) return; el[el.tagName==="INPUT"&&el.type!=="button"?"placeholder":"textContent"]=T[id]; });
+  // innerHTML titles
+  ["ac_t","ec_t","ab_t","wa_t","ac_fl","ec_fl","ab_fl","ab_vl","ab_pvl","wa_info"].forEach(id=>{
+    const el=$(id); if(el&&T[id]) el.innerHTML=T[id];
+  });
+  $("h_lang").textContent = T.h_lang;
+  $("back_btn").textContent = T.back;
+  // chips
+  const cc = ["cc_all","cc_pend","cc_over","cc_paid","cc_none"];
+  document.querySelectorAll("#cchips .chip").forEach((el,i) => { if(T[cc[i]]) el.textContent=T[cc[i]]; });
+  const bc = ["bc_all","bc_un","bc_ov","bc_pd"];
+  document.querySelectorAll("#bchips .chip").forEach((el,i) => { if(T[bc[i]]) el.textContent=T[bc[i]]; });
+  // placeholders
+  $("cs").placeholder = T.cs_ph;
+  $("bs").placeholder = T.bs_ph;
+  $("ac_name").placeholder  = T.ac_name_ph;
+  $("ac_meter").placeholder = T.ac_meter_ph;
+  $("ac_phone").placeholder = T.ac_phone_ph;
+  $("ac_addr").placeholder  = T.ac_addr_ph;
+  $("ab_month").placeholder = T.ab_month_ph;
+  $("ab_desc").placeholder  = T.ab_desc_ph;
+}
+/* ════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════ */
+function gp(p) {
+  if(p!=="d") prevP = (curP==="d")?prevP:curP;
+  curP = p;
+  document.querySelectorAll(".pg").forEach(x=>x.classList.remove("on"));
+  const pg=$("pg-"+p); if(pg) pg.classList.add("on");
+  ["c","b","s"].forEach(id=>{
+    const t=$("tab-"+id), n=$("nb-"+id);
+    if(t) t.classList.toggle("on",id===p);
+    if(n) n.classList.toggle("on",id===p);
+  });
+  if(p==="s") rS();
+  if(p==="b") rB();
+}
+function goBack() {
+  detId=null; gp(prevP==="d"?"c":prevP);
+}
+/* ════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════ */
+function isOD(b){
+  if(b.paid||!b.dueDate) return false;
+  const t=new Date(); t.setHours(0,0,0,0);
+  return new Date(b.dueDate)<t;
+}
+function getSt(cid){
+  const cb=gB().filter(b=>b.clientId===cid);
+  if(!cb.length) return "none";
+  const up=cb.filter(b=>!b.paid);
+  if(!up.length) return "paid";
+  return up.some(b=>isOD(b))?"overdue":"pending";
+}
+const unpaidT = cid => gB().filter(b=>b.clientId===cid&&!b.paid).reduce((s,b)=>s+(b.amount||0),0);
+const paidT   = cid => gB().filter(b=>b.clientId===cid&&b.paid).reduce((s,b)=>s+(b.amount||0),0);
+/* ════════════════════════════════════════════
+   RENDER ALL
+════════════════════════════════════════════ */
+function renderAll(){
+  rStats(); rC(); rB();
+  if(curP==="s") rS();
+  if(detId) openDet(detId);
+}
+function rStats(){
+  const cl=gC();
+  $("sc").textContent=cl.length;
+  $("sp").textContent=cl.filter(c=>getSt(c.id)==="pending").length;
+  $("so").textContent=cl.filter(c=>getSt(c.id)==="overdue").length;
+  $("sd").textContent=gB().filter(b=>b.paid).length;
+}
+/* ════════════════════════════════════════════
+   CHIPS / FILTERS
+════════════════════════════════════════════ */
+function cf(f,btn){
+  cF=f;
+  document.querySelectorAll("#cchips .chip").forEach(c=>c.className="chip");
+  btn.className="chip " + (f==="all"?"on-b":f==="pending"?"on-y":f==="overdue"?"on-r":f==="paid"?"on-g":"on-b");
+  rC();
+}
+function bf(f,btn){
+  bF=f;
+  document.querySelectorAll("#bchips .chip").forEach(c=>c.className="chip");
+  btn.className="chip " + (f==="all"?"on-b":f==="unpaid"?"on-y":f==="overdue"?"on-r":f==="paid"?"on-g":"on-b");
+  rB();
+}
+/* ════════════════════════════════════════════
+   RENDER CLIENTS
+════════════════════════════════════════════ */
+function rC(){
+  const q=(v("cs")||"").toLowerCase();
+  let list=gC().filter(c=>(c.name||"").toLowerCase().includes(q)||(c.meter||"").toLowerCase().includes(q));
+  if(cF!=="all") list=list.filter(c=>getSt(c.id)===cF);
+  const el=$("clist"); if(!el) return;
+  if(!list.length){
+    el.innerHTML=`<div class="empty"><div class="ei">🔍</div><div class="et">${T.empty_c_t}</div><div class="es">${T.empty_c_s}</div></div>`;
+    return;
+  }
+  const badgeMap={pending:`<span class="badge bp">${T.bp_t}</span>`,overdue:`<span class="badge bo">${T.bo_t}</span>`,paid:`<span class="badge bd">${T.bd_t}</span>`,none:`<span class="badge bn">${T.bn_t}</span>`};
+  const stMap={pending:"sp",overdue:"so",paid:"sd",none:"sn"};
+  el.innerHTML=list.map(c=>{
+    const st=getSt(c.id),ut=unpaidT(c.id),bc=gB().filter(b=>b.clientId===c.id).length;
+    return `<div class="cc ${stMap[st]}" onclick="openDet('${c.id}')">
+      <div class="cc-top"><div class="cc-name">${esc(c.name)}</div><div class="cc-meter">${esc(c.meter)}</div></div>
+      <div class="cc-row">${badgeMap[st]}${ut>0?`<span class="cc-amt">$${fmt(ut)}`:""}<span style="font-size:11px;color:var(--t3)">${bc} ${bc===1?T.bill_s:T.bills_s}</span></div>
+      ${c.phone?`<div class="cc-phone">📲 ${esc(c.phone)}</div>`:`<div class="cc-nophone">${T.no_phone_c}</div>`}
+    </div>`;
+  }).join("");
+}
+/* ════════════════════════════════════════════
+   RENDER ALL BILLS
+════════════════════════════════════════════ */
+function rB(){
+  const q=(v("bs")||"").toLowerCase();
+  let list=gB().map(b=>({...b,c:gC().find(x=>x.id===b.clientId)})).filter(b=>b.c);
+  if(q) list=list.filter(b=>(b.c.name||"").toLowerCase().includes(q)||(b.c.meter||"").toLowerCase().includes(q)||(b.month||"").toLowerCase().includes(q));
+  if(bF==="paid")    list=list.filter(b=>b.paid);
+  if(bF==="unpaid")  list=list.filter(b=>!b.paid);
+  if(bF==="overdue") list=list.filter(b=>isOD(b));
+  const el=$("blist"); if(!el) return;
+  if(!list.length){
+    el.innerHTML=`<div class="empty"><div class="ei">📋</div><div class="et">${T.empty_b_t}</div><div class="es">${T.empty_b_s}</div></div>`;
+    return;
+  }
+  const bg=b=>b.paid?`<span class="badge bd">${T.bd_t}</span>`:isOD(b)?`<span class="badge bo">${T.bo_t}</span>`:`<span class="badge bp">${T.bp_t}</span>`;
+  el.innerHTML=list.map(b=>{
+    const hp=b.c.phone&&b.c.phone.trim();
+    return `<div class="abl">
+      <div class="abl-top">
+        <div><div class="abl-name">${esc(b.c.name)}</div><div class="abl-sub">${esc(b.c.meter)} · ${esc(b.month||"—")}</div></div>
+        <div><div class="abl-amt">$${fmt(b.amount)}</div><div class="abl-due">${T.due_lbl} ${fmtD(b.dueDate)}</div></div>
+      </div>
+      <div class="abl-foot">${bg(b)}${b.desc?`<span style="font-size:11px;color:var(--t3);font-style:italic">${esc(b.desc)}</span>`:""}${!b.paid&&hp?`<button class="abl-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}</div>
+    </div>`;
+  }).join("");
+}
+/* ════════════════════════════════════════════
+   CLIENT DETAIL
+════════════════════════════════════════════ */
+function openDet(id){
+  detId=id;
+  if(curP!=="d") prevP=curP;
+  const c=gC().find(x=>x.id===id); if(!c) return;
+  const cB=gB().filter(b=>b.clientId===id).sort((a,b)=>(b.createdAt?.seconds||b.createdAt||0)-(a.createdAt?.seconds||a.createdAt||0));
+  const ut=unpaidT(id), pt=paidT(id), hp=c.phone&&c.phone.trim();
+  const bg=b=>b.paid?`<span class="badge bd">${T.bd_t}</span>`:isOD(b)?`<span class="badge bo">${T.bo_t}</span>`:`<span class="badge bp">${T.bp_t}</span>`;
+  let bH="";
+  if(!cB.length){
+    bH=`<div class="empty"><div class="ei">📄</div><div class="et">${T.no_bills_t}</div><div class="es">${T.no_bills_s}</div></div>`;
+  } else {
+    bH=cB.map(b=>{
+      const cls=b.paid?"bcp":isOD(b)?"bco":"bcn";
+      return `<div class="bc ${cls}">
+        <div class="bc-top"><div><div class="bc-period">${esc(b.month||"—")}</div><div style="margin-top:4px">${bg(b)}</div></div><div class="bc-amt">$${fmt(b.amount)}</div></div>
+        <div class="bc-dates">${T.issued} ${fmtD(b.billDate)}&nbsp;·&nbsp;${T.due_lbl} ${fmtD(b.dueDate)}</div>
+        ${b.desc?`<div class="bc-desc">💬 ${esc(b.desc)}</div>`:""}
+        <div class="bc-acts">
+          ${!b.paid?`<button class="bca bca-pay" onclick="markPaid('${b.id}')">${T.mark_paid}</button>`:`<button class="bca bca-unp" onclick="markUnpaid('${b.id}')">${T.mark_unpaid}</button>`}
+          ${!b.paid&&hp?`<button class="bca bca-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}
+          <button class="bca bca-del" onclick="delBill('${b.id}')">${T.del_btn}</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+  $("detail").innerHTML=`
+    <div class="profile">
+      <div class="pname">${esc(c.name)}</div>
+      <div class="prow">📟 <strong style="font-family:monospace;font-size:13px">${esc(c.meter)}</strong></div>
+      ${c.address?`<div class="prow">📍 <strong>${esc(c.address)}</strong></div>`:""}
+      ${hp?`<div class="prow">📲 <strong>${esc(c.phone)}</strong></div>`:`<div style="font-size:12px;color:var(--red);margin-top:8px;padding:8px 12px;background:var(--rdim);border-radius:8px">${T.no_wa_warn}</div>`}
+      <div class="totals">
+        <div class="tbox tu"><div class="tv">$${fmt(ut)}</div><div class="tl">${T.da_unpaid}</div></div>
+        <div class="tbox tp"><div class="tv">$${fmt(pt)}</div><div class="tl">${T.da_paid}</div></div>
+      </div>
+      <button class="abtn a-blue" onclick="openAddBillFor('${c.id}')" style="margin-top:0">${T.add_bill}</button>
+      ${hp&&ut>0?`<button class="abtn a-wa" onclick="sendRem('${c.id}')">${T.send_reminder}</button>`:""}
+      <button class="abtn a-ghost" onclick="openEditC('${c.id}')">${T.edit_client}</button>
+      <button class="abtn a-danger" onclick="delClient('${c.id}')">${T.del_client}</button>
+    </div>
+    <div class="sechead">${cB.length} ${cB.length===1?T.bill_s:T.bills_s}</div>
+    ${bH}`;
+  $("back_btn").textContent = T.back;
+  document.querySelectorAll(".pg").forEach(x=>x.classList.remove("on"));
+  $("pg-d").classList.add("on");
+  curP="d";
+}
+/* ════════════════════════════════════════════
+   ADD CLIENT
+════════════════════════════════════════════ */
+async function saveClient(){
+  const name=v("ac_name"),meter=v("ac_meter"),phone=v("ac_phone"),addr=v("ac_addr");
+  if(!name)  return toast(...T.t_name_req);
+  if(!meter) return toast(...T.t_meter_req);
+  try{
+    await window.DB.addClient({name,meter,phone,address:addr});
+    closeSh("sh-ac");
+    ["ac_name","ac_meter","ac_phone","ac_addr"].forEach(id=>{const el=$(id);if(el)el.value="";});
+    toast(...T.t_saved);
+  }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
+}
+function openEditC(id){
+  const c=gC().find(x=>x.id===id); if(!c) return;
+  $("ec_id").value=id; $("ec_name").value=c.name||""; $("ec_meter").value=c.meter||"";
+  $("ec_phone").value=c.phone||""; $("ec_addr").value=c.address||"";
+  openSh("sh-ec");
+}
+async function updClient(){
+  const id=v("ec_id"),name=v("ec_name"),meter=v("ec_meter");
+  if(!name||!meter) return toast(...T.t_name_req);
+  try{
+    await window.DB.updateClient(id,{name,meter,phone:v("ec_phone"),address:v("ec_addr")});
+    closeSh("sh-ec"); toast(...T.t_updated);
+  }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
+}
+async function delClient(id){
+  const c=gC().find(x=>x.id===id);
+  if(!confirm(T.conf_del_c.replace("{n}",c?.name||""))) return;
+  try{ await window.DB.deleteClient(id); goBack(); toast(...T.t_deleted); }
+  catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
+}
+/* ════════════════════════════════════════════
+   ADD BILL
+════════════════════════════════════════════ */
+function openAddBillFor(cid){
+  populateSel(cid); openSh("sh-ab");
+}
+function populateSel(preId){
+  const sel=$("ab_client");
+  sel.innerHTML=`<option value="">${T.ab_sel_ph}</option>`;
+  [...gC()].sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(c=>{
+    const o=document.createElement("option");
+    o.value=c.id; o.textContent=`${c.name}  (${c.meter})`; sel.appendChild(o);
+  });
+  if(preId){sel.value=preId;onBC();} else rPrev();
+}
+function onBC(){
+  const cid=v("ab_client"), c=gC().find(x=>x.id===cid);
+  const box=$("ab_fix");
+  if(c){box.style.display="block";$("ab_fm").textContent=c.meter||"—";$("ab_fp").textContent=c.phone||"⚠️";}
+  else box.style.display="none";
+  rPrev();
+}
+function rPrev(){
+  const cid=v("ab_client"), c=gC().find(x=>x.id===cid), amt=parseFloat(v("ab_amt"));
+  const el=$("ab_prev"); if(!el) return;
+  if(!c||!amt){el.textContent=T.ab_pvh; return;}
+  el.textContent=buildBillMsg(c,{amount:amt,month:v("ab_month"),billDate:v("ab_date"),dueDate:v("ab_due"),desc:v("ab_desc")});
+}
+async function saveBill(sendWa){
+  const cid=v("ab_client"),amount=parseFloat(v("ab_amt")),month=v("ab_month"),due=v("ab_due");
+  const c=gC().find(x=>x.id===cid);
+  if(!c)            return toast(...T.t_no_c);
+  if(!amount||amount<=0) return toast(...T.t_bad_a);
+  if(!due)          return toast(...T.t_no_due);
+  if(!month)        return toast(...T.t_no_per);
+  const b={clientId:cid,amount,month,billDate:v("ab_date"),dueDate:due,desc:v("ab_desc"),paid:false};
+  try{
+    await window.DB.addBill(b);
+    closeSh("sh-ab");
+    ["ab_amt","ab_month","ab_due","ab_desc"].forEach(id=>{const el=$(id);if(el)el.value="";});
+    $("ab_fix").style.display="none"; $("ab_client").value="";
+    if(sendWa&&c.phone){ openWA(c.phone,buildBillMsg(c,b)); toast(...T.t_wa); }
+    else if(sendWa&&!c.phone){ toast(...T.t_no_ph); }
+    else { toast(T.t_bill_sv[0],T.t_bill_sv[1],c.name); }
+  }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
+}
+/* ════════════════════════════════════════════
+   MARK PAID / UNPAID / DELETE
+════════════════════════════════════════════ */
+async function markPaid(id){
+  try{ await window.DB.updateBill(id,{paid:true,paidAt:Date.now()}); toast(...T.t_paid); }
+  catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
+}
+async function markUnpaid(id){
+  try{ await window.DB.updateBill(id,{paid:false,paidAt:null}); toast(...T.t_unpaid); }
+  catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
+}
+async function delBill(id){
+  if(!confirm(T.conf_del_b)) return;
+  try{ await window.DB.deleteBill(id); toast(...T.t_bdel); }
+  catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
+}
+/* ════════════════════════════════════════════
+   WHATSAPP — 1 TAP
+════════════════════════════════════════════ */
+function buildBillMsg(c,b){
+  if(L==="ar"){
+    return `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *${c.name}*،\n\n━━━━━━━━━━━\n🔒 *بيانات العميل:*\n👤 الاسم: *${c.name}*\n📟 رقم العداد: *${c.meter}*\n━━━━━━━━━━━\n📋 *تفاصيل الفاتورة:*\n📅 الفترة: *${b.month||"—"}*\n🗓 الإصدار: *${fmtD(b.billDate)}*\n💰 المبلغ: *$${fmt(b.amount)}*\n⏰ السداد قبل: *${fmtD(b.dueDate)}*${b.desc?"\n📝 "+b.desc:""}\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
+  }
+  return `⚡ *New Electricity Bill*\n\nDear *${c.name}*,\n\n━━━━━━━━━━━\n🔒 *Client Info:*\n👤 Name: *${c.name}*\n📟 Meter No: *${c.meter}*\n━━━━━━━━━━━\n📋 *Bill Details:*\n📅 Period: *${b.month||"—"}*\n🗓 Issued: *${fmtD(b.billDate)}*\n💰 Amount: *$${fmt(b.amount)}*\n⏰ Pay Before: *${fmtD(b.dueDate)}*${b.desc?"\n📝 "+b.desc:""}\n━━━━━━━━━━━\nPlease pay before the due date.\n\nThank you 🙏\n_Electric Station — Accounting_`;
+}
+function buildRemMsg(c,up){
+  const tot=up.reduce((s,b)=>s+(b.amount||0),0);
+  if(L==="ar"){
+    const lines=up.map(b=>`  • ${b.month||"؟"}: *$${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n");
+    return `⚡ *تذكير بالدفع*\n\nعزيزي *${c.name}*،\n📟 رقم العداد: *${c.meter}*\n\n━━━━━━━━━━━\nلديك *${up.length}* فاتورة غير مسددة:\n\n${lines}\n\n💰 *الإجمالي: $${fmt(tot)}*\n━━━━━━━━━━━\nيرجى التسوية في أقرب وقت.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
+  }
+  const lines=up.map(b=>`  • ${b.month||"?"}: *$${fmt(b.amount)}* (due ${fmtD(b.dueDate)})`).join("\n");
+  return `⚡ *Payment Reminder*\n\nDear *${c.name}*,\n📟 Meter: *${c.meter}*\n\n━━━━━━━━━━━\nYou have *${up.length}* unpaid bill${up.length>1?"s":""}:\n\n${lines}\n\n💰 *Total: $${fmt(tot)}*\n━━━━━━━━━━━\nPlease settle your balance soon.\n\nThank you 🙏\n_Electric Station — Accounting_`;
+}
+/* ONE-TAP: opens WA immediately, no extra sheet for single bills */
+function openWA(phone,msg){
+  const clean=(phone||"").replace(/\D/g,"");
+  window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`,"_blank");
+}
+function waForBill(id){
+  const b=gB().find(x=>x.id===id), c=b?gC().find(x=>x.id===b.clientId):null;
+  if(!c) return;
+  if(!c.phone||!c.phone.trim()) return toast(...T.t_no_wa);
+  /* Direct 1-tap — no confirm sheet needed */
+  openWA(c.phone, buildBillMsg(c,b));
+  toast(...T.t_wa);
+}
+function sendRem(cid){
+  const c=gC().find(x=>x.id===cid); if(!c) return;
+  if(!c.phone||!c.phone.trim()) return toast(...T.t_no_wa);
+  const up=gB().filter(b=>b.clientId===cid&&!b.paid);
+  if(!up.length) return toast(...T.t_all_pd);
+  /* Show WA sheet with pre-filled message for reminder (user may want to review) */
+  waBuf=buildRemMsg(c,up);
+  $("wa_prev").textContent=waBuf;
+  $("wa_phone").value=c.phone;
+  openSh("sh-wa");
+}
+function doWa(){
+  const ph=v("wa_phone"); if(!ph) return toast(...T.t_no_num);
+  openWA(ph,waBuf); closeSh("sh-wa"); toast(...T.t_wa);
+}
+function bulkWa(){
+  bulkQ=gC().filter(c=>{const up=gB().filter(b=>b.clientId===c.id&&!b.paid);return up.length>0&&c.phone&&c.phone.trim();});
+  if(!bulkQ.length) return toast(...T.t_no_snd);
+  bulkI=0; nextBulk();
+}
+function nextBulk(){
+  if(bulkI>=bulkQ.length){toast(T.t_done[0],T.t_done[1],bulkQ.length+" "+(L==="ar"?"عملاء":"clients"));return;}
+  const c=bulkQ[bulkI];
+  openWA(c.phone,buildRemMsg(c,gB().filter(b=>b.clientId===c.id&&!b.paid)));
+  bulkI++;
+  if(bulkI<bulkQ.length){
+    setTimeout(()=>{if(confirm(T.conf_next.replace("{n}",c.name).replace("{x}",bulkQ[bulkI].name))) nextBulk();},900);
+  } else {
+    setTimeout(()=>toast(T.t_done[0],T.t_done[1],bulkQ.length+" "+(L==="ar"?"عملاء":"clients")),700);
+  }
+}
+/* ════════════════════════════════════════════
+   SUMMARY
+════════════════════════════════════════════ */
+function rS(){
+  const all=gB(),paid=all.filter(b=>b.paid),up=all.filter(b=>!b.paid),ov=all.filter(b=>isOD(b));
+  const tB=all.reduce((s,b)=>s+(b.amount||0),0),tC=paid.reduce((s,b)=>s+(b.amount||0),0);
+  const rate=tB>0?Math.round((tC/tB)*100):0;
+  $("s_tb").textContent="$"+fmt(tB); $("s_tc").textContent="$"+fmt(tC);
+  $("s_to").textContent="$"+fmt(tB-tC); $("s_rate").textContent=rate+"%";
+  $("s_bar").style.width=rate+"%";
+  $("s_bt").textContent=all.length; $("s_bp").textContent=paid.length;
+  $("s_bu").textContent=up.length;  $("s_bo").textContent=ov.length;
+  const debtors=gC().map(c=>({...c,owed:gB().filter(b=>b.clientId===c.id&&!b.paid).reduce((s,b)=>s+(b.amount||0),0)})).filter(c=>c.owed>0).sort((a,b)=>b.owed-a.owed).slice(0,10);
+  const el=$("topd"); if(!el) return;
+  if(!debtors.length){el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--green);font-size:14px;font-weight:700">${T.all_paid}</div>`;return;}
+  el.innerHTML=debtors.map(d=>`
+    <div class="drow">
+      <div><div class="dname">${esc(d.name)}</div><div class="dmt">${esc(d.meter)}</div></div>
+      <div class="drv"><div class="damt">$${fmt(d.owed)}</div>${d.phone?`<button class="dwa" onclick="sendRem('${d.id}')">📲</button>`:""}</div>
+    </div>`).join("");
+}
+/* ════════════════════════════════════════════
+   SHEET HELPERS
+════════════════════════════════════════════ */
+function openSh(id){ $(id).classList.add("on"); }
+function closeSh(id){ $(id).classList.remove("on"); }
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
+let tTm;
+function toast(icon,title,msg){
+  clearTimeout(tTm);
+  $("t_i").textContent=icon; $("t_t").textContent=title; $("t_m").textContent=msg||"";
+  const el=$("toast"); el.classList.add("on");
+  tTm=setTimeout(()=>el.classList.remove("on"),3200);
+}
+</script>
+</body>
+</html>
