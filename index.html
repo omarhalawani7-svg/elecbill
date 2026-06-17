@@ -173,6 +173,9 @@ html[lang="ar"] .abl-wa{margin-left:0;margin-right:auto;}
 .abl-pay{background:#16a34a;color:#fff;border:none;border-radius:7px;padding:6px 18px;font-size:12px;font-weight:700;margin-left:auto;cursor:pointer;transition:transform .1s;}
 .abl-pay:active{transform:scale(.95);}
 html[lang="ar"] .abl-pay{margin-left:0;margin-right:auto;}
+.abl-unpay{background:#d97706;color:#fff;border:none;border-radius:7px;padding:6px 18px;font-size:12px;font-weight:700;margin-left:auto;cursor:pointer;transition:transform .1s;}
+.abl-unpay:active{transform:scale(.95);}
+html[lang="ar"] .abl-unpay{margin-left:0;margin-right:auto;}
 /* ── SUMMARY ── */
 .scard{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rxl);padding:18px;margin-bottom:11px;}
 .scard-t{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:13px;}
@@ -971,7 +974,7 @@ function rB(){
         <div><div class="abl-name">${esc(b.c.name)}</div><div class="abl-sub">${esc(b.c.meter)} · ${esc(b.month||"—")}</div></div>
         <div><div class="abl-amt">$${fmt(b.amount)}</div><div class="abl-due">${T.due_lbl} ${fmtD(b.dueDate)}</div></div>
       </div>
-      <div class="abl-foot">${bg(b)}${b.desc?`<span style="font-size:11px;color:var(--t3);font-style:italic">${esc(b.desc)}</span>`:""}${!b.paid&&hp?`<button class="abl-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}${!b.paid?`<button class="abl-pay" data-action="paid" data-id="${b.id}">✅ ${T.mark_paid}</button>`:""}</div>
+      <div class="abl-foot">${bg(b)}${b.desc?`<span style="font-size:11px;color:var(--t3);font-style:italic">${esc(b.desc)}</span>`:""}${!b.paid&&hp?`<button class="abl-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}${!b.paid?`<button class="abl-pay" data-action="paid" data-id="${b.id}">✅ ${T.mark_paid}</button>`:`<button class="abl-unpay" data-action="unpaid-confirm" data-id="${b.id}">↩ ${T.mark_unpaid}</button>`}</div>
     </div>`;
   }).join("");
 }
@@ -1209,6 +1212,13 @@ document.addEventListener("click", e => {
   const id = btn.dataset.id;
   if(action === "paid")   markPaid(id);
   if(action === "unpaid") markUnpaid(id);
+  if(action === "unpaid-confirm"){
+    const b=gB().find(x=>x.id===id);
+    const msg=L==="ar"
+      ?`⚠️ تأكيد\n\nهل تريد إلغاء الدفع لهذه الفاتورة؟\nالفترة: ${b?.month||"—"}\nالمبلغ: $${fmt(b?.amount)}\n\nسيتم إعادتها إلى قائمة غير المدفوعة.`
+      :`⚠️ Confirm\n\nMark this bill as UNPAID?\nPeriod: ${b?.month||"—"}\nAmount: $${fmt(b?.amount)}\n\nIt will move back to unpaid.`;
+    if(confirm(msg)) markUnpaid(id);
+  }
   if(action === "delbill") delBill(id);
   if(action === "wabill") waForBill(id);
 });
