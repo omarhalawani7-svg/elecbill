@@ -156,10 +156,10 @@ html[lang="ar"] .sechead{text-transform:none;letter-spacing:0;font-size:12px;}
 .bca{flex:1;padding:9px 6px;border-radius:9px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;transition:transform .1s;}
 html[lang="ar"] .bca{font-size:13px;}
 .bca:active{transform:scale(.95);}
-.bca-pay{background:var(--gdim);color:var(--green);border:1.5px solid rgba(74,222,128,.3);}
-.bca-unp{background:var(--ydim);color:var(--yellow);border:1.5px solid rgba(245,158,11,.3);}
-.bca-wa{background:var(--wadim);color:var(--wa);border:1.5px solid rgba(37,211,102,.3);}
-.bca-del{background:var(--rdim);color:var(--red);border:1.5px solid rgba(239,68,68,.3);max-width:44px;}
+.bca-pay{background:#16a34a;color:#fff;border:1.5px solid #15803d;}
+.bca-unp{background:#d97706;color:#fff;border:1.5px solid #b45309;}
+.bca-wa{background:#25d366;color:#fff;border:1.5px solid #1ebe57;}
+.bca-del{background:#dc2626;color:#fff;border:1.5px solid #b91c1c;max-width:44px;}
 /* ── ALL BILLS PAGE ── */
 .abl{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rl);padding:14px;margin-bottom:9px;}
 .abl-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;}
@@ -992,9 +992,9 @@ function openDet(id){
         <div class="bc-dates">${T.issued} ${fmtD(b.billDate)}&nbsp;·&nbsp;${T.due_lbl} ${fmtD(b.dueDate)}</div>
         ${b.desc?`<div class="bc-desc">💬 ${esc(b.desc)}</div>`:""}
         <div class="bc-acts">
-          ${!b.paid?`<button class="bca bca-pay" onclick="markPaid('${b.id}')">${T.mark_paid}</button>`:`<button class="bca bca-unp" onclick="markUnpaid('${b.id}')">${T.mark_unpaid}</button>`}
-          ${!b.paid&&hp?`<button class="bca bca-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}
-          <button class="bca bca-del" onclick="delBill('${b.id}')">${T.del_btn}</button>
+          ${!b.paid?`<button class="bca bca-pay" data-action="paid" data-id="${b.id}">${T.mark_paid}</button>`:`<button class="bca bca-unp" data-action="unpaid" data-id="${b.id}">${T.mark_unpaid}</button>`}
+          ${!b.paid&&hp?`<button class="bca bca-wa" data-action="wabill" data-id="${b.id}">${T.wa_btn}</button>`:""}
+          <button class="bca bca-del" data-action="delbill" data-id="${b.id}">${T.del_btn}</button>
         </div>
       </div>`;
     }).join("");
@@ -1199,6 +1199,24 @@ function rS(){
 function openSh(id){$(id).classList.add("on");}
 function closeSh(id){$(id).classList.remove("on");}
 
+/* ════ BILL ACTION DELEGATION ════ */
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-action]");
+  if(!btn) return;
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+  if(action === "paid")   markPaid(id);
+  if(action === "unpaid") markUnpaid(id);
+  if(action === "delbill") delBill(id);
+  if(action === "wabill") waForBill(id);
+});
+/* ════ KEYBOARD PIN ════ */
+document.addEventListener("keydown", e => {
+  if(!$("sh-pin").classList.contains("on")) return;
+  if(e.key>="0"&&e.key<="9"){e.preventDefault();pinD(e.key);}
+  else if(e.key==="Backspace"){e.preventDefault();pinBack();}
+  else if(e.key==="Escape"){e.preventDefault();cancelPin();}
+});
 /* ════ TOAST ════ */
 let tTm;
 function toast(icon,title,msg){
