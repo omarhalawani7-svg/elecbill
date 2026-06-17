@@ -170,6 +170,9 @@ html[lang="ar"] .bca{font-size:13px;}
 .abl-foot{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px;}
 .abl-wa{background:var(--wadim);color:var(--wa);border:1.5px solid rgba(37,211,102,.3);border-radius:7px;padding:5px 11px;font-size:12px;font-weight:700;margin-left:auto;}
 html[lang="ar"] .abl-wa{margin-left:0;margin-right:auto;}
+.abl-pay{background:#16a34a;color:#fff;border:none;border-radius:7px;padding:6px 18px;font-size:12px;font-weight:700;margin-left:auto;cursor:pointer;transition:transform .1s;}
+.abl-pay:active{transform:scale(.95);}
+html[lang="ar"] .abl-pay{margin-left:0;margin-right:auto;}
 /* ── SUMMARY ── */
 .scard{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rxl);padding:18px;margin-bottom:11px;}
 .scard-t{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:13px;}
@@ -968,7 +971,7 @@ function rB(){
         <div><div class="abl-name">${esc(b.c.name)}</div><div class="abl-sub">${esc(b.c.meter)} · ${esc(b.month||"—")}</div></div>
         <div><div class="abl-amt">$${fmt(b.amount)}</div><div class="abl-due">${T.due_lbl} ${fmtD(b.dueDate)}</div></div>
       </div>
-      <div class="abl-foot">${bg(b)}${b.desc?`<span style="font-size:11px;color:var(--t3);font-style:italic">${esc(b.desc)}</span>`:""}${!b.paid&&hp?`<button class="abl-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}</div>
+      <div class="abl-foot">${bg(b)}${b.desc?`<span style="font-size:11px;color:var(--t3);font-style:italic">${esc(b.desc)}</span>`:""}${!b.paid&&hp?`<button class="abl-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}${!b.paid?`<button class="abl-pay" data-action="paid" data-id="${b.id}">✅ ${T.mark_paid}</button>`:""}</div>
     </div>`;
   }).join("");
 }
@@ -992,7 +995,6 @@ function openDet(id){
         <div class="bc-dates">${T.issued} ${fmtD(b.billDate)}&nbsp;·&nbsp;${T.due_lbl} ${fmtD(b.dueDate)}</div>
         ${b.desc?`<div class="bc-desc">💬 ${esc(b.desc)}</div>`:""}
         <div class="bc-acts">
-          ${!b.paid?`<button class="bca bca-pay" data-action="paid" data-id="${b.id}">${T.mark_paid}</button>`:`<button class="bca bca-unp" data-action="unpaid" data-id="${b.id}">${T.mark_unpaid}</button>`}
           ${!b.paid&&hp?`<button class="bca bca-wa" data-action="wabill" data-id="${b.id}">${T.wa_btn}</button>`:""}
           <button class="bca bca-del" data-action="delbill" data-id="${b.id}">${T.del_btn}</button>
         </div>
