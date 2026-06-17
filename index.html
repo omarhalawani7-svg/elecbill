@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="theme-color" content="#030303">
+<meta name="theme-color" content="#f5f5f5">
 <title>ElecBill Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#030303;--card:#0e0e0e;--card2:#161616;--border:#1c1c1c;--border2:#262626;
+  --bg:#f5f5f5;--card:#ffffff;--card2:#eeeeee;--border:#e0e0e0;--border2:#d0d0d0;
   --blue:#22c55e;--bdim:rgba(34,197,94,.12);--bglow:rgba(34,197,94,.22);
   --green:#4ade80;--gdim:rgba(74,222,128,.1);
   --yellow:#f59e0b;--ydim:rgba(245,158,11,.13);
   --red:#ef4444;--rdim:rgba(239,68,68,.13);
   --wa:#25d366;--wadim:rgba(37,211,102,.12);
-  --text:#f0f0f0;--t2:#7a7a7a;--t3:#3c3c3c;
+  --text:#111111;--t2:#555555;--t3:#999999;
   --font:'Inter',system-ui,sans-serif;
   --r:14px;--rl:20px;--rxl:26px;
 }
@@ -44,7 +44,7 @@ button{cursor:pointer;}
 .sp-ar .sp-lname{color:var(--text);font-family:'Cairo',sans-serif;}
 .sp-hint{font-size:11px;color:var(--t3);}
 /* ── HEADER ── */
-.hdr{position:sticky;top:0;z-index:80;background:rgba(3,3,3,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.hdr{position:sticky;top:0;z-index:80;background:rgba(245,245,245,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .hbrand{display:flex;align-items:center;gap:10px;}
 .hicon{width:34px;height:34px;background:var(--blue);border-radius:9px;font-size:17px;display:flex;align-items:center;justify-content:center;}
 .htitle{font-size:17px;font-weight:900;letter-spacing:-.4px;}
@@ -189,7 +189,7 @@ html[lang="ar"] .scard-t{text-transform:none;letter-spacing:0;font-size:12px;}
 .damt{font-family:monospace;font-size:14px;font-weight:800;color:var(--red);}
 .dwa{background:var(--wadim);border:1.5px solid rgba(37,211,102,.3);color:var(--wa);border-radius:7px;padding:5px 9px;font-size:13px;font-weight:700;}
 /* ── BOTTOM NAV ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:80;background:rgba(3,3,3,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:80;background:rgba(245,245,245,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));}
 .nb{flex:1;padding:9px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:8px;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;transition:all .18s;background:none;}
 html[lang="ar"] .nb{text-transform:none;letter-spacing:0;font-size:11px;}
 .nb .ni{font-size:19px;}
@@ -223,10 +223,10 @@ html[lang="ar"] .fixrow .fxl{text-transform:none;letter-spacing:0;font-size:11px
 .fixrow .fxv{color:var(--text);font-weight:600;font-family:monospace;font-size:12px;}
 .fixrow .fxw{color:var(--wa);}
 /* ── WA PREVIEW BOX ── */
-.wabox{background:#021108;border:1.5px solid rgba(37,211,102,.28);border-radius:var(--r);padding:13px;margin-bottom:13px;}
+.wabox{background:#e8f5e9;border:1.5px solid rgba(37,211,102,.28);border-radius:var(--r);padding:13px;margin-bottom:13px;}
 .wabox-hd{font-size:10px;font-weight:800;color:var(--wa);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
-.wabox-txt{font-size:13px;color:#d1fae5;line-height:1.75;white-space:pre-wrap;word-break:break-word;}
+.wabox-txt{font-size:13px;color:#1b5e20;line-height:1.75;white-space:pre-wrap;word-break:break-word;}
 /* ── TOAST ── */
 .toast{position:fixed;top:66px;left:11px;right:11px;z-index:500;background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;transform:translateY(-110px);opacity:0;transition:all .28s cubic-bezier(.22,1,.36,1);box-shadow:0 6px 24px rgba(0,0,0,.6);pointer-events:none;}
 .toast.on{transform:translateY(0);opacity:1;}
