@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#030303">
 <title>ElecBill Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0d1117;--card:#161b27;--card2:#1c2333;--border:#252d40;--border2:#2e3a52;
-  --blue:#3b82f6;--bdim:rgba(59,130,246,.13);--bglow:rgba(59,130,246,.2);
-  --green:#22c55e;--gdim:rgba(34,197,94,.13);
+  --bg:#030303;--card:#0e0e0e;--card2:#161616;--border:#1c1c1c;--border2:#262626;
+  --blue:#22c55e;--bdim:rgba(34,197,94,.12);--bglow:rgba(34,197,94,.22);
+  --green:#4ade80;--gdim:rgba(74,222,128,.1);
   --yellow:#f59e0b;--ydim:rgba(245,158,11,.13);
   --red:#ef4444;--rdim:rgba(239,68,68,.13);
   --wa:#25d366;--wadim:rgba(37,211,102,.12);
-  --text:#f0f4ff;--t2:#8b9ab5;--t3:#5a6a85;
+  --text:#f0f0f0;--t2:#7a7a7a;--t3:#3c3c3c;
   --font:'Inter',system-ui,sans-serif;
   --r:14px;--rl:20px;--rxl:26px;
 }
@@ -28,7 +28,7 @@ button,input,select,textarea{font-family:var(--font);border:none;outline:none;}
 button{cursor:pointer;}
 ::-webkit-scrollbar{width:0;height:0;}
 /* ── SPLASH ── */
-#splash{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:32px 24px;transition:opacity .4s;}
+#splash{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;transition:opacity .4s;}
 #splash.hide{opacity:0;pointer-events:none;}
 .sp-logo{font-size:56px;margin-bottom:14px;}
 .sp-title{font-size:28px;font-weight:900;letter-spacing:-.6px;margin-bottom:6px;text-align:center;}
@@ -37,14 +37,14 @@ button{cursor:pointer;}
 .sp-btn{padding:24px 12px;border-radius:var(--rxl);border:2px solid var(--border2);background:var(--card);display:flex;flex-direction:column;align-items:center;gap:9px;transition:transform .12s,border-color .2s;}
 .sp-btn:active{transform:scale(.95);}
 .sp-en{border-color:var(--blue);}
-.sp-ar{border-color:var(--yellow);}
+.sp-ar{border-color:rgba(255,255,255,.3);}
 .sp-flag{font-size:38px;}
 .sp-lname{font-size:19px;font-weight:900;}
 .sp-en .sp-lname{color:var(--blue);}
-.sp-ar .sp-lname{color:var(--yellow);font-family:'Cairo',sans-serif;}
+.sp-ar .sp-lname{color:var(--text);font-family:'Cairo',sans-serif;}
 .sp-hint{font-size:11px;color:var(--t3);}
 /* ── HEADER ── */
-.hdr{position:sticky;top:0;z-index:80;background:rgba(13,17,23,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.hdr{position:sticky;top:0;z-index:80;background:rgba(3,3,3,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .hbrand{display:flex;align-items:center;gap:10px;}
 .hicon{width:34px;height:34px;background:var(--blue);border-radius:9px;font-size:17px;display:flex;align-items:center;justify-content:center;}
 .htitle{font-size:17px;font-weight:900;letter-spacing:-.4px;}
@@ -52,24 +52,26 @@ button{cursor:pointer;}
 html[lang="ar"] .hsub{text-transform:none;letter-spacing:0;font-size:10px;}
 .hright{display:flex;align-items:center;gap:7px;}
 .hlang{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--t2);}
+.hadm{background:transparent;border:1.5px solid var(--border2);border-radius:7px;padding:4px 9px;font-size:15px;color:var(--t2);transition:all .18s;}
+.hadm.on{border-color:var(--blue);color:var(--blue);background:var(--bdim);}
 .hdb{font-size:11px;font-weight:700;}
 .hdate{font-size:11px;color:var(--t3);background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;}
 /* ── STATS ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 12px 0;}
 .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 6px;text-align:center;position:relative;overflow:hidden;}
 .stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;}
-.s1::before{background:var(--blue);} .s2::before{background:var(--yellow);}
-.s3::before{background:var(--red);} .s4::before{background:var(--green);}
+.s1::before{background:var(--blue);}  .s2::before{background:var(--yellow);}
+.s3::before{background:var(--red);}   .s4::before{background:var(--green);}
 .sv{font-size:21px;font-weight:900;line-height:1;letter-spacing:-.5px;}
-.s1 .sv{color:var(--blue);} .s2 .sv{color:var(--yellow);}
-.s3 .sv{color:var(--red);}  .s4 .sv{color:var(--green);}
+.s1 .sv{color:var(--blue);}  .s2 .sv{color:var(--yellow);}
+.s3 .sv{color:var(--red);}   .s4 .sv{color:var(--green);}
 .sl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
 html[lang="ar"] .sl{text-transform:none;letter-spacing:0;font-size:10px;}
 /* ── TABS ── */
 .tabs{display:flex;margin:10px 12px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:3px;}
 .tab{flex:1;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;color:var(--t3);background:transparent;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:2px;}
 .tab .ti{font-size:18px;}
-.tab.on{background:var(--blue);color:#fff;}
+.tab.on{background:var(--blue);color:#000;}
 html[lang="ar"] .tab{font-size:12px;}
 /* ── PAGES ── */
 .pg{display:none;padding:12px;animation:fu .18s ease;}
@@ -84,7 +86,7 @@ html[lang="ar"] .sbox input{padding:12px 40px 12px 14px;text-align:right;}
 .sbox input:focus{border-color:var(--blue);}
 .sico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none;}
 html[lang="ar"] .sico{left:auto;right:13px;}
-.addbtn{width:48px;height:48px;background:var(--blue);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0;box-shadow:0 3px 12px var(--bglow);transition:transform .12s;}
+.addbtn{width:48px;height:48px;background:var(--blue);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:24px;color:#000;flex-shrink:0;box-shadow:0 3px 12px var(--bglow);transition:transform .12s;}
 .addbtn:active{transform:scale(.91);}
 /* ── CHIPS ── */
 .chips{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px;}
@@ -110,7 +112,7 @@ html[dir="rtl"] .cc::before{right:0;left:auto;}
 html[lang="ar"] .badge{font-size:11px;}
 .bp{background:var(--ydim);color:var(--yellow);border:1px solid rgba(245,158,11,.3);}
 .bo{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.3);}
-.bd{background:var(--gdim);color:var(--green);border:1px solid rgba(34,197,94,.3);}
+.bd{background:var(--gdim);color:var(--green);border:1px solid rgba(74,222,128,.3);}
 .bn{background:var(--card2);color:var(--t3);border:1px solid var(--border);}
 .cc-amt{font-family:monospace;font-size:13px;font-weight:800;color:var(--blue);}
 .cc-phone{font-size:11px;color:var(--wa);margin-top:6px;}
@@ -120,7 +122,7 @@ html[lang="ar"] .badge{font-size:11px;}
 .abtn:first-child{margin-top:0;}
 .abtn:active{transform:scale(.97);}
 html[lang="ar"] .abtn{font-size:16px;}
-.a-blue{background:var(--blue);color:#fff;box-shadow:0 3px 12px var(--bglow);}
+.a-blue{background:var(--blue);color:#000;box-shadow:0 3px 12px var(--bglow);}
 .a-wa{background:var(--wa);color:#fff;box-shadow:0 3px 12px rgba(37,211,102,.28);}
 .a-ghost{background:var(--card2);color:var(--t2);border:1.5px solid var(--border2);}
 .a-danger{background:var(--rdim);color:var(--red);border:1.5px solid rgba(239,68,68,.3);}
@@ -133,7 +135,7 @@ html[lang="ar"] .abtn{font-size:16px;}
 .totals{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0;}
 .tbox{border-radius:var(--r);padding:13px;text-align:center;}
 .tu{background:var(--rdim);border:1px solid rgba(239,68,68,.2);}
-.tp{background:var(--gdim);border:1px solid rgba(34,197,94,.2);}
+.tp{background:var(--gdim);border:1px solid rgba(74,222,128,.2);}
 .tv{font-family:monospace;font-size:20px;font-weight:900;}
 .tu .tv{color:var(--red);} .tp .tv{color:var(--green);}
 .tl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-top:3px;}
@@ -143,7 +145,7 @@ html[lang="ar"] .sechead{text-transform:none;letter-spacing:0;font-size:12px;}
 .sechead::after{content:'';flex:1;height:1px;background:var(--border);}
 /* ── BILL CARD ── */
 .bc{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rl);padding:15px;margin-bottom:9px;}
-.bc.bcp{border-color:rgba(34,197,94,.22);} .bc.bco{border-color:rgba(239,68,68,.22);} .bc.bcn{border-color:rgba(245,158,11,.18);}
+.bc.bcp{border-color:rgba(74,222,128,.22);} .bc.bco{border-color:rgba(239,68,68,.22);} .bc.bcn{border-color:rgba(245,158,11,.18);}
 .bc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
 .bc-period{font-size:16px;font-weight:800;}
 .bc-amt{font-family:monospace;font-size:20px;font-weight:900;color:var(--blue);}
@@ -154,7 +156,7 @@ html[lang="ar"] .sechead{text-transform:none;letter-spacing:0;font-size:12px;}
 .bca{flex:1;padding:9px 6px;border-radius:9px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;transition:transform .1s;}
 html[lang="ar"] .bca{font-size:13px;}
 .bca:active{transform:scale(.95);}
-.bca-pay{background:var(--gdim);color:var(--green);border:1.5px solid rgba(34,197,94,.3);}
+.bca-pay{background:var(--gdim);color:var(--green);border:1.5px solid rgba(74,222,128,.3);}
 .bca-unp{background:var(--ydim);color:var(--yellow);border:1.5px solid rgba(245,158,11,.3);}
 .bca-wa{background:var(--wadim);color:var(--wa);border:1.5px solid rgba(37,211,102,.3);}
 .bca-del{background:var(--rdim);color:var(--red);border:1.5px solid rgba(239,68,68,.3);max-width:44px;}
@@ -187,13 +189,13 @@ html[lang="ar"] .scard-t{text-transform:none;letter-spacing:0;font-size:12px;}
 .damt{font-family:monospace;font-size:14px;font-weight:800;color:var(--red);}
 .dwa{background:var(--wadim);border:1.5px solid rgba(37,211,102,.3);color:var(--wa);border-radius:7px;padding:5px 9px;font-size:13px;font-weight:700;}
 /* ── BOTTOM NAV ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:80;background:rgba(13,17,23,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:80;background:rgba(3,3,3,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));}
 .nb{flex:1;padding:9px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:8px;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;transition:all .18s;background:none;}
 html[lang="ar"] .nb{text-transform:none;letter-spacing:0;font-size:11px;}
 .nb .ni{font-size:19px;}
 .nb.on{color:var(--blue);background:var(--bdim);}
 /* ── OVERLAYS / SHEETS ── */
-.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.68);backdrop-filter:blur(6px);align-items:flex-end;justify-content:center;}
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:flex-end;justify-content:center;}
 .ov.on{display:flex;}
 .sheet{background:var(--card);border:1px solid var(--border2);border-radius:26px 26px 0 0;padding:18px 18px calc(28px + env(safe-area-inset-bottom,0px));width:100%;max-width:520px;max-height:93dvh;overflow-y:auto;animation:sup .26s cubic-bezier(.22,1,.36,1);}
 @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -221,12 +223,12 @@ html[lang="ar"] .fixrow .fxl{text-transform:none;letter-spacing:0;font-size:11px
 .fixrow .fxv{color:var(--text);font-weight:600;font-family:monospace;font-size:12px;}
 .fixrow .fxw{color:var(--wa);}
 /* ── WA PREVIEW BOX ── */
-.wabox{background:#0b1f14;border:1.5px solid rgba(37,211,102,.28);border-radius:var(--r);padding:13px;margin-bottom:13px;}
+.wabox{background:#021108;border:1.5px solid rgba(37,211,102,.28);border-radius:var(--r);padding:13px;margin-bottom:13px;}
 .wabox-hd{font-size:10px;font-weight:800;color:var(--wa);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 .wabox-txt{font-size:13px;color:#d1fae5;line-height:1.75;white-space:pre-wrap;word-break:break-word;}
 /* ── TOAST ── */
-.toast{position:fixed;top:66px;left:11px;right:11px;z-index:500;background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;transform:translateY(-110px);opacity:0;transition:all .28s cubic-bezier(.22,1,.36,1);box-shadow:0 6px 24px rgba(0,0,0,.5);pointer-events:none;}
+.toast{position:fixed;top:66px;left:11px;right:11px;z-index:500;background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;transform:translateY(-110px);opacity:0;transition:all .28s cubic-bezier(.22,1,.36,1);box-shadow:0 6px 24px rgba(0,0,0,.6);pointer-events:none;}
 .toast.on{transform:translateY(0);opacity:1;}
 .ti{font-size:20px;flex-shrink:0;}
 .tt{font-size:14px;font-weight:700;}
@@ -239,10 +241,27 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 .ldg{display:flex;flex-direction:column;align-items:center;padding:50px 16px;gap:11px;}
 .spin{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:sp .8s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
+/* ── PIN PAD ── */
+.pin-header{text-align:center;margin-bottom:6px;}
+.pin-header .stitle{margin-bottom:4px;}
+.pin-sub{font-size:13px;color:var(--t3);text-align:center;margin-bottom:22px;}
+.pin-dots{display:flex;justify-content:center;gap:18px;margin-bottom:28px;}
+.pdot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);background:transparent;display:inline-block;transition:all .15s;}
+.pdot.filled{background:var(--blue);border-color:var(--blue);transform:scale(1.1);}
+.pin-pad{display:flex;flex-direction:column;gap:10px;max-width:260px;margin:0 auto;}
+.pin-row{display:flex;gap:10px;justify-content:center;}
+.pkey{width:76px;height:64px;background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);font-size:24px;font-weight:700;color:var(--text);transition:transform .1s,background .12s;}
+.pkey:active{transform:scale(.9);background:var(--border);}
+.pkey-del{font-size:18px;color:var(--t2);}
+.pkey-x{font-size:13px;font-weight:700;color:var(--t2);}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.shake{animation:shake .42s ease;}
+/* ── CHANGE PIN ── */
+.chpin-info{font-size:13px;color:var(--t2);background:var(--card2);border-radius:9px;padding:11px;margin-bottom:14px;line-height:1.6;border:1px solid var(--border);}
 </style>
 </head>
 <body>
-<!-- SPLASH / LANG PICKER -->
+<!-- SPLASH -->
 <div id="splash">
   <div class="sp-logo">⚡</div>
   <div class="sp-title">ElecBill Pro</div>
@@ -268,6 +287,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
   </div>
   <div class="hright">
     <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
+    <button class="hadm" id="h_adm" onclick="toggleAdmin()" title="Admin">🔒</button>
     <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
     <div class="hdate" id="h_date"></div>
   </div>
@@ -290,7 +310,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
   <div style="height:12px"></div>
   <div class="srow">
     <div class="sbox"><span class="sico">🔍</span><input type="search" id="cs" oninput="rC()" autocomplete="off"></div>
-    <button class="addbtn" onclick="openSh('sh-ac')">+</button>
+    <button class="addbtn" onclick="requireAdmin(()=>openSh('sh-ac'))">+</button>
   </div>
   <div class="chips" id="cchips">
     <button class="chip on-b" onclick="cf('all',this)">—</button>
@@ -431,13 +451,68 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <button class="abtn a-ghost" id="wa_cn" onclick="closeSh('sh-wa')">Cancel</button>
   </div>
 </div>
+<!-- SHEET: ADMIN PIN -->
+<div class="ov" id="sh-pin">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="pin-header">
+      <div class="stitle" id="pin_title">🔒 <span>Admin</span></div>
+      <div class="pin-sub" id="pin_sub">Enter 4-digit PIN</div>
+    </div>
+    <div class="pin-dots" id="pin_dots">
+      <span class="pdot"></span><span class="pdot"></span>
+      <span class="pdot"></span><span class="pdot"></span>
+    </div>
+    <div class="pin-pad">
+      <div class="pin-row">
+        <button class="pkey" onclick="pinD('1')">1</button>
+        <button class="pkey" onclick="pinD('2')">2</button>
+        <button class="pkey" onclick="pinD('3')">3</button>
+      </div>
+      <div class="pin-row">
+        <button class="pkey" onclick="pinD('4')">4</button>
+        <button class="pkey" onclick="pinD('5')">5</button>
+        <button class="pkey" onclick="pinD('6')">6</button>
+      </div>
+      <div class="pin-row">
+        <button class="pkey" onclick="pinD('7')">7</button>
+        <button class="pkey" onclick="pinD('8')">8</button>
+        <button class="pkey" onclick="pinD('9')">9</button>
+      </div>
+      <div class="pin-row">
+        <button class="pkey pkey-x" onclick="cancelPin()">✕</button>
+        <button class="pkey" onclick="pinD('0')">0</button>
+        <button class="pkey pkey-del" onclick="pinBack()">⌫</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- SHEET: CHANGE PIN -->
+<div class="ov" id="sh-chpin">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="stitle" id="chpin_t">🔑 <span>Change PIN</span></div>
+    <div class="chpin-info" id="chpin_info">ℹ️ Enter a new 4-digit PIN. Default is 1234.</div>
+    <div class="fg">
+      <div class="fl" id="chpin_nl">New PIN <span class="freq">*</span></div>
+      <input class="fi" id="chpin_new" type="password" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="••••">
+    </div>
+    <div class="fg">
+      <div class="fl" id="chpin_cl">Confirm PIN <span class="freq">*</span></div>
+      <input class="fi" id="chpin_conf" type="password" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="••••">
+    </div>
+    <div style="height:10px"></div>
+    <button class="abtn a-blue" id="chpin_sv" onclick="saveNewPin()" style="margin-top:0">💾 Save New PIN</button>
+    <button class="abtn a-ghost" id="chpin_cn" onclick="closeSh('sh-chpin')">Cancel</button>
+  </div>
+</div>
 <!-- TOAST -->
 <div class="toast" id="toast"><div class="ti" id="t_i">✅</div><div><div class="tt" id="t_t"></div><div class="tm" id="t_m"></div></div></div>
-<!-- FIREBASE + APP LOGIC -->
+
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-/* ── FIREBASE CONFIG (your real credentials) ── */
 const app = initializeApp({
   apiKey:            "AIzaSyAYCnRk--CmpA7lb1Qh3D0eBw3IqJvva_s",
   authDomain:        "elecbill1-ff6cd.firebaseapp.com",
@@ -447,7 +522,6 @@ const app = initializeApp({
   appId:             "1:448569501513:web:9378445a4b2e6d980bdc98"
 });
 const db = getFirestore(app);
-/* ── LIVE LISTENERS ── */
 window.__C = []; window.__B = [];
 onSnapshot(query(collection(db,"clients"), orderBy("name")), snap => {
   window.__C = snap.docs.map(d => ({ id:d.id, ...d.data() }));
@@ -459,11 +533,10 @@ onSnapshot(query(collection(db,"bills"), orderBy("createdAt","desc")), snap => {
 }, err => { console.error(err); });
 function showDbErr() {
   const el = document.getElementById("h_db");
-  el.textContent = "⚠️ offline"; el.style.color = "var(--yellow)";
+  el.textContent = "⚠️"; el.style.color = "var(--yellow)";
 }
-document.getElementById("h_db").textContent = "☁️";
-document.getElementById("h_db").style.color = "var(--green)";
-/* ── DB OPERATIONS ── */
+document.getElementById("h_db").textContent = "●";
+document.getElementById("h_db").style.color = "var(--blue)";
 window.DB = {
   addClient:    d  => addDoc(collection(db,"clients"), {...d, createdAt:serverTimestamp()}),
   updateClient: (id,d) => updateDoc(doc(db,"clients",id), d),
@@ -478,35 +551,34 @@ window.DB = {
   deleteBill: id => deleteDoc(doc(db,"bills",id))
 };
 </script>
+
 <script>
-/* ════════════════════════════════════════════
-   TRANSLATIONS
-════════════════════════════════════════════ */
+/* ════ TRANSLATIONS ════ */
 const TX = {
 en: {
   h_sub:"Billing Management", h_lang:"عربي",
-  sl1:"Clients", sl2:"Pending", sl3:"Overdue", sl4:"Paid Bills",
-  nt1:"Clients", nt2:"Bills",   nt3:"Summary",
-  nb1:"Clients", nb2:"Bills",   nb3:"Summary",
+  sl1:"Clients", sl2:"Pending", sl3:"Overdue", sl4:"Paid",
+  nt1:"Clients", nt2:"Bills", nt3:"Summary",
+  nb1:"Clients", nb2:"Bills", nb3:"Summary",
   cs_ph:"Search by name or meter #…", bs_ph:"Search bills…",
   cc_all:"All", cc_pend:"⏳ Pending", cc_over:"🔴 Overdue", cc_paid:"✅ Paid", cc_none:"No Bills",
-  bc_all:"All", bc_un:"⏳ Unpaid",    bc_ov:"🔴 Overdue",   bc_pd:"✅ Paid",
+  bc_all:"All", bc_un:"⏳ Unpaid", bc_ov:"🔴 Overdue", bc_pd:"✅ Paid",
   s_fin:"💰 Financial Overview", s_tb_l:"Total Billed", s_tc_l:"Total Collected", s_to_l:"Outstanding", s_rl:"Collection Rate",
   s_cnt:"📋 Bills Count", s_bt_l:"Total Bills", s_bp_l:"Paid", s_bu_l:"Unpaid", s_bo_l:"Overdue",
   s_top:"🔴 Top Unpaid Clients",
   s_bk_t:"📲 Bulk WhatsApp", s_bk_d:"Send reminders to all clients with unpaid bills.", s_bk_btn:"Send to All Unpaid",
-  ac_t:"Add <span>Client</span>",    ac_fl:"🔒 Fixed Info — saved permanently",
+  ac_t:"Add <span>Client</span>", ac_fl:"🔒 Fixed Info — saved permanently",
   ac_nl:"Full Name", ac_ml:"Watt-Meter Serial #", ac_pl:"📱 WhatsApp #",
   ac_ph:"Algeria: 213 then number without leading 0. Example: 213550123456",
-  ac_al:"Address",   ac_sv:"✅ Save Client",       ac_cn:"Cancel",
+  ac_al:"Address", ac_sv:"✅ Save Client", ac_cn:"Cancel",
   ac_name_ph:"e.g. Ahmed Benali", ac_meter_ph:"e.g. WM-2024-001", ac_phone_ph:"213XXXXXXXXX", ac_addr_ph:"Street, district…",
-  ec_t:"Edit <span>Client</span>",   ec_fl:"🔒 Fixed Info",
+  ec_t:"Edit <span>Client</span>", ec_fl:"🔒 Fixed Info",
   ec_nl:"Full Name", ec_ml:"Watt-Meter Serial #", ec_pl:"📱 WhatsApp #", ec_al:"Address",
   ec_sv:"💾 Save Changes", ec_cn:"Cancel",
-  ab_t:"Add <span>Bill</span>",      ab_fl:"🔒 Fixed Info — from client record",
-  ab_cl:"Client",   ab_sel_ph:"— Select client —", ab_fm_l:"Meter #", ab_fp_l:"WhatsApp",
+  ab_t:"Add <span>Bill</span>", ab_fl:"🔒 Fixed Info — from client record",
+  ab_cl:"Client", ab_sel_ph:"— Select client —", ab_fm_l:"Meter #", ab_fp_l:"WhatsApp",
   ab_vl:"📝 Variable Info — changes every bill",
-  ab_ml:"Billing Period",  ab_al:"Amount ($)", ab_dl:"Due Date", ab_il:"Issue Date", ab_nl2:"Note / Description",
+  ab_ml:"Billing Period", ab_al:"Amount ($)", ab_dl:"Due Date", ab_il:"Issue Date", ab_nl2:"Note / Description",
   ab_pvl:"📲 WhatsApp Preview", ab_pvh:"Message that will be sent",
   ab_month_ph:"e.g. January 2025 or Jan–Feb 2025", ab_desc_ph:"e.g. includes penalty, 2 months…",
   ab_sv:"💾 Save Bill Only", ab_svwl:"Save &amp; Send WhatsApp", ab_cn:"Cancel",
@@ -524,8 +596,15 @@ en: {
   bill_s:"bill", bills_s:"bills", no_phone_c:"⚠️ No WhatsApp number",
   no_bills_t:"No bills yet", no_bills_s:"Tap Add New Bill above.",
   empty_c_t:"No clients found", empty_c_s:"Add a new client with the + button.",
-  empty_b_t:"No bills here",    empty_b_s:"Open a client and tap Add New Bill.",
+  empty_b_t:"No bills here", empty_b_s:"Open a client and tap Add New Bill.",
   all_paid:"🎉 All clients are up to date!",
+  pin_title:"🔒 <span>Admin</span>", pin_sub:"Enter 4-digit PIN",
+  chpin_t:"🔑 <span>Change PIN</span>",
+  chpin_info:"ℹ️ Enter a new 4-digit PIN. Default PIN is 1234.",
+  chpin_nl:"New PIN", chpin_cl:"Confirm PIN",
+  chpin_sv:"💾 Save New PIN", chpin_cn:"Cancel",
+  change_pin:"🔑 Change Admin PIN",
+  lock_admin:"🔒 Lock Admin",
   t_name_req:["⚠️","Name required","Enter the client's full name."],
   t_meter_req:["⚠️","Meter # required","Enter the watt-meter serial number."],
   t_saved:["✅","Saved","Client added successfully."],
@@ -534,7 +613,7 @@ en: {
   t_no_c:["⚠️","No Client","Please select a client."],
   t_bad_a:["⚠️","Invalid Amount","Enter a valid amount in $."],
   t_no_due:["⚠️","Due Date Required","Set the payment due date."],
-  t_no_per:["⚠️","Period Required","Enter the billing period (e.g. January 2025)."],
+  t_no_per:["⚠️","Period Required","Enter the billing period."],
   t_bill_sv:["✅","Bill Saved",""],
   t_wa:["📲","WhatsApp Opening","Message ready — just tap Send."],
   t_no_ph:["⚠️","No Phone","Bill saved but this client has no WhatsApp number."],
@@ -547,6 +626,12 @@ en: {
   t_done:["🎉","All Done!",""],
   t_no_num:["⚠️","Enter Number","Enter a phone number."],
   t_err:["❌","Error",""],
+  t_adm_on:["🔓","Admin Unlocked","Client management enabled."],
+  t_adm_off:["🔒","Admin Locked",""],
+  t_pin_wrong:["❌","Wrong PIN","Try again."],
+  t_pin_changed:["✅","PIN Changed","New PIN saved."],
+  t_pin_mismatch:["⚠️","PINs don't match","Enter the same PIN in both fields."],
+  t_pin_short:["⚠️","PIN too short","Enter exactly 4 digits."],
   conf_del_c:"Delete this client and ALL their bills?\n\nThis cannot be undone.",
   conf_del_b:"Delete this bill?",
   conf_next:"✅ Sent to {n}.\n\nNext: {x}\n\nOpen WhatsApp for them?",
@@ -563,20 +648,20 @@ ar: {
   s_cnt:"📋 عدد الفواتير", s_bt_l:"الإجمالي", s_bp_l:"مدفوعة", s_bu_l:"غير مدفوعة", s_bo_l:"متأخرة",
   s_top:"🔴 أكثر العملاء ديناً",
   s_bk_t:"📲 واتساب جماعي", s_bk_d:"أرسل تذكيراً لكل عميل لديه فواتير غير مدفوعة.", s_bk_btn:"إرسال للجميع",
-  ac_t:"إضافة <span>عميل</span>",   ac_fl:"🔒 معلومات ثابتة — تُحفظ بشكل دائم",
+  ac_t:"إضافة <span>عميل</span>", ac_fl:"🔒 معلومات ثابتة — تُحفظ بشكل دائم",
   ac_nl:"الاسم الكامل", ac_ml:"رقم تسلسل العداد", ac_pl:"📱 رقم الواتساب",
   ac_ph:"الجزائر: 213 ثم الرقم بدون الصفر الأول. مثال: 213550123456",
   ac_al:"العنوان", ac_sv:"✅ حفظ العميل", ac_cn:"إلغاء",
   ac_name_ph:"مثال: أحمد بن علي", ac_meter_ph:"مثال: WM-2024-001", ac_phone_ph:"213XXXXXXXXX", ac_addr_ph:"الشارع، الحي…",
-  ec_t:"تعديل <span>العميل</span>",  ec_fl:"🔒 المعلومات الثابتة",
+  ec_t:"تعديل <span>العميل</span>", ec_fl:"🔒 المعلومات الثابتة",
   ec_nl:"الاسم الكامل", ec_ml:"رقم تسلسل العداد", ec_pl:"📱 رقم الواتساب", ec_al:"العنوان",
   ec_sv:"💾 حفظ التغييرات", ec_cn:"إلغاء",
-  ab_t:"إضافة <span>فاتورة</span>",  ab_fl:"🔒 معلومات ثابتة — من ملف العميل",
+  ab_t:"إضافة <span>فاتورة</span>", ab_fl:"🔒 معلومات ثابتة — من ملف العميل",
   ab_cl:"العميل", ab_sel_ph:"— اختر عميلاً —", ab_fm_l:"رقم العداد", ab_fp_l:"واتساب",
   ab_vl:"📝 معلومات متغيرة — تتغير مع كل فاتورة",
   ab_ml:"فترة الفاتورة", ab_al:"المبلغ ($)", ab_dl:"تاريخ السداد", ab_il:"تاريخ الإصدار", ab_nl2:"ملاحظة",
   ab_pvl:"📲 معاينة رسالة الواتساب", ab_pvh:"الرسالة التي ستُرسل",
-  ab_month_ph:"مثال: جانفي 2025 أو جانفي–فيفري 2025", ab_desc_ph:"مثال: تشمل غرامة، شهرين…",
+  ab_month_ph:"مثال: جانفي 2025", ab_desc_ph:"مثال: تشمل غرامة، شهرين…",
   ab_sv:"💾 حفظ الفاتورة فقط", ab_svwl:"حفظ وإرسال عبر الواتساب", ab_cn:"إلغاء",
   wa_t:"📲 <span>واتساب</span>", wa_mh:"الرسالة", wa_pl:"رقم الهاتف",
   wa_hint:"يمكنك تعديل الرقم قبل الإرسال.",
@@ -594,81 +679,87 @@ ar: {
   empty_c_t:"لا يوجد عملاء", empty_c_s:"أضف عميلاً جديداً بزر +.",
   empty_b_t:"لا توجد فواتير", empty_b_s:"افتح عميلاً واضغط إضافة فاتورة.",
   all_paid:"🎉 جميع العملاء ليس لديهم متأخرات!",
+  pin_title:"🔒 <span>المدير</span>", pin_sub:"أدخل رمز PIN من 4 أرقام",
+  chpin_t:"🔑 <span>تغيير PIN</span>",
+  chpin_info:"ℹ️ أدخل رمز PIN جديداً من 4 أرقام. الرمز الافتراضي هو 1234.",
+  chpin_nl:"الرمز الجديد", chpin_cl:"تأكيد الرمز",
+  chpin_sv:"💾 حفظ الرمز الجديد", chpin_cn:"إلغاء",
+  change_pin:"🔑 تغيير رمز PIN",
+  lock_admin:"🔒 قفل وضع المدير",
   t_name_req:["⚠️","الاسم مطلوب","يرجى إدخال الاسم الكامل."],
   t_meter_req:["⚠️","رقم العداد مطلوب","يرجى إدخال رقم تسلسل العداد."],
   t_saved:["✅","تم الحفظ","تمت إضافة العميل بنجاح."],
   t_updated:["✅","تم التحديث","تم حفظ بيانات العميل."],
   t_deleted:["🗑","تم الحذف","تم حذف العميل وجميع فواتيره."],
   t_no_c:["⚠️","لم يتم اختيار عميل","يرجى اختيار عميل."],
-  t_bad_a:["⚠️","مبلغ غير صحيح","يرجى إدخال مبلغ صحيح بالدولار."],
+  t_bad_a:["⚠️","مبلغ غير صحيح","يرجى إدخال مبلغ صحيح."],
   t_no_due:["⚠️","تاريخ السداد مطلوب","يرجى تحديد تاريخ السداد."],
   t_no_per:["⚠️","الفترة مطلوبة","يرجى إدخال فترة الفاتورة."],
   t_bill_sv:["✅","تم حفظ الفاتورة",""],
   t_wa:["📲","فتح الواتساب","الرسالة جاهزة — اضغط إرسال."],
   t_no_ph:["⚠️","لا يوجد هاتف","تم حفظ الفاتورة لكن لا يوجد رقم واتساب."],
   t_paid:["✅","تم الدفع","تم تحديث الفاتورة."],
-  t_unpaid:["↩","تم التحديد كغير مدفوع","تمت إعادة الفاتورة."],
+  t_unpaid:["↩","تم التحديد كغير مدفوع",""],
   t_bdel:["🗑","تم حذف الفاتورة",""],
-  t_no_wa:["⚠️","لا يوجد رقم","لا يوجد رقم واتساب. اضغط تعديل."],
+  t_no_wa:["⚠️","لا يوجد رقم","اضغط تعديل لإضافة رقم واتساب."],
   t_all_pd:["✅","كل شيء مدفوع","لا توجد فواتير غير مدفوعة."],
   t_no_snd:["✅","لا يوجد ما يُرسَل","جميع العملاء محدّثون."],
   t_done:["🎉","اكتمل الإرسال!",""],
   t_no_num:["⚠️","أدخل رقماً","يرجى إدخال رقم هاتف."],
   t_err:["❌","خطأ",""],
+  t_adm_on:["🔓","تم فتح وضع المدير","يمكنك الآن إدارة العملاء."],
+  t_adm_off:["🔒","تم القفل",""],
+  t_pin_wrong:["❌","رمز خاطئ","حاول مرة أخرى."],
+  t_pin_changed:["✅","تم تغيير الرمز",""],
+  t_pin_mismatch:["⚠️","الرمزان غير متطابقان","أدخل نفس الرمز في الحقلين."],
+  t_pin_short:["⚠️","الرمز قصير جداً","يجب أن يتكون من 4 أرقام بالضبط."],
   conf_del_c:"هل تريد حذف هذا العميل وجميع فواتيره؟\n\nلا يمكن التراجع.",
   conf_del_b:"هل تريد حذف هذه الفاتورة؟",
   conf_next:"✅ تم الإرسال لـ {n}.\n\nالتالي: {x}\n\nهل تفتح الواتساب؟",
 }};
-/* ════════════════════════════════════════════
-   STATE
-════════════════════════════════════════════ */
+
+/* ════ STATE ════ */
 let L="en", T=TX.en;
 let cF="all", bF="all";
 let curP="c", prevP="c", detId=null;
 let waBuf="", bulkQ=[], bulkI=0;
-const gC = () => window.__C||[];
-const gB = () => window.__B||[];
-const v  = id => (document.getElementById(id)?.value||"").trim();
-const $  = id => document.getElementById(id);
-const esc = s => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-const fmt = n => Number(n||0).toLocaleString("en-US");
-const fmtD = d => {
+let __admin=false, __pinBuf="", __pendingAction=null;
+const gC=()=>window.__C||[];
+const gB=()=>window.__B||[];
+const v=id=>(document.getElementById(id)?.value||"").trim();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const fmt=n=>Number(n||0).toLocaleString("en-US");
+const fmtD=d=>{
   if(!d) return "—";
-  try { return new Date(d).toLocaleDateString(L==="ar"?"ar-DZ":"en-GB",{day:"2-digit",month:"short",year:"numeric"}); } catch(e){ return d; }
+  try{return new Date(d).toLocaleDateString(L==="ar"?"ar-DZ":"en-GB",{day:"2-digit",month:"short",year:"numeric"});}catch(e){return d;}
 };
-const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2);
-/* ════════════════════════════════════════════
-   BOOT
-════════════════════════════════════════════ */
-function boot(lang) {
-  L = lang; T = TX[lang];
-  localStorage.setItem("eb_lang", lang);
+
+/* ════ BOOT ════ */
+function boot(lang){
+  L=lang; T=TX[lang];
+  localStorage.setItem("eb_lang",lang);
   $("splash").classList.add("hide");
-  setTimeout(() => $("splash").style.display="none", 420);
-  document.documentElement.lang = lang;
-  document.documentElement.dir  = lang==="ar" ? "rtl" : "ltr";
+  setTimeout(()=>$("splash").style.display="none",420);
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==="ar"?"rtl":"ltr";
   applyTx();
-  window.__render = renderAll;
+  updateAdminBtn();
+  window.__render=renderAll;
   renderAll();
 }
-function switchLang() {
-  boot(L==="en"?"ar":"en");
-}
-window.addEventListener("DOMContentLoaded", () => {
-  // Set date
-  $("h_date").textContent = new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
-  $("ab_date").value = new Date().toISOString().split("T")[0];
-  // Overlay close on tap outside
-  document.querySelectorAll(".ov").forEach(o => o.addEventListener("click", e => { if(e.target===o) closeSh(o.id); }));
-  // Check saved lang
-  const sl = localStorage.getItem("eb_lang");
-  if(sl) { boot(sl); } else { /* show splash */ }
+function switchLang(){ boot(L==="en"?"ar":"en"); }
+window.addEventListener("DOMContentLoaded",()=>{
+  $("h_date").textContent=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+  $("ab_date").value=new Date().toISOString().split("T")[0];
+  document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)closeSh(o.id);}));
+  const sl=localStorage.getItem("eb_lang");
+  if(sl){boot(sl);}
 });
-/* ════════════════════════════════════════════
-   TRANSLATIONS APPLY
-════════════════════════════════════════════ */
-function applyTx() {
-  const ids = ["h_sub","h_lang","sl1","sl2","sl3","sl4",
+
+/* ════ TRANSLATIONS APPLY ════ */
+function applyTx(){
+  const ids=["h_sub","h_lang","sl1","sl2","sl3","sl4",
     "nt1","nt2","nt3","nb1","nb2","nb3",
     "s_fin","s_tb_l","s_tc_l","s_to_l","s_rl",
     "s_cnt","s_bt_l","s_bp_l","s_bu_l","s_bo_l",
@@ -678,74 +769,139 @@ function applyTx() {
     "ab_cl","ab_sel_ph","ab_fm_l","ab_fp_l",
     "ab_ml","ab_al","ab_dl","ab_il","ab_nl2",
     "ab_pvl","ab_pvh","ab_sv","ab_svwl","ab_cn",
-    "wa_mh","wa_pl","wa_hint","wa_info","wa_sl","wa_cn"
+    "wa_mh","wa_pl","wa_hint","wa_info","wa_sl","wa_cn",
+    "pin_sub","chpin_nl","chpin_cl","chpin_sv","chpin_cn"
   ];
-  ids.forEach(id => { const el=$(id); if(!el||T[id]===undefined) return; el[el.tagName==="INPUT"&&el.type!=="button"?"placeholder":"textContent"]=T[id]; });
-  // innerHTML titles
-  ["ac_t","ec_t","ab_t","wa_t","ac_fl","ec_fl","ab_fl","ab_vl","ab_pvl","wa_info"].forEach(id=>{
-    const el=$(id); if(el&&T[id]) el.innerHTML=T[id];
+  ids.forEach(id=>{const el=$(id);if(!el||T[id]===undefined)return;el[el.tagName==="INPUT"&&el.type!=="button"?"placeholder":"textContent"]=T[id];});
+  ["ac_t","ec_t","ab_t","wa_t","ac_fl","ec_fl","ab_fl","ab_vl","ab_pvl","wa_info","pin_title","chpin_t","chpin_info"].forEach(id=>{
+    const el=$(id);if(el&&T[id])el.innerHTML=T[id];
   });
-  $("h_lang").textContent = T.h_lang;
-  $("back_btn").textContent = T.back;
-  // chips
-  const cc = ["cc_all","cc_pend","cc_over","cc_paid","cc_none"];
-  document.querySelectorAll("#cchips .chip").forEach((el,i) => { if(T[cc[i]]) el.textContent=T[cc[i]]; });
-  const bc = ["bc_all","bc_un","bc_ov","bc_pd"];
-  document.querySelectorAll("#bchips .chip").forEach((el,i) => { if(T[bc[i]]) el.textContent=T[bc[i]]; });
-  // placeholders
-  $("cs").placeholder = T.cs_ph;
-  $("bs").placeholder = T.bs_ph;
-  $("ac_name").placeholder  = T.ac_name_ph;
-  $("ac_meter").placeholder = T.ac_meter_ph;
-  $("ac_phone").placeholder = T.ac_phone_ph;
-  $("ac_addr").placeholder  = T.ac_addr_ph;
-  $("ab_month").placeholder = T.ab_month_ph;
-  $("ab_desc").placeholder  = T.ab_desc_ph;
+  $("h_lang").textContent=T.h_lang;
+  $("back_btn").textContent=T.back;
+  const cc=["cc_all","cc_pend","cc_over","cc_paid","cc_none"];
+  document.querySelectorAll("#cchips .chip").forEach((el,i)=>{if(T[cc[i]])el.textContent=T[cc[i]];});
+  const bc=["bc_all","bc_un","bc_ov","bc_pd"];
+  document.querySelectorAll("#bchips .chip").forEach((el,i)=>{if(T[bc[i]])el.textContent=T[bc[i]];});
+  $("cs").placeholder=T.cs_ph;
+  $("bs").placeholder=T.bs_ph;
+  $("ac_name").placeholder=T.ac_name_ph;
+  $("ac_meter").placeholder=T.ac_meter_ph;
+  $("ac_phone").placeholder=T.ac_phone_ph;
+  $("ac_addr").placeholder=T.ac_addr_ph;
+  $("ab_month").placeholder=T.ab_month_ph;
+  $("ab_desc").placeholder=T.ab_desc_ph;
+  const ci=$("chpin_info");if(ci&&T.chpin_info)ci.innerHTML=T.chpin_info;
 }
-/* ════════════════════════════════════════════
-   NAVIGATION
-════════════════════════════════════════════ */
-function gp(p) {
-  if(p!=="d") prevP = (curP==="d")?prevP:curP;
-  curP = p;
+
+/* ════ ADMIN / PIN ════ */
+function getPin(){
+  const s=localStorage.getItem("eb_adm");
+  if(!s) return "1234";
+  try{return atob(s).split('').reverse().join('');}catch{return "1234";}
+}
+function requireAdmin(action){
+  if(__admin){action();return;}
+  __pendingAction=action;
+  __pinBuf="";
+  updateDots();
+  openSh("sh-pin");
+}
+function toggleAdmin(){
+  if(__admin){
+    __admin=false;
+    updateAdminBtn();
+    toast(...T.t_adm_off);
+    if(detId) openDet(detId);
+  } else {
+    __pendingAction=null;
+    __pinBuf="";
+    updateDots();
+    openSh("sh-pin");
+  }
+}
+function cancelPin(){
+  __pendingAction=null;
+  __pinBuf="";
+  closeSh("sh-pin");
+}
+function pinD(d){
+  if(__pinBuf.length>=4) return;
+  __pinBuf+=d;
+  updateDots();
+  if(__pinBuf.length===4) setTimeout(checkPin,180);
+}
+function pinBack(){
+  __pinBuf=__pinBuf.slice(0,-1);
+  updateDots();
+}
+function updateDots(){
+  const el=$("pin_dots");if(!el)return;
+  el.innerHTML=[0,1,2,3].map(i=>`<span class="pdot ${i<__pinBuf.length?'filled':''}"></span>`).join('');
+}
+function checkPin(){
+  if(__pinBuf===getPin()){
+    __admin=true; __pinBuf="";
+    closeSh("sh-pin");
+    updateAdminBtn();
+    toast(...T.t_adm_on);
+    if(__pendingAction){const a=__pendingAction;__pendingAction=null;setTimeout(a,280);}
+    else if(detId){setTimeout(()=>openDet(detId),280);}
+  } else {
+    const dots=$("pin_dots");
+    if(dots){dots.classList.add("shake");setTimeout(()=>dots.classList.remove("shake"),500);}
+    __pinBuf="";
+    setTimeout(updateDots,450);
+    toast(...T.t_pin_wrong);
+  }
+}
+function updateAdminBtn(){
+  const btn=$("h_adm");if(!btn)return;
+  if(__admin){btn.textContent="🔓";btn.classList.add("on");}
+  else{btn.textContent="🔒";btn.classList.remove("on");}
+}
+function saveNewPin(){
+  const np=v("chpin_new"), cp=v("chpin_conf");
+  if(np.length!==4||!/^\d{4}$/.test(np)) return toast(...T.t_pin_short);
+  if(np!==cp) return toast(...T.t_pin_mismatch);
+  localStorage.setItem("eb_adm", btoa(np.split('').reverse().join('')));
+  closeSh("sh-chpin");
+  toast(...T.t_pin_changed);
+}
+
+/* ════ NAVIGATION ════ */
+function gp(p){
+  if(p!=="d") prevP=(curP==="d")?prevP:curP;
+  curP=p;
   document.querySelectorAll(".pg").forEach(x=>x.classList.remove("on"));
-  const pg=$("pg-"+p); if(pg) pg.classList.add("on");
+  const pg=$("pg-"+p);if(pg)pg.classList.add("on");
   ["c","b","s"].forEach(id=>{
-    const t=$("tab-"+id), n=$("nb-"+id);
-    if(t) t.classList.toggle("on",id===p);
-    if(n) n.classList.toggle("on",id===p);
+    const t=$("tab-"+id),n=$("nb-"+id);
+    if(t)t.classList.toggle("on",id===p);
+    if(n)n.classList.toggle("on",id===p);
   });
-  if(p==="s") rS();
-  if(p==="b") rB();
+  if(p==="s")rS();
+  if(p==="b")rB();
 }
-function goBack() {
-  detId=null; gp(prevP==="d"?"c":prevP);
-}
-/* ════════════════════════════════════════════
-   HELPERS
-════════════════════════════════════════════ */
+function goBack(){detId=null;gp(prevP==="d"?"c":prevP);}
+
+/* ════ HELPERS ════ */
 function isOD(b){
-  if(b.paid||!b.dueDate) return false;
-  const t=new Date(); t.setHours(0,0,0,0);
+  if(b.paid||!b.dueDate)return false;
+  const t=new Date();t.setHours(0,0,0,0);
   return new Date(b.dueDate)<t;
 }
 function getSt(cid){
   const cb=gB().filter(b=>b.clientId===cid);
-  if(!cb.length) return "none";
+  if(!cb.length)return "none";
   const up=cb.filter(b=>!b.paid);
-  if(!up.length) return "paid";
+  if(!up.length)return "paid";
   return up.some(b=>isOD(b))?"overdue":"pending";
 }
-const unpaidT = cid => gB().filter(b=>b.clientId===cid&&!b.paid).reduce((s,b)=>s+(b.amount||0),0);
-const paidT   = cid => gB().filter(b=>b.clientId===cid&&b.paid).reduce((s,b)=>s+(b.amount||0),0);
-/* ════════════════════════════════════════════
-   RENDER ALL
-════════════════════════════════════════════ */
-function renderAll(){
-  rStats(); rC(); rB();
-  if(curP==="s") rS();
-  if(detId) openDet(detId);
-}
+const unpaidT=cid=>gB().filter(b=>b.clientId===cid&&!b.paid).reduce((s,b)=>s+(b.amount||0),0);
+const paidT=cid=>gB().filter(b=>b.clientId===cid&&b.paid).reduce((s,b)=>s+(b.amount||0),0);
+
+/* ════ RENDER ALL ════ */
+function renderAll(){rStats();rC();rB();if(curP==="s")rS();if(detId)openDet(detId);}
 function rStats(){
   const cl=gC();
   $("sc").textContent=cl.length;
@@ -753,29 +909,27 @@ function rStats(){
   $("so").textContent=cl.filter(c=>getSt(c.id)==="overdue").length;
   $("sd").textContent=gB().filter(b=>b.paid).length;
 }
-/* ════════════════════════════════════════════
-   CHIPS / FILTERS
-════════════════════════════════════════════ */
+
+/* ════ CHIPS / FILTERS ════ */
 function cf(f,btn){
   cF=f;
   document.querySelectorAll("#cchips .chip").forEach(c=>c.className="chip");
-  btn.className="chip " + (f==="all"?"on-b":f==="pending"?"on-y":f==="overdue"?"on-r":f==="paid"?"on-g":"on-b");
+  btn.className="chip "+(f==="all"?"on-b":f==="pending"?"on-y":f==="overdue"?"on-r":f==="paid"?"on-g":"on-b");
   rC();
 }
 function bf(f,btn){
   bF=f;
   document.querySelectorAll("#bchips .chip").forEach(c=>c.className="chip");
-  btn.className="chip " + (f==="all"?"on-b":f==="unpaid"?"on-y":f==="overdue"?"on-r":f==="paid"?"on-g":"on-b");
+  btn.className="chip "+(f==="all"?"on-b":f==="unpaid"?"on-y":f==="overdue"?"on-r":f==="paid"?"on-g":"on-b");
   rB();
 }
-/* ════════════════════════════════════════════
-   RENDER CLIENTS
-════════════════════════════════════════════ */
+
+/* ════ RENDER CLIENTS ════ */
 function rC(){
   const q=(v("cs")||"").toLowerCase();
   let list=gC().filter(c=>(c.name||"").toLowerCase().includes(q)||(c.meter||"").toLowerCase().includes(q));
-  if(cF!=="all") list=list.filter(c=>getSt(c.id)===cF);
-  const el=$("clist"); if(!el) return;
+  if(cF!=="all")list=list.filter(c=>getSt(c.id)===cF);
+  const el=$("clist");if(!el)return;
   if(!list.length){
     el.innerHTML=`<div class="empty"><div class="ei">🔍</div><div class="et">${T.empty_c_t}</div><div class="es">${T.empty_c_s}</div></div>`;
     return;
@@ -786,22 +940,22 @@ function rC(){
     const st=getSt(c.id),ut=unpaidT(c.id),bc=gB().filter(b=>b.clientId===c.id).length;
     return `<div class="cc ${stMap[st]}" onclick="openDet('${c.id}')">
       <div class="cc-top"><div class="cc-name">${esc(c.name)}</div><div class="cc-meter">${esc(c.meter)}</div></div>
-      <div class="cc-row">${badgeMap[st]}${ut>0?`<span class="cc-amt">$${fmt(ut)}`:""}<span style="font-size:11px;color:var(--t3)">${bc} ${bc===1?T.bill_s:T.bills_s}</span></div>
+      <div class="cc-row">${badgeMap[st]}${ut>0?`<span class="cc-amt">$${fmt(ut)}</span>`:""}
+      <span style="font-size:11px;color:var(--t3)">${bc} ${bc===1?T.bill_s:T.bills_s}</span></div>
       ${c.phone?`<div class="cc-phone">📲 ${esc(c.phone)}</div>`:`<div class="cc-nophone">${T.no_phone_c}</div>`}
     </div>`;
   }).join("");
 }
-/* ════════════════════════════════════════════
-   RENDER ALL BILLS
-════════════════════════════════════════════ */
+
+/* ════ RENDER ALL BILLS ════ */
 function rB(){
   const q=(v("bs")||"").toLowerCase();
   let list=gB().map(b=>({...b,c:gC().find(x=>x.id===b.clientId)})).filter(b=>b.c);
-  if(q) list=list.filter(b=>(b.c.name||"").toLowerCase().includes(q)||(b.c.meter||"").toLowerCase().includes(q)||(b.month||"").toLowerCase().includes(q));
-  if(bF==="paid")    list=list.filter(b=>b.paid);
-  if(bF==="unpaid")  list=list.filter(b=>!b.paid);
-  if(bF==="overdue") list=list.filter(b=>isOD(b));
-  const el=$("blist"); if(!el) return;
+  if(q)list=list.filter(b=>(b.c.name||"").toLowerCase().includes(q)||(b.c.meter||"").toLowerCase().includes(q)||(b.month||"").toLowerCase().includes(q));
+  if(bF==="paid")list=list.filter(b=>b.paid);
+  if(bF==="unpaid")list=list.filter(b=>!b.paid);
+  if(bF==="overdue")list=list.filter(b=>isOD(b));
+  const el=$("blist");if(!el)return;
   if(!list.length){
     el.innerHTML=`<div class="empty"><div class="ei">📋</div><div class="et">${T.empty_b_t}</div><div class="es">${T.empty_b_s}</div></div>`;
     return;
@@ -818,15 +972,14 @@ function rB(){
     </div>`;
   }).join("");
 }
-/* ════════════════════════════════════════════
-   CLIENT DETAIL
-════════════════════════════════════════════ */
+
+/* ════ CLIENT DETAIL ════ */
 function openDet(id){
   detId=id;
-  if(curP!=="d") prevP=curP;
-  const c=gC().find(x=>x.id===id); if(!c) return;
+  if(curP!=="d")prevP=curP;
+  const c=gC().find(x=>x.id===id);if(!c)return;
   const cB=gB().filter(b=>b.clientId===id).sort((a,b)=>(b.createdAt?.seconds||b.createdAt||0)-(a.createdAt?.seconds||a.createdAt||0));
-  const ut=unpaidT(id), pt=paidT(id), hp=c.phone&&c.phone.trim();
+  const ut=unpaidT(id),pt=paidT(id),hp=c.phone&&c.phone.trim();
   const bg=b=>b.paid?`<span class="badge bd">${T.bd_t}</span>`:isOD(b)?`<span class="badge bo">${T.bo_t}</span>`:`<span class="badge bp">${T.bp_t}</span>`;
   let bH="";
   if(!cB.length){
@@ -858,23 +1011,26 @@ function openDet(id){
       </div>
       <button class="abtn a-blue" onclick="openAddBillFor('${c.id}')" style="margin-top:0">${T.add_bill}</button>
       ${hp&&ut>0?`<button class="abtn a-wa" onclick="sendRem('${c.id}')">${T.send_reminder}</button>`:""}
-      <button class="abtn a-ghost" onclick="openEditC('${c.id}')">${T.edit_client}</button>
-      <button class="abtn a-danger" onclick="delClient('${c.id}')">${T.del_client}</button>
+      <button class="abtn a-ghost" onclick="requireAdmin(()=>openEditC('${c.id}'))">${T.edit_client}</button>
+      <button class="abtn a-danger" onclick="requireAdmin(()=>delClient('${c.id}'))">${T.del_client}</button>
+      ${__admin?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="openSh('sh-chpin')">${T.change_pin}</button>
+        <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="toggleAdmin()">${T.lock_admin}</button>
+      </div>`:""}
     </div>
     <div class="sechead">${cB.length} ${cB.length===1?T.bill_s:T.bills_s}</div>
     ${bH}`;
-  $("back_btn").textContent = T.back;
+  $("back_btn").textContent=T.back;
   document.querySelectorAll(".pg").forEach(x=>x.classList.remove("on"));
   $("pg-d").classList.add("on");
   curP="d";
 }
-/* ════════════════════════════════════════════
-   ADD CLIENT
-════════════════════════════════════════════ */
+
+/* ════ ADD CLIENT ════ */
 async function saveClient(){
   const name=v("ac_name"),meter=v("ac_meter"),phone=v("ac_phone"),addr=v("ac_addr");
-  if(!name)  return toast(...T.t_name_req);
-  if(!meter) return toast(...T.t_meter_req);
+  if(!name)return toast(...T.t_name_req);
+  if(!meter)return toast(...T.t_meter_req);
   try{
     await window.DB.addClient({name,meter,phone,address:addr});
     closeSh("sh-ac");
@@ -883,90 +1039,85 @@ async function saveClient(){
   }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
 function openEditC(id){
-  const c=gC().find(x=>x.id===id); if(!c) return;
-  $("ec_id").value=id; $("ec_name").value=c.name||""; $("ec_meter").value=c.meter||"";
-  $("ec_phone").value=c.phone||""; $("ec_addr").value=c.address||"";
+  const c=gC().find(x=>x.id===id);if(!c)return;
+  $("ec_id").value=id;$("ec_name").value=c.name||"";$("ec_meter").value=c.meter||"";
+  $("ec_phone").value=c.phone||"";$("ec_addr").value=c.address||"";
   openSh("sh-ec");
 }
 async function updClient(){
   const id=v("ec_id"),name=v("ec_name"),meter=v("ec_meter");
-  if(!name||!meter) return toast(...T.t_name_req);
+  if(!name||!meter)return toast(...T.t_name_req);
   try{
     await window.DB.updateClient(id,{name,meter,phone:v("ec_phone"),address:v("ec_addr")});
-    closeSh("sh-ec"); toast(...T.t_updated);
+    closeSh("sh-ec");toast(...T.t_updated);
   }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
 async function delClient(id){
   const c=gC().find(x=>x.id===id);
-  if(!confirm(T.conf_del_c.replace("{n}",c?.name||""))) return;
-  try{ await window.DB.deleteClient(id); goBack(); toast(...T.t_deleted); }
+  if(!confirm(T.conf_del_c.replace("{n}",c?.name||"")))return;
+  try{await window.DB.deleteClient(id);goBack();toast(...T.t_deleted);}
   catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
-/* ════════════════════════════════════════════
-   ADD BILL
-════════════════════════════════════════════ */
-function openAddBillFor(cid){
-  populateSel(cid); openSh("sh-ab");
-}
+
+/* ════ ADD BILL ════ */
+function openAddBillFor(cid){populateSel(cid);openSh("sh-ab");}
 function populateSel(preId){
   const sel=$("ab_client");
   sel.innerHTML=`<option value="">${T.ab_sel_ph}</option>`;
   [...gC()].sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(c=>{
     const o=document.createElement("option");
-    o.value=c.id; o.textContent=`${c.name}  (${c.meter})`; sel.appendChild(o);
+    o.value=c.id;o.textContent=`${c.name}  (${c.meter})`;sel.appendChild(o);
   });
-  if(preId){sel.value=preId;onBC();} else rPrev();
+  if(preId){sel.value=preId;onBC();}else rPrev();
 }
 function onBC(){
-  const cid=v("ab_client"), c=gC().find(x=>x.id===cid);
+  const cid=v("ab_client"),c=gC().find(x=>x.id===cid);
   const box=$("ab_fix");
   if(c){box.style.display="block";$("ab_fm").textContent=c.meter||"—";$("ab_fp").textContent=c.phone||"⚠️";}
   else box.style.display="none";
   rPrev();
 }
 function rPrev(){
-  const cid=v("ab_client"), c=gC().find(x=>x.id===cid), amt=parseFloat(v("ab_amt"));
-  const el=$("ab_prev"); if(!el) return;
-  if(!c||!amt){el.textContent=T.ab_pvh; return;}
+  const cid=v("ab_client"),c=gC().find(x=>x.id===cid),amt=parseFloat(v("ab_amt"));
+  const el=$("ab_prev");if(!el)return;
+  if(!c||!amt){el.textContent=T.ab_pvh;return;}
   el.textContent=buildBillMsg(c,{amount:amt,month:v("ab_month"),billDate:v("ab_date"),dueDate:v("ab_due"),desc:v("ab_desc")});
 }
 async function saveBill(sendWa){
   const cid=v("ab_client"),amount=parseFloat(v("ab_amt")),month=v("ab_month"),due=v("ab_due");
   const c=gC().find(x=>x.id===cid);
-  if(!c)            return toast(...T.t_no_c);
-  if(!amount||amount<=0) return toast(...T.t_bad_a);
-  if(!due)          return toast(...T.t_no_due);
-  if(!month)        return toast(...T.t_no_per);
+  if(!c)return toast(...T.t_no_c);
+  if(!amount||amount<=0)return toast(...T.t_bad_a);
+  if(!due)return toast(...T.t_no_due);
+  if(!month)return toast(...T.t_no_per);
   const b={clientId:cid,amount,month,billDate:v("ab_date"),dueDate:due,desc:v("ab_desc"),paid:false};
   try{
     await window.DB.addBill(b);
     closeSh("sh-ab");
     ["ab_amt","ab_month","ab_due","ab_desc"].forEach(id=>{const el=$(id);if(el)el.value="";});
-    $("ab_fix").style.display="none"; $("ab_client").value="";
-    if(sendWa&&c.phone){ openWA(c.phone,buildBillMsg(c,b)); toast(...T.t_wa); }
-    else if(sendWa&&!c.phone){ toast(...T.t_no_ph); }
-    else { toast(T.t_bill_sv[0],T.t_bill_sv[1],c.name); }
+    $("ab_fix").style.display="none";$("ab_client").value="";
+    if(sendWa&&c.phone){openWA(c.phone,buildBillMsg(c,b));toast(...T.t_wa);}
+    else if(sendWa&&!c.phone){toast(...T.t_no_ph);}
+    else{toast(T.t_bill_sv[0],T.t_bill_sv[1],c.name);}
   }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
-/* ════════════════════════════════════════════
-   MARK PAID / UNPAID / DELETE
-════════════════════════════════════════════ */
+
+/* ════ MARK PAID / DELETE ════ */
 async function markPaid(id){
-  try{ await window.DB.updateBill(id,{paid:true,paidAt:Date.now()}); toast(...T.t_paid); }
+  try{await window.DB.updateBill(id,{paid:true,paidAt:Date.now()});toast(...T.t_paid);}
   catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
 async function markUnpaid(id){
-  try{ await window.DB.updateBill(id,{paid:false,paidAt:null}); toast(...T.t_unpaid); }
+  try{await window.DB.updateBill(id,{paid:false,paidAt:null});toast(...T.t_unpaid);}
   catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
 async function delBill(id){
-  if(!confirm(T.conf_del_b)) return;
-  try{ await window.DB.deleteBill(id); toast(...T.t_bdel); }
+  if(!confirm(T.conf_del_b))return;
+  try{await window.DB.deleteBill(id);toast(...T.t_bdel);}
   catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
-/* ════════════════════════════════════════════
-   WHATSAPP — 1 TAP
-════════════════════════════════════════════ */
+
+/* ════ WHATSAPP ════ */
 function buildBillMsg(c,b){
   if(L==="ar"){
     return `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *${c.name}*،\n\n━━━━━━━━━━━\n🔒 *بيانات العميل:*\n👤 الاسم: *${c.name}*\n📟 رقم العداد: *${c.meter}*\n━━━━━━━━━━━\n📋 *تفاصيل الفاتورة:*\n📅 الفترة: *${b.month||"—"}*\n🗓 الإصدار: *${fmtD(b.billDate)}*\n💰 المبلغ: *$${fmt(b.amount)}*\n⏰ السداد قبل: *${fmtD(b.dueDate)}*${b.desc?"\n📝 "+b.desc:""}\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
@@ -982,38 +1133,35 @@ function buildRemMsg(c,up){
   const lines=up.map(b=>`  • ${b.month||"?"}: *$${fmt(b.amount)}* (due ${fmtD(b.dueDate)})`).join("\n");
   return `⚡ *Payment Reminder*\n\nDear *${c.name}*,\n📟 Meter: *${c.meter}*\n\n━━━━━━━━━━━\nYou have *${up.length}* unpaid bill${up.length>1?"s":""}:\n\n${lines}\n\n💰 *Total: $${fmt(tot)}*\n━━━━━━━━━━━\nPlease settle your balance soon.\n\nThank you 🙏\n_Electric Station — Accounting_`;
 }
-/* ONE-TAP: opens WA immediately, no extra sheet for single bills */
 function openWA(phone,msg){
   const clean=(phone||"").replace(/\D/g,"");
   window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`,"_blank");
 }
 function waForBill(id){
-  const b=gB().find(x=>x.id===id), c=b?gC().find(x=>x.id===b.clientId):null;
-  if(!c) return;
-  if(!c.phone||!c.phone.trim()) return toast(...T.t_no_wa);
-  /* Direct 1-tap — no confirm sheet needed */
-  openWA(c.phone, buildBillMsg(c,b));
+  const b=gB().find(x=>x.id===id),c=b?gC().find(x=>x.id===b.clientId):null;
+  if(!c)return;
+  if(!c.phone||!c.phone.trim())return toast(...T.t_no_wa);
+  openWA(c.phone,buildBillMsg(c,b));
   toast(...T.t_wa);
 }
 function sendRem(cid){
-  const c=gC().find(x=>x.id===cid); if(!c) return;
-  if(!c.phone||!c.phone.trim()) return toast(...T.t_no_wa);
+  const c=gC().find(x=>x.id===cid);if(!c)return;
+  if(!c.phone||!c.phone.trim())return toast(...T.t_no_wa);
   const up=gB().filter(b=>b.clientId===cid&&!b.paid);
-  if(!up.length) return toast(...T.t_all_pd);
-  /* Show WA sheet with pre-filled message for reminder (user may want to review) */
+  if(!up.length)return toast(...T.t_all_pd);
   waBuf=buildRemMsg(c,up);
   $("wa_prev").textContent=waBuf;
   $("wa_phone").value=c.phone;
   openSh("sh-wa");
 }
 function doWa(){
-  const ph=v("wa_phone"); if(!ph) return toast(...T.t_no_num);
-  openWA(ph,waBuf); closeSh("sh-wa"); toast(...T.t_wa);
+  const ph=v("wa_phone");if(!ph)return toast(...T.t_no_num);
+  openWA(ph,waBuf);closeSh("sh-wa");toast(...T.t_wa);
 }
 function bulkWa(){
   bulkQ=gC().filter(c=>{const up=gB().filter(b=>b.clientId===c.id&&!b.paid);return up.length>0&&c.phone&&c.phone.trim();});
-  if(!bulkQ.length) return toast(...T.t_no_snd);
-  bulkI=0; nextBulk();
+  if(!bulkQ.length)return toast(...T.t_no_snd);
+  bulkI=0;nextBulk();
 }
 function nextBulk(){
   if(bulkI>=bulkQ.length){toast(T.t_done[0],T.t_done[1],bulkQ.length+" "+(L==="ar"?"عملاء":"clients"));return;}
@@ -1021,25 +1169,24 @@ function nextBulk(){
   openWA(c.phone,buildRemMsg(c,gB().filter(b=>b.clientId===c.id&&!b.paid)));
   bulkI++;
   if(bulkI<bulkQ.length){
-    setTimeout(()=>{if(confirm(T.conf_next.replace("{n}",c.name).replace("{x}",bulkQ[bulkI].name))) nextBulk();},900);
+    setTimeout(()=>{if(confirm(T.conf_next.replace("{n}",c.name).replace("{x}",bulkQ[bulkI].name)))nextBulk();},900);
   } else {
     setTimeout(()=>toast(T.t_done[0],T.t_done[1],bulkQ.length+" "+(L==="ar"?"عملاء":"clients")),700);
   }
 }
-/* ════════════════════════════════════════════
-   SUMMARY
-════════════════════════════════════════════ */
+
+/* ════ SUMMARY ════ */
 function rS(){
   const all=gB(),paid=all.filter(b=>b.paid),up=all.filter(b=>!b.paid),ov=all.filter(b=>isOD(b));
   const tB=all.reduce((s,b)=>s+(b.amount||0),0),tC=paid.reduce((s,b)=>s+(b.amount||0),0);
   const rate=tB>0?Math.round((tC/tB)*100):0;
-  $("s_tb").textContent="$"+fmt(tB); $("s_tc").textContent="$"+fmt(tC);
-  $("s_to").textContent="$"+fmt(tB-tC); $("s_rate").textContent=rate+"%";
+  $("s_tb").textContent="$"+fmt(tB);$("s_tc").textContent="$"+fmt(tC);
+  $("s_to").textContent="$"+fmt(tB-tC);$("s_rate").textContent=rate+"%";
   $("s_bar").style.width=rate+"%";
-  $("s_bt").textContent=all.length; $("s_bp").textContent=paid.length;
-  $("s_bu").textContent=up.length;  $("s_bo").textContent=ov.length;
+  $("s_bt").textContent=all.length;$("s_bp").textContent=paid.length;
+  $("s_bu").textContent=up.length;$("s_bo").textContent=ov.length;
   const debtors=gC().map(c=>({...c,owed:gB().filter(b=>b.clientId===c.id&&!b.paid).reduce((s,b)=>s+(b.amount||0),0)})).filter(c=>c.owed>0).sort((a,b)=>b.owed-a.owed).slice(0,10);
-  const el=$("topd"); if(!el) return;
+  const el=$("topd");if(!el)return;
   if(!debtors.length){el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--green);font-size:14px;font-weight:700">${T.all_paid}</div>`;return;}
   el.innerHTML=debtors.map(d=>`
     <div class="drow">
@@ -1047,19 +1194,17 @@ function rS(){
       <div class="drv"><div class="damt">$${fmt(d.owed)}</div>${d.phone?`<button class="dwa" onclick="sendRem('${d.id}')">📲</button>`:""}</div>
     </div>`).join("");
 }
-/* ════════════════════════════════════════════
-   SHEET HELPERS
-════════════════════════════════════════════ */
-function openSh(id){ $(id).classList.add("on"); }
-function closeSh(id){ $(id).classList.remove("on"); }
-/* ════════════════════════════════════════════
-   TOAST
-════════════════════════════════════════════ */
+
+/* ════ SHEET HELPERS ════ */
+function openSh(id){$(id).classList.add("on");}
+function closeSh(id){$(id).classList.remove("on");}
+
+/* ════ TOAST ════ */
 let tTm;
 function toast(icon,title,msg){
   clearTimeout(tTm);
-  $("t_i").textContent=icon; $("t_t").textContent=title; $("t_m").textContent=msg||"";
-  const el=$("toast"); el.classList.add("on");
+  $("t_i").textContent=icon;$("t_t").textContent=title;$("t_m").textContent=msg||"";
+  const el=$("toast");el.classList.add("on");
   tTm=setTimeout(()=>el.classList.remove("on"),3200);
 }
 </script>
