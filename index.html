@@ -626,6 +626,135 @@ window.DB = {
   updateBill: (id,d) => updateDoc(doc(db,"bills",id), d),
   deleteBill: id => deleteDoc(doc(db,"bills",id))
 };
+
+/* ════ GOOGLE AUTH (module scope — has access to auth, db, etc.) ════ */
+const ADMIN_EMAIL = "omar.halawani.7@gmail.com";
+
+async function isAllowed(email){
+  if(!email) return false;
+  if(email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) return true;
+  try{
+    const snap = await getDoc(doc(db,"config","access"));
+    if(!snap.exists()) return false;
+    const emails = (snap.data().emails||[]).map(e=>e.toLowerCase());
+    return emails.includes(email.toLowerCase());
+  }catch(err){
+    console.error("isAllowed error",err);
+    return false;
+  }
+}
+
+async function handleUser(user){
+  const $ = id => document.getElementById(id);
+  if(!user){
+    $("auth-screen").style.display="flex";
+    $("denied-screen").style.display="none";
+    $("splash").style.display="none";
+    window.__currentUser = null;
+    return;
+  }
+  window.__currentUser = user;
+  const allowed = await isAllowed(user.email);
+  if(allowed){
+    $("auth-screen").style.display="none";
+    $("denied-screen").style.display="none";
+    const av = $("h_avatar");
+    if(user.photoURL){
+      av.innerHTML=`<img src="${user.photoURL}" alt="">`;
+    } else {
+      av.textContent = user.email.charAt(0).toUpperCase();
+    }
+    av.style.display="flex";
+    window.bootAfterAuth && window.bootAfterAuth();
+  } else {
+    $("auth-screen").style.display="none";
+    $("denied-screen").style.display="flex";
+    $("splash").style.display="none";
+    $("denied-email-display").textContent = user.email;
+  }
+}
+
+window.gSignIn = async function(){
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch(err){
+    if(err.code==="auth/popup-blocked"||err.code==="auth/cancelled-popup-request"){
+      await signInWithRedirect(auth, new GoogleAuthProvider());
+    } else {
+      console.error("Sign-in error",err);
+      window.toast && window.toast("❌","Sign-in failed",err.message);
+    }
+  }
+};
+
+window.gSignOut = async function(){
+  const confirmed = confirm("Sign out of ElecBill Pro?");
+  if(!confirmed) return;
+  await signOut(auth);
+  window.__currentUser = null;
+  const av = document.getElementById("h_avatar");
+  av.style.display="none"; av.innerHTML="";
+  document.getElementById("auth-screen").style.display="flex";
+  document.getElementById("splash").style.display="none";
+};
+
+window.loadAllowedEmails = async function(){
+  const list=document.getElementById("ae-list");
+  list.innerHTML=`<div style="color:var(--t3);font-size:13px;padding:12px 0">Loading…</div>`;
+  try{
+    const snap=await getDoc(doc(db,"config","access"));
+    const emails = snap.exists()?(snap.data().emails||[]):[];
+    const L = window.__L || "en";
+    if(emails.length===0){
+      list.innerHTML=`<div style="color:var(--t3);font-size:13px;padding:12px 0">${L==="ar"?"لا يوجد مستخدمون مضافون":"No additional users added"}</div>`;
+      return;
+    }
+    list.innerHTML = emails.map(em=>`
+      <div class="ae-row">
+        <span class="ae-email">${em}</span>
+        <button class="ae-del" onclick="removeAllowedEmail('${em}')">${L==="ar"?"حذف":"Remove"}</button>
+      </div>`).join("");
+  }catch(err){
+    list.innerHTML=`<div style="color:var(--red);font-size:13px;padding:12px 0">Error loading</div>`;
+  }
+};
+
+window.addAllowedEmail = async function(){
+  const inp=document.getElementById("ae-input");
+  const email=(inp.value||"").trim().toLowerCase();
+  const t = window.toast;
+  if(!email||!email.includes("@")){t&&t("⚠️","Invalid","Enter a valid Gmail address.");return;}
+  if(email===ADMIN_EMAIL.toLowerCase()){t&&t("ℹ️","Admin","You are already the main admin.");return;}
+  try{
+    await setDoc(doc(db,"config","access"),{emails:arrayUnion(email)},{merge:true});
+    inp.value="";
+    t&&t("✅","Added",email+" can now access the app.");
+    window.loadAllowedEmails();
+  }catch(err){
+    t&&t("❌","Error",err.message);
+  }
+};
+
+window.removeAllowedEmail = async function(email){
+  const L = window.__L || "en";
+  const msg=L==="ar"?`هل تريد إزالة الوصول لـ ${email}؟`:`Remove access for ${email}?`;
+  if(!confirm(msg)) return;
+  const t = window.toast;
+  try{
+    await updateDoc(doc(db,"config","access"),{emails:arrayRemove(email)});
+    t&&t("🗑️","Removed",email+" access removed.");
+    window.loadAllowedEmails();
+  }catch(err){
+    t&&t("❌","Error",err.message);
+  }
+};
+
+onAuthStateChanged(auth, handleUser);
+getRedirectResult(auth).then(result=>{
+  if(result?.user) handleUser(result.user);
+}).catch(err=>{
+  if(err.code!=="auth/no-auth-event") console.error("Redirect result error",err);
+});
 </script>
 
 <script>
@@ -795,7 +924,7 @@ ar: {
 }};
 
 /* ════ STATE ════ */
-let L="en", T=TX.en;
+let L="en", T=TX.en; window.__L=L;
 let cF="all", bF="all";
 let curP="c", prevP="c", detId=null;
 let waBuf="", bulkQ=[], bulkI=0;
@@ -813,7 +942,7 @@ const fmtD=d=>{
 
 /* ════ BOOT ════ */
 function boot(lang){
-  L=lang; T=TX[lang];
+  L=lang; T=TX[lang]; window.__L=lang;
   localStorage.setItem("eb_lang",lang);
   $("splash").classList.add("hide");
   setTimeout(()=>$("splash").style.display="none",420);
@@ -1100,7 +1229,7 @@ function openDet(id){
       ${__admin?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
         <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="openSh('sh-chpin')">${T.change_pin}</button>
         <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="toggleAdmin()">${T.lock_admin}</button>
-        ${(__currentUser&&__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com")?`<button class="abtn a-blue" style="margin-top:0;width:100%;font-size:13px" onclick="loadAllowedEmails();openSh('sh-access')">👥 ${L==="ar"?"إدارة الوصول":"Manage Access"}</button>`:""}
+        ${(window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com")?`<button class="abtn a-blue" style="margin-top:0;width:100%;font-size:13px" onclick="loadAllowedEmails();openSh('sh-access')">👥 ${L==="ar"?"إدارة الوصول":"Manage Access"}</button>`:""}
       </div>`:""}
     </div>
     <div class="sechead">${cB.length} ${cB.length===1?T.bill_s:T.bills_s}</div>
@@ -1309,135 +1438,7 @@ document.addEventListener("keydown", e => {
   else if(e.key==="Backspace"){e.preventDefault();pinBack();}
   else if(e.key==="Escape"){e.preventDefault();cancelPin();}
 });
-/* ════ GOOGLE AUTH ════ */
-const ADMIN_EMAIL = "omar.halawani.7@gmail.com";
-let __currentUser = null;
-
-async function isAllowed(email){
-  if(!email) return false;
-  if(email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) return true;
-  try{
-    const snap = await getDoc(doc(db,"config","access"));
-    if(!snap.exists()) return false;
-    const emails = (snap.data().emails||[]).map(e=>e.toLowerCase());
-    return emails.includes(email.toLowerCase());
-  }catch(err){
-    console.error("isAllowed error",err);
-    return false;
-  }
-}
-
-async function handleUser(user){
-  if(!user){
-    // Not signed in — show auth screen
-    $("auth-screen").style.display="flex";
-    $("denied-screen").style.display="none";
-    $("splash").style.display="none";
-    return;
-  }
-  __currentUser = user;
-  const allowed = await isAllowed(user.email);
-  if(allowed){
-    // Authorized — hide auth screens, show app
-    $("auth-screen").style.display="none";
-    $("denied-screen").style.display="none";
-    // Show avatar
-    const av = $("h_avatar");
-    if(user.photoURL){
-      av.innerHTML=`<img src="${user.photoURL}" alt="">`;
-    } else {
-      av.textContent = user.email.charAt(0).toUpperCase();
-    }
-    av.style.display="flex";
-    // Boot the app (shows splash if not already started)
-    bootAfterAuth();
-  } else {
-    // Not authorized
-    $("auth-screen").style.display="none";
-    $("denied-screen").style.display="flex";
-    $("splash").style.display="none";
-    $("denied-email-display").textContent = user.email;
-  }
-}
-
-window.gSignIn = async function(){
-  try {
-    await signInWithPopup(auth, new GoogleAuthProvider());
-  } catch(err){
-    if(err.code==="auth/popup-blocked"||err.code==="auth/cancelled-popup-request"){
-      await signInWithRedirect(auth, new GoogleAuthProvider());
-    } else {
-      console.error("Sign-in error",err);
-      toast("❌","Sign-in failed",err.message);
-    }
-  }
-};
-
-window.gSignOut = async function(){
-  const confirmed = confirm("Sign out of ElecBill Pro?");
-  if(!confirmed) return;
-  await signOut(auth);
-  __currentUser = null;
-  $("h_avatar").style.display="none";
-  $("h_avatar").innerHTML="";
-};
-
-window.loadAllowedEmails = async function(){
-  const list=$("ae-list");
-  list.innerHTML=`<div style="color:var(--t3);font-size:13px;padding:12px 0">Loading…</div>`;
-  try{
-    const snap=await getDoc(doc(db,"config","access"));
-    const emails = snap.exists()?(snap.data().emails||[]):[];
-    if(emails.length===0){
-      list.innerHTML=`<div style="color:var(--t3);font-size:13px;padding:12px 0">${L==="ar"?"لا يوجد مستخدمون مضافون":"No additional users added"}</div>`;
-      return;
-    }
-    list.innerHTML = emails.map(em=>`
-      <div class="ae-row">
-        <span class="ae-email">${em}</span>
-        <button class="ae-del" onclick="removeAllowedEmail('${em}')">${L==="ar"?"حذف":"Remove"}</button>
-      </div>`).join("");
-  }catch(err){
-    list.innerHTML=`<div style="color:var(--red);font-size:13px;padding:12px 0">Error loading</div>`;
-  }
-};
-
-window.addAllowedEmail = async function(){
-  const inp=$("ae-input");
-  const email=(inp.value||"").trim().toLowerCase();
-  if(!email||!email.includes("@")){toast("⚠️","Invalid","Enter a valid Gmail address.");return;}
-  if(email===ADMIN_EMAIL.toLowerCase()){toast("ℹ️","Admin","You are already the main admin.");return;}
-  try{
-    await setDoc(doc(db,"config","access"),{emails:arrayUnion(email)},{merge:true});
-    inp.value="";
-    toast("✅","Added",email+" can now access the app.");
-    loadAllowedEmails();
-  }catch(err){
-    toast("❌","Error",err.message);
-  }
-};
-
-window.removeAllowedEmail = async function(email){
-  const msg=L==="ar"?`هل تريد إزالة الوصول لـ ${email}؟`:`Remove access for ${email}?`;
-  if(!confirm(msg)) return;
-  try{
-    await updateDoc(doc(db,"config","access"),{emails:arrayRemove(email)});
-    toast("🗑️","Removed",email+" access removed.");
-    loadAllowedEmails();
-  }catch(err){
-    toast("❌","Error",err.message);
-  }
-};
-
-// Initialize auth
-onAuthStateChanged(auth, handleUser);
-
-// Handle redirect result (mobile fallback)
-getRedirectResult(auth).then(result=>{
-  if(result?.user) handleUser(result.user);
-}).catch(err=>{
-  if(err.code!=="auth/no-auth-event") console.error("Redirect result error",err);
-});
+/* ════ AUTH — functions exposed by module via window.* ════ */
 /* ════ TOAST ════ */
 let tTm;
 function toast(icon,title,msg){
@@ -1446,6 +1447,7 @@ function toast(icon,title,msg){
   const el=$("toast");el.classList.add("on");
   tTm=setTimeout(()=>el.classList.remove("on"),3200);
 }
+window.toast = toast;
 </script>
 </body>
 </html>
