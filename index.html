@@ -2,6 +2,9 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -27,8 +30,30 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 button,input,select,textarea{font-family:var(--font);border:none;outline:none;}
 button{cursor:pointer;}
 ::-webkit-scrollbar{width:0;height:0;}
+/* ── AUTH SCREEN ── */
+#auth-screen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+#denied-screen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;}
+.auth-logo{font-size:64px;margin-bottom:16px;}
+.auth-title{font-size:30px;font-weight:900;letter-spacing:-.6px;margin-bottom:6px;}
+.auth-sub{font-size:14px;color:var(--t3);margin-bottom:48px;text-align:center;line-height:1.5;}
+.google-btn{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e0e0e0;border-radius:14px;padding:14px 28px;font-size:16px;font-weight:700;color:#333;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.08);transition:transform .1s,box-shadow .2s;}
+.google-btn:active{transform:scale(.96);}
+.auth-note{font-size:12px;color:var(--t3);margin-top:20px;text-align:center;line-height:1.6;}
+.denied-icon{font-size:56px;margin-bottom:16px;}
+.denied-title{font-size:22px;font-weight:900;color:var(--red);margin-bottom:10px;}
+.denied-msg{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:28px;}
+.denied-email{font-size:13px;font-weight:700;color:var(--t3);background:var(--card);border:1.5px solid var(--border);border-radius:9px;padding:9px 16px;margin-bottom:24px;word-break:break-all;}
+/* ── USER AVATAR ── */
+.uavatar{width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.uavatar img{width:100%;height:100%;object-fit:cover;}
+/* ── ACCESS MGMT ── */
+.ae-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.ae-row:last-child{border-bottom:none;}
+.ae-email{font-size:13px;color:var(--text);word-break:break-all;flex:1;margin-right:10px;}
+.ae-del{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;}
+.ae-admin-badge{font-size:10px;background:var(--bdim);color:var(--blue);border:1px solid rgba(34,197,94,.3);border-radius:5px;padding:2px 7px;font-weight:700;margin-left:6px;white-space:nowrap;}
 /* ── SPLASH ── */
-#splash{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;transition:opacity .4s;}
+#splash{position:fixed;inset:0;z-index:1000;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;transition:opacity .4s;}
 #splash.hide{opacity:0;pointer-events:none;}
 .sp-logo{font-size:56px;margin-bottom:14px;}
 .sp-title{font-size:28px;font-weight:900;letter-spacing:-.6px;margin-bottom:6px;text-align:center;}
@@ -267,6 +292,25 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 </style>
 </head>
 <body>
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-logo">⚡</div>
+  <div class="auth-title">ElecBill Pro</div>
+  <div class="auth-sub">Sign in with your Google account<br>to access the app</div>
+  <button class="google-btn" onclick="gSignIn()">
+    <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.9 3 4 11.9 4 23s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.2-2.7-.5-3z"/><path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16.2 19.2 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 16.3 3 9.7 7.9 6.3 14.7z"/><path fill="#FBBC05" d="M24 43c5.6 0 10.5-1.9 14.4-5l-6.7-5.5C29.8 34.4 27 35.5 24 35.5c-5.7 0-10.6-3.8-12.3-9.1l-7.1 5.5C8.1 39.3 15.5 43 24 43z"/><path fill="#EA4335" d="M43.6 20H24v8.5h11.9c-.9 2.6-2.6 4.8-4.9 6.3l6.7 5.5C41.5 36.7 44 30.3 44 23c0-1-.1-2-.4-3z"/></svg>
+    Sign in with Google
+  </button>
+  <div class="auth-note">Only authorized accounts can access this app.</div>
+</div>
+<!-- ACCESS DENIED SCREEN -->
+<div id="denied-screen">
+  <div class="denied-icon">🚫</div>
+  <div class="denied-title">Access Denied</div>
+  <div class="denied-msg">Your account is not authorized.<br>Contact the admin to request access.</div>
+  <div class="denied-email" id="denied-email-display"></div>
+  <button class="google-btn" onclick="gSignOut()" style="font-size:14px;padding:11px 22px">Sign out &amp; try another account</button>
+</div>
 <!-- SPLASH -->
 <div id="splash">
   <div class="sp-logo">⚡</div>
@@ -295,7 +339,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
     <button class="hadm" id="h_adm" onclick="toggleAdmin()" title="Admin">🔒</button>
     <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
-    <div class="hdate" id="h_date"></div>
+    <div class="uavatar" id="h_avatar" onclick="gSignOut()" title="Sign out" style="cursor:pointer;display:none"></div>
   </div>
 </header>
 <!-- STATS -->
@@ -512,13 +556,38 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <button class="abtn a-ghost" id="chpin_cn" onclick="closeSh('sh-chpin')">Cancel</button>
   </div>
 </div>
+<!-- SHEET: ACCESS MANAGEMENT -->
+<div class="ov" id="sh-access">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="stitle">👥 <span id="acc_title">Access Management</span></div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:14px" id="acc_sub">Only authorized Google accounts can open this app.</div>
+    <!-- Admin row -->
+    <div class="ae-row">
+      <span class="ae-email">omar.halawani.7@gmail.com</span>
+      <span class="ae-admin-badge">ADMIN</span>
+    </div>
+    <!-- Dynamic allowed emails -->
+    <div id="ae-list" style="margin-bottom:14px"></div>
+    <!-- Add email -->
+    <div class="fg" style="margin-top:4px">
+      <div class="fl" id="acc_addl">Add Gmail account</div>
+      <div style="display:flex;gap:8px">
+        <input class="fi" id="ae-input" type="email" placeholder="user@gmail.com" autocomplete="off" style="flex:1">
+        <button class="abtn a-blue" onclick="addAllowedEmail()" style="margin:0;padding:0 16px;min-width:auto;height:44px;border-radius:11px;font-size:13px" id="acc_addb">Add</button>
+      </div>
+    </div>
+    <button class="abtn a-ghost" onclick="closeSh('sh-access')" id="acc_cl">Close</button>
+  </div>
+</div>
 <!-- TOAST -->
 <div class="toast" id="toast"><div class="ti" id="t_i">✅</div><div><div class="tt" id="t_t"></div><div class="tm" id="t_m"></div></div></div>
 
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, query, orderBy, onSnapshot, serverTimestamp, writeBatch, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 const app = initializeApp({
   apiKey:            "AIzaSyAYCnRk--CmpA7lb1Qh3D0eBw3IqJvva_s",
   authDomain:        "elecbill1-ff6cd.firebaseapp.com",
@@ -528,6 +597,7 @@ const app = initializeApp({
   appId:             "1:448569501513:web:9378445a4b2e6d980bdc98"
 });
 const db = getFirestore(app);
+const auth = getAuth(app);
 window.__C = []; window.__B = [];
 onSnapshot(query(collection(db,"clients"), orderBy("name")), snap => {
   window.__C = snap.docs.map(d => ({ id:d.id, ...d.data() }));
@@ -759,9 +829,18 @@ window.addEventListener("DOMContentLoaded",()=>{
   $("h_date").textContent=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
   $("ab_date").value=new Date().toISOString().split("T")[0];
   document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)closeSh(o.id);}));
-  const sl=localStorage.getItem("eb_lang");
-  if(sl){boot(sl);}
+  // Boot is now triggered by handleUser() after auth check
 });
+function bootAfterAuth(){
+  if(window.__appStarted) return;
+  window.__appStarted = true;
+  const sl=localStorage.getItem("eb_lang");
+  const s=$("splash");
+  s.style.display="flex";
+  // If language already chosen, boot directly; otherwise show language picker
+  if(sl){ boot(sl); }
+  // else: splash stays visible showing the language picker
+}
 
 /* ════ TRANSLATIONS APPLY ════ */
 function applyTx(){
@@ -1021,6 +1100,7 @@ function openDet(id){
       ${__admin?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
         <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="openSh('sh-chpin')">${T.change_pin}</button>
         <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="toggleAdmin()">${T.lock_admin}</button>
+        ${(__currentUser&&__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com")?`<button class="abtn a-blue" style="margin-top:0;width:100%;font-size:13px" onclick="loadAllowedEmails();openSh('sh-access')">👥 ${L==="ar"?"إدارة الوصول":"Manage Access"}</button>`:""}
       </div>`:""}
     </div>
     <div class="sechead">${cB.length} ${cB.length===1?T.bill_s:T.bills_s}</div>
@@ -1228,6 +1308,135 @@ document.addEventListener("keydown", e => {
   if(e.key>="0"&&e.key<="9"){e.preventDefault();pinD(e.key);}
   else if(e.key==="Backspace"){e.preventDefault();pinBack();}
   else if(e.key==="Escape"){e.preventDefault();cancelPin();}
+});
+/* ════ GOOGLE AUTH ════ */
+const ADMIN_EMAIL = "omar.halawani.7@gmail.com";
+let __currentUser = null;
+
+async function isAllowed(email){
+  if(!email) return false;
+  if(email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) return true;
+  try{
+    const snap = await getDoc(doc(db,"config","access"));
+    if(!snap.exists()) return false;
+    const emails = (snap.data().emails||[]).map(e=>e.toLowerCase());
+    return emails.includes(email.toLowerCase());
+  }catch(err){
+    console.error("isAllowed error",err);
+    return false;
+  }
+}
+
+async function handleUser(user){
+  if(!user){
+    // Not signed in — show auth screen
+    $("auth-screen").style.display="flex";
+    $("denied-screen").style.display="none";
+    $("splash").style.display="none";
+    return;
+  }
+  __currentUser = user;
+  const allowed = await isAllowed(user.email);
+  if(allowed){
+    // Authorized — hide auth screens, show app
+    $("auth-screen").style.display="none";
+    $("denied-screen").style.display="none";
+    // Show avatar
+    const av = $("h_avatar");
+    if(user.photoURL){
+      av.innerHTML=`<img src="${user.photoURL}" alt="">`;
+    } else {
+      av.textContent = user.email.charAt(0).toUpperCase();
+    }
+    av.style.display="flex";
+    // Boot the app (shows splash if not already started)
+    bootAfterAuth();
+  } else {
+    // Not authorized
+    $("auth-screen").style.display="none";
+    $("denied-screen").style.display="flex";
+    $("splash").style.display="none";
+    $("denied-email-display").textContent = user.email;
+  }
+}
+
+window.gSignIn = async function(){
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch(err){
+    if(err.code==="auth/popup-blocked"||err.code==="auth/cancelled-popup-request"){
+      await signInWithRedirect(auth, new GoogleAuthProvider());
+    } else {
+      console.error("Sign-in error",err);
+      toast("❌","Sign-in failed",err.message);
+    }
+  }
+};
+
+window.gSignOut = async function(){
+  const confirmed = confirm("Sign out of ElecBill Pro?");
+  if(!confirmed) return;
+  await signOut(auth);
+  __currentUser = null;
+  $("h_avatar").style.display="none";
+  $("h_avatar").innerHTML="";
+};
+
+window.loadAllowedEmails = async function(){
+  const list=$("ae-list");
+  list.innerHTML=`<div style="color:var(--t3);font-size:13px;padding:12px 0">Loading…</div>`;
+  try{
+    const snap=await getDoc(doc(db,"config","access"));
+    const emails = snap.exists()?(snap.data().emails||[]):[];
+    if(emails.length===0){
+      list.innerHTML=`<div style="color:var(--t3);font-size:13px;padding:12px 0">${L==="ar"?"لا يوجد مستخدمون مضافون":"No additional users added"}</div>`;
+      return;
+    }
+    list.innerHTML = emails.map(em=>`
+      <div class="ae-row">
+        <span class="ae-email">${em}</span>
+        <button class="ae-del" onclick="removeAllowedEmail('${em}')">${L==="ar"?"حذف":"Remove"}</button>
+      </div>`).join("");
+  }catch(err){
+    list.innerHTML=`<div style="color:var(--red);font-size:13px;padding:12px 0">Error loading</div>`;
+  }
+};
+
+window.addAllowedEmail = async function(){
+  const inp=$("ae-input");
+  const email=(inp.value||"").trim().toLowerCase();
+  if(!email||!email.includes("@")){toast("⚠️","Invalid","Enter a valid Gmail address.");return;}
+  if(email===ADMIN_EMAIL.toLowerCase()){toast("ℹ️","Admin","You are already the main admin.");return;}
+  try{
+    await setDoc(doc(db,"config","access"),{emails:arrayUnion(email)},{merge:true});
+    inp.value="";
+    toast("✅","Added",email+" can now access the app.");
+    loadAllowedEmails();
+  }catch(err){
+    toast("❌","Error",err.message);
+  }
+};
+
+window.removeAllowedEmail = async function(email){
+  const msg=L==="ar"?`هل تريد إزالة الوصول لـ ${email}؟`:`Remove access for ${email}?`;
+  if(!confirm(msg)) return;
+  try{
+    await updateDoc(doc(db,"config","access"),{emails:arrayRemove(email)});
+    toast("🗑️","Removed",email+" access removed.");
+    loadAllowedEmails();
+  }catch(err){
+    toast("❌","Error",err.message);
+  }
+};
+
+// Initialize auth
+onAuthStateChanged(auth, handleUser);
+
+// Handle redirect result (mobile fallback)
+getRedirectResult(auth).then(result=>{
+  if(result?.user) handleUser(result.user);
+}).catch(err=>{
+  if(err.code!=="auth/no-auth-event") console.error("Redirect result error",err);
 });
 /* ════ TOAST ════ */
 let tTm;
