@@ -441,8 +441,11 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <div class="fg"><div class="fl" id="ac_ml">Meter Serial # <span class="freq">*</span></div><input class="fi" id="ac_meter" type="text" autocomplete="off"></div>
     <div class="fg">
       <div class="fl" id="ac_pl">📱 WhatsApp # <span class="freq">*</span></div>
-      <input class="fi" id="ac_phone" type="tel" autocomplete="off">
-      <div class="fhint" id="ac_ph">Algeria: 213 then number without 0. Example: 213550123456</div>
+      <div style="display:flex;gap:8px">
+        <input class="fi" id="ac_cc" type="tel" value="961" style="width:72px;flex-shrink:0" placeholder="961" title="Country code">
+        <input class="fi" id="ac_phone" type="tel" autocomplete="off" placeholder="70123456" style="flex:1">
+      </div>
+      <div class="fhint" id="ac_ph">Country code + local number (without leading 0)</div>
     </div>
     <div class="fg"><div class="fl" id="ac_al">Address</div><input class="fi" id="ac_addr" type="text" autocomplete="off"></div>
     <div style="height:12px"></div>
@@ -458,7 +461,14 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <div class="dlbl" id="ec_fl">🔒 Fixed Info</div>
     <div class="fg"><div class="fl" id="ec_nl">Name <span class="freq">*</span></div><input class="fi" id="ec_name" type="text" autocomplete="off"></div>
     <div class="fg"><div class="fl" id="ec_ml">Meter Serial # <span class="freq">*</span></div><input class="fi" id="ec_meter" type="text" autocomplete="off"></div>
-    <div class="fg"><div class="fl" id="ec_pl">📱 WhatsApp #</div><input class="fi" id="ec_phone" type="tel" autocomplete="off"><div class="fhint">213XXXXXXXXX</div></div>
+    <div class="fg">
+      <div class="fl" id="ec_pl">📱 WhatsApp #</div>
+      <div style="display:flex;gap:8px">
+        <input class="fi" id="ec_cc" type="tel" value="961" style="width:72px;flex-shrink:0" placeholder="961" title="Country code">
+        <input class="fi" id="ec_phone" type="tel" autocomplete="off" placeholder="70123456" style="flex:1">
+      </div>
+      <div class="fhint">Country code + local number (without leading 0)</div>
+    </div>
     <div class="fg"><div class="fl" id="ec_al">Address</div><input class="fi" id="ec_addr" type="text" autocomplete="off"></div>
     <input type="hidden" id="ec_id">
     <div style="height:12px"></div>
@@ -573,11 +583,6 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <div class="stitle">📲 <span id="waapi_title">WhatsApp API</span></div>
     <div class="wapi-status off" id="waapi_status"><span id="waapi_st_txt">⚪ Not configured</span></div>
     <div style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.6" id="waapi_sub">Use <strong>Green API</strong> to send messages automatically — no manual tap needed. <a href="https://green-api.com" target="_blank" style="color:var(--blue)">green-api.com</a> (free 3,000 msg/month).</div>
-    <div class="fg">
-      <div class="fl" id="waapi_ccl">Country Code</div>
-      <input class="fi" id="waapi_cc" type="tel" placeholder="e.g. 961" value="961" autocomplete="off" style="max-width:120px">
-      <div style="font-size:11px;color:var(--t3);margin-top:4px" id="waapi_cc_hint">Lebanon = 961 · Numbers are stored without country code</div>
-    </div>
     <div class="fg">
       <div class="fl" id="waapi_idl">Instance ID</div>
       <input class="fi" id="waapi_id" type="text" placeholder="e.g. 7103XXXXXXXX" autocomplete="off" autocorrect="off" autocapitalize="off">
@@ -811,11 +816,10 @@ window.saveWAConfig = async function(){
   const id=(document.getElementById("waapi_id").value||"").trim();
   const tok=(document.getElementById("waapi_tok").value||"").trim();
   const lim=parseInt(document.getElementById("waapi_lim").value)||3000;
-  const cc=(document.getElementById("waapi_cc").value||"961").replace(/\D/g,"");
   if(!id||!tok){window.toast&&window.toast("⚠️","Missing","Enter Instance ID and API Token.");return;}
   try{
-    await setDoc(doc(db,"config","whatsapp"),{instanceId:id,apiToken:tok,limit:lim,countryCode:cc},{merge:true});
-    window.__waConfig={...window.__waConfig,instanceId:id,apiToken:tok,limit:lim,countryCode:cc};
+    await setDoc(doc(db,"config","whatsapp"),{instanceId:id,apiToken:tok,limit:lim},{merge:true});
+    window.__waConfig={...window.__waConfig,instanceId:id,apiToken:tok,limit:lim};
     window.toast&&window.toast("✅","Saved","WhatsApp API configured!");
     window.loadWAConfig&&window.loadWAConfig();
     window.updateWACounter&&window.updateWACounter();
@@ -1338,28 +1342,44 @@ function openDet(id){
 }
 
 /* ════ ADD CLIENT ════ */
+function buildFullPhone(ccId, phoneId){
+  const cc=(v(ccId)||"961").replace(/\D/g,"");
+  const local=v(phoneId).replace(/\D/g,"").replace(/^0+/,"");
+  if(!local)return "";
+  return local.startsWith(cc)?local:cc+local;
+}
 async function saveClient(){
-  const name=v("ac_name"),meter=v("ac_meter"),phone=v("ac_phone"),addr=v("ac_addr");
+  const name=v("ac_name"),meter=v("ac_meter"),addr=v("ac_addr");
+  const phone=buildFullPhone("ac_cc","ac_phone");
   if(!name)return toast(...T.t_name_req);
   if(!meter)return toast(...T.t_meter_req);
   try{
     await window.DB.addClient({name,meter,phone,address:addr});
     closeSh("sh-ac");
     ["ac_name","ac_meter","ac_phone","ac_addr"].forEach(id=>{const el=$(id);if(el)el.value="";});
+    if($("ac_cc"))$("ac_cc").value="961";
     toast(...T.t_saved);
   }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
 function openEditC(id){
   const c=gC().find(x=>x.id===id);if(!c)return;
   $("ec_id").value=id;$("ec_name").value=c.name||"";$("ec_meter").value=c.meter||"";
-  $("ec_phone").value=c.phone||"";$("ec_addr").value=c.address||"";
+  // Split stored phone into cc + local for display
+  const stored=(c.phone||"").replace(/\D/g,"");
+  const defaultCC="961";
+  let ccVal=defaultCC, localVal=stored;
+  if(stored.startsWith(defaultCC))localVal=stored.slice(defaultCC.length);
+  if($("ec_cc"))$("ec_cc").value=ccVal;
+  $("ec_phone").value=localVal;
+  $("ec_addr").value=c.address||"";
   openSh("sh-ec");
 }
 async function updClient(){
   const id=v("ec_id"),name=v("ec_name"),meter=v("ec_meter");
   if(!name||!meter)return toast(...T.t_name_req);
+  const phone=buildFullPhone("ec_cc","ec_phone");
   try{
-    await window.DB.updateClient(id,{name,meter,phone:v("ec_phone"),address:v("ec_addr")});
+    await window.DB.updateClient(id,{name,meter,phone,address:v("ec_addr")});
     closeSh("sh-ec");toast(...T.t_updated);
   }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
@@ -1478,11 +1498,10 @@ window.loadWAConfig = function(){
   const hasApi=!!(cfg.instanceId&&cfg.apiToken);
   const st=document.getElementById("waapi_status");
   if(st){st.className="wapi-status "+(hasApi?"on":"off");document.getElementById("waapi_st_txt").textContent=hasApi?"✅ Active — sends automatically":"⚪ Not configured";}
-  const idEl=document.getElementById("waapi_id"),tokEl=document.getElementById("waapi_tok"),limEl=document.getElementById("waapi_lim"),ccEl=document.getElementById("waapi_cc");
+  const idEl=document.getElementById("waapi_id"),tokEl=document.getElementById("waapi_tok"),limEl=document.getElementById("waapi_lim");
   if(idEl)idEl.value=cfg.instanceId||"";
   if(tokEl)tokEl.value=cfg.apiToken||"";
   if(limEl)limEl.value=cfg.limit||3000;
-  if(ccEl)ccEl.value=cfg.countryCode||"961";
   const wrap=document.getElementById("waapi_usage_wrap");
   if(wrap){
     if(hasApi){
@@ -1502,13 +1521,10 @@ window.loadWAConfig = function(){
 /* ════ AUTO-SEND VIA GREEN API ════ */
 async function sendWAMsg(phone,msg){
   const cfg=window.__waConfig||{};
-  const cc=(cfg.countryCode||"961").replace(/\D/g,"");
-  let clean=(phone||"").replace(/\D/g,"");
-  // Strip leading zeros (local format → international)
-  clean=clean.replace(/^0+/,"");
+  let clean=(phone||"").replace(/\D/g,"").replace(/^0+/,"");
   if(!clean){toast(...T.t_no_ph);return false;}
-  // Prepend country code if number doesn't already start with it
-  if(!clean.startsWith(cc)){clean=cc+clean;}
+  // Fallback: prepend 961 for legacy numbers stored without country code
+  if(clean.length<=8){clean="961"+clean;}
   if(clean.length<10){
     toast("⚠️","Invalid Number",L==="ar"?"رقم الهاتف غير صحيح":"Invalid phone number — check client record.");
     return false;
