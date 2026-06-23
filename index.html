@@ -348,7 +348,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <button class="hadm" id="h_adm" onclick="toggleAdmin()" title="Admin">🔒</button>
     <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
     <div class="hdate" id="h_date"></div>
-    <div class="wa-counter" id="wa-counter" title="WA messages this month. Tap to configure." style="display:none" onclick="requireAdmin(()=>{loadWAConfig();openSh('sh-waapi');})"></div>
+    <div class="wa-counter" id="wa-counter" title="WhatsApp API Settings" style="display:none" onclick="requireAdmin(()=>{loadWAConfig();openSh('sh-waapi');})"></div>
     <div class="uavatar" id="h_avatar" onclick="gSignOut()" title="Sign out" style="cursor:pointer;display:none"></div>
   </div>
 </header>
@@ -1450,7 +1450,11 @@ window.updateWACounter = function(){
     el.style.display="flex";
     el.textContent="📲 "+count+"/"+limit;
     el.className="wa-counter"+(count>limit*.9?" danger":count>limit*.7?" warn":"");
-  }else{el.style.display="none";}
+  }else{
+    el.style.display="flex";
+    el.textContent="⚙️ WA";
+    el.className="wa-counter";
+  }
 };
 window.updateWASendBtn = function(){
   const cfg=window.__waConfig||{};
