@@ -1320,7 +1320,7 @@ function openDet(id){
       ${__admin?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
         <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="openSh('sh-chpin')">${T.change_pin}</button>
         <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="toggleAdmin()">${T.lock_admin}</button>
-        ${(window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com")?`<button class="abtn a-blue" style="margin-top:0;width:100%;font-size:13px" onclick="loadAllowedEmails();openSh('sh-access')">👥 ${L==="ar"?"إدارة الوصول":"Manage Access"}</button>`:""}
+        ${(window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com")?`<button class="abtn a-blue" style="margin-top:0;width:100%;font-size:13px" onclick="loadAllowedEmails();openSh('sh-access')">👥 ${L==="ar"?"إدارة الوصول":"Manage Access"}</button><button class="abtn a-wa" style="margin-top:6px;width:100%;font-size:13px" onclick="loadWAConfig();openSh('sh-waapi')">📲 ${L==="ar"?"إعدادات واتساب API":"WhatsApp API Settings"}</button>`:""}
       </div>`:""}
     </div>
     <div class="sechead">${cB.length} ${cB.length===1?T.bill_s:T.bills_s}</div>
