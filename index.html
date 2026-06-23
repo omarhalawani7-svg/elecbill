@@ -574,6 +574,11 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <div class="wapi-status off" id="waapi_status"><span id="waapi_st_txt">⚪ Not configured</span></div>
     <div style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.6" id="waapi_sub">Use <strong>Green API</strong> to send messages automatically — no manual tap needed. <a href="https://green-api.com" target="_blank" style="color:var(--blue)">green-api.com</a> (free 3,000 msg/month).</div>
     <div class="fg">
+      <div class="fl" id="waapi_ccl">Country Code</div>
+      <input class="fi" id="waapi_cc" type="tel" placeholder="e.g. 961" value="961" autocomplete="off" style="max-width:120px">
+      <div style="font-size:11px;color:var(--t3);margin-top:4px" id="waapi_cc_hint">Lebanon = 961 · Numbers are stored without country code</div>
+    </div>
+    <div class="fg">
       <div class="fl" id="waapi_idl">Instance ID</div>
       <input class="fi" id="waapi_id" type="text" placeholder="e.g. 7103XXXXXXXX" autocomplete="off" autocorrect="off" autocapitalize="off">
     </div>
@@ -806,10 +811,11 @@ window.saveWAConfig = async function(){
   const id=(document.getElementById("waapi_id").value||"").trim();
   const tok=(document.getElementById("waapi_tok").value||"").trim();
   const lim=parseInt(document.getElementById("waapi_lim").value)||3000;
+  const cc=(document.getElementById("waapi_cc").value||"961").replace(/\D/g,"");
   if(!id||!tok){window.toast&&window.toast("⚠️","Missing","Enter Instance ID and API Token.");return;}
   try{
-    await setDoc(doc(db,"config","whatsapp"),{instanceId:id,apiToken:tok,limit:lim},{merge:true});
-    window.__waConfig={...window.__waConfig,instanceId:id,apiToken:tok,limit:lim};
+    await setDoc(doc(db,"config","whatsapp"),{instanceId:id,apiToken:tok,limit:lim,countryCode:cc},{merge:true});
+    window.__waConfig={...window.__waConfig,instanceId:id,apiToken:tok,limit:lim,countryCode:cc};
     window.toast&&window.toast("✅","Saved","WhatsApp API configured!");
     window.loadWAConfig&&window.loadWAConfig();
     window.updateWACounter&&window.updateWACounter();
@@ -1472,10 +1478,11 @@ window.loadWAConfig = function(){
   const hasApi=!!(cfg.instanceId&&cfg.apiToken);
   const st=document.getElementById("waapi_status");
   if(st){st.className="wapi-status "+(hasApi?"on":"off");document.getElementById("waapi_st_txt").textContent=hasApi?"✅ Active — sends automatically":"⚪ Not configured";}
-  const idEl=document.getElementById("waapi_id"),tokEl=document.getElementById("waapi_tok"),limEl=document.getElementById("waapi_lim");
+  const idEl=document.getElementById("waapi_id"),tokEl=document.getElementById("waapi_tok"),limEl=document.getElementById("waapi_lim"),ccEl=document.getElementById("waapi_cc");
   if(idEl)idEl.value=cfg.instanceId||"";
   if(tokEl)tokEl.value=cfg.apiToken||"";
   if(limEl)limEl.value=cfg.limit||3000;
+  if(ccEl)ccEl.value=cfg.countryCode||"961";
   const wrap=document.getElementById("waapi_usage_wrap");
   if(wrap){
     if(hasApi){
@@ -1495,13 +1502,15 @@ window.loadWAConfig = function(){
 /* ════ AUTO-SEND VIA GREEN API ════ */
 async function sendWAMsg(phone,msg){
   const cfg=window.__waConfig||{};
+  const cc=(cfg.countryCode||"961").replace(/\D/g,"");
   let clean=(phone||"").replace(/\D/g,"");
   // Strip leading zeros (local format → international)
   clean=clean.replace(/^0+/,"");
   if(!clean){toast(...T.t_no_ph);return false;}
-  // Warn if number looks too short (missing country code)
+  // Prepend country code if number doesn't already start with it
+  if(!clean.startsWith(cc)){clean=cc+clean;}
   if(clean.length<10){
-    toast("⚠️","Invalid Number",L==="ar"?"أضف رمز الدولة للرقم (مثال: 96170xxxxxxx)":"Add country code to the number (e.g. 96170xxxxxxx)");
+    toast("⚠️","Invalid Number",L==="ar"?"رقم الهاتف غير صحيح":"Invalid phone number — check client record.");
     return false;
   }
   if(cfg.instanceId&&cfg.apiToken){
