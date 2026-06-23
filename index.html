@@ -1495,8 +1495,15 @@ window.loadWAConfig = function(){
 /* ════ AUTO-SEND VIA GREEN API ════ */
 async function sendWAMsg(phone,msg){
   const cfg=window.__waConfig||{};
-  const clean=(phone||"").replace(/\D/g,"");
+  let clean=(phone||"").replace(/\D/g,"");
+  // Strip leading zeros (local format → international)
+  clean=clean.replace(/^0+/,"");
   if(!clean){toast(...T.t_no_ph);return false;}
+  // Warn if number looks too short (missing country code)
+  if(clean.length<10){
+    toast("⚠️","Invalid Number",L==="ar"?"أضف رمز الدولة للرقم (مثال: 96170xxxxxxx)":"Add country code to the number (e.g. 96170xxxxxxx)");
+    return false;
+  }
   if(cfg.instanceId&&cfg.apiToken){
     const chatId=clean+"@c.us";
     const url="https://api.green-api.com/waInstance"+cfg.instanceId+"/sendMessage/"+cfg.apiToken;
@@ -1508,7 +1515,8 @@ async function sendWAMsg(phone,msg){
         toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال رسالة واتساب تلقائياً":"WhatsApp message sent automatically");
         return true;
       }else{
-        toast("❌","API Error",data.message||"Failed — check Instance ID & Token.");
+        const detail=data.message||data.error||JSON.stringify(data);
+        toast("❌","API Error",detail+" — Make sure phone has country code (e.g. 96170xxxxxxx)");
         return false;
       }
     }catch(err){toast("❌","Error",err.message);return false;}
