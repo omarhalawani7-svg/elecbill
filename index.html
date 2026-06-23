@@ -52,6 +52,14 @@ button{cursor:pointer;}
 .ae-email{font-size:13px;color:var(--text);word-break:break-all;flex:1;margin-right:10px;}
 .ae-del{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;}
 .ae-admin-badge{font-size:10px;background:var(--bdim);color:var(--blue);border:1px solid rgba(34,197,94,.3);border-radius:5px;padding:2px 7px;font-weight:700;margin-left:6px;white-space:nowrap;}
+/* ── WA COUNTER ── */
+.wa-counter{font-size:10px;font-weight:800;background:var(--wadim);color:var(--wa);border:1px solid rgba(37,211,102,.3);border-radius:6px;padding:3px 7px;white-space:nowrap;cursor:pointer;}
+.wa-counter.warn{color:var(--yellow);background:var(--ydim);border-color:rgba(245,158,11,.3);}
+.wa-counter.danger{color:var(--red);background:var(--rdim);border-color:rgba(239,68,68,.3);}
+/* ── WA API SHEET ── */
+.wapi-status{display:flex;align-items:center;gap:7px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;margin-bottom:14px;}
+.wapi-status.on{background:rgba(37,211,102,.12);color:#16a34a;border:1px solid rgba(37,211,102,.3);}
+.wapi-status.off{background:var(--card2);color:var(--t2);border:1px solid var(--border);}
 /* ── SPLASH ── */
 #splash{position:fixed;inset:0;z-index:1000;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;transition:opacity .4s;}
 #splash.hide{opacity:0;pointer-events:none;}
@@ -339,6 +347,8 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
     <button class="hadm" id="h_adm" onclick="toggleAdmin()" title="Admin">🔒</button>
     <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
+    <div class="hdate" id="h_date"></div>
+    <div class="wa-counter" id="wa-counter" title="WA messages this month. Tap to configure." style="display:none" onclick="requireAdmin(()=>{loadWAConfig();openSh('sh-waapi');})"></div>
     <div class="uavatar" id="h_avatar" onclick="gSignOut()" title="Sign out" style="cursor:pointer;display:none"></div>
   </div>
 </header>
@@ -497,7 +507,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
       <div class="fhint" id="wa_hint">You can edit before sending.</div>
     </div>
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:12px;font-size:12px;color:var(--t2);line-height:1.6" id="wa_info">ℹ️ WhatsApp opens with the message ready. Just tap <strong>Send</strong>.</div>
-    <button class="abtn a-wa" id="wa_snd" onclick="doWa()" style="margin-top:0"><span>📲</span><span id="wa_sl">Open WhatsApp</span></button>
+    <button class="abtn a-wa" id="wa_snd" onclick="doWa()" style="margin-top:0"><span id="wa_si">📲</span><span id="wa_sl">Open WhatsApp</span></button>
     <button class="abtn a-ghost" id="wa_cn" onclick="closeSh('sh-wa')">Cancel</button>
   </div>
 </div>
@@ -554,6 +564,39 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <div style="height:10px"></div>
     <button class="abtn a-blue" id="chpin_sv" onclick="saveNewPin()" style="margin-top:0">💾 Save New PIN</button>
     <button class="abtn a-ghost" id="chpin_cn" onclick="closeSh('sh-chpin')">Cancel</button>
+  </div>
+</div>
+<!-- SHEET: WHATSAPP API (Green API) -->
+<div class="ov" id="sh-waapi">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="stitle">📲 <span id="waapi_title">WhatsApp API</span></div>
+    <div class="wapi-status off" id="waapi_status"><span id="waapi_st_txt">⚪ Not configured</span></div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.6" id="waapi_sub">Use <strong>Green API</strong> to send messages automatically — no manual tap needed. <a href="https://green-api.com" target="_blank" style="color:var(--blue)">green-api.com</a> (free 3,000 msg/month).</div>
+    <div class="fg">
+      <div class="fl" id="waapi_idl">Instance ID</div>
+      <input class="fi" id="waapi_id" type="text" placeholder="e.g. 7103XXXXXXXX" autocomplete="off" autocorrect="off" autocapitalize="off">
+    </div>
+    <div class="fg">
+      <div class="fl" id="waapi_tokl">API Token</div>
+      <input class="fi" id="waapi_tok" type="password" placeholder="your token" autocomplete="off">
+    </div>
+    <div class="fg">
+      <div class="fl" id="waapi_liml">Monthly Limit</div>
+      <input class="fi" id="waapi_lim" type="number" value="3000">
+    </div>
+    <div id="waapi_usage_wrap" style="margin-bottom:14px;display:none">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:5px">
+        <span id="waapi_usage_label">Messages this month</span>
+        <span id="waapi_usage_num" style="font-weight:800"></span>
+      </div>
+      <div style="height:7px;background:var(--card2);border-radius:4px;overflow:hidden">
+        <div id="waapi_bar" style="height:100%;background:var(--wa);border-radius:4px;transition:width .4s"></div>
+      </div>
+    </div>
+    <button class="abtn a-wa" onclick="saveWAConfig()" style="margin-top:0" id="waapi_sv">💾 Save</button>
+    <button class="abtn a-ghost" onclick="clearWAConfig()" style="margin-top:0;font-size:13px" id="waapi_clr">🗑️ Remove API</button>
+    <button class="abtn a-ghost" onclick="closeSh('sh-waapi')" id="waapi_cn">Close</button>
   </div>
 </div>
 <!-- SHEET: ACCESS MANAGEMENT -->
@@ -749,6 +792,54 @@ window.removeAllowedEmail = async function(email){
   }
 };
 
+/* ════ WHATSAPP API CONFIG ════ */
+window.__waConfig = {};
+async function loadWACfg(){
+  try{
+    const snap = await getDoc(doc(db,"config","whatsapp"));
+    window.__waConfig = snap.exists() ? snap.data() : {};
+    window.updateWACounter && window.updateWACounter();
+    window.updateWASendBtn && window.updateWASendBtn();
+  }catch(e){ console.error("WA cfg err",e); }
+}
+window.saveWAConfig = async function(){
+  const id=(document.getElementById("waapi_id").value||"").trim();
+  const tok=(document.getElementById("waapi_tok").value||"").trim();
+  const lim=parseInt(document.getElementById("waapi_lim").value)||3000;
+  if(!id||!tok){window.toast&&window.toast("⚠️","Missing","Enter Instance ID and API Token.");return;}
+  try{
+    await setDoc(doc(db,"config","whatsapp"),{instanceId:id,apiToken:tok,limit:lim},{merge:true});
+    window.__waConfig={...window.__waConfig,instanceId:id,apiToken:tok,limit:lim};
+    window.toast&&window.toast("✅","Saved","WhatsApp API configured!");
+    window.loadWAConfig&&window.loadWAConfig();
+    window.updateWACounter&&window.updateWACounter();
+    window.updateWASendBtn&&window.updateWASendBtn();
+  }catch(e){window.toast&&window.toast("❌","Error",e.message);}
+};
+window.clearWAConfig = async function(){
+  if(!confirm("Remove WhatsApp API settings?"))return;
+  try{
+    await setDoc(doc(db,"config","whatsapp"),{instanceId:"",apiToken:"",limit:3000},{merge:true});
+    window.__waConfig={...window.__waConfig,instanceId:"",apiToken:""};
+    window.toast&&window.toast("🗑️","Removed","API settings cleared.");
+    window.loadWAConfig&&window.loadWAConfig();
+    window.updateWACounter&&window.updateWACounter();
+    window.updateWASendBtn&&window.updateWASendBtn();
+  }catch(e){window.toast&&window.toast("❌","Error",e.message);}
+};
+window.incrementWACount = async function(){
+  const now=new Date();
+  const month=now.getFullYear()+"-"+(now.getMonth()+1).toString().padStart(2,"0");
+  const cfg=window.__waConfig||{};
+  const curCount=cfg.sentMonth===month?(cfg.sentCount||0):0;
+  const newCount=curCount+1;
+  try{
+    await updateDoc(doc(db,"config","whatsapp"),{sentCount:newCount,sentMonth:month});
+    window.__waConfig={...window.__waConfig,sentCount:newCount,sentMonth:month};
+    window.updateWACounter&&window.updateWACounter();
+  }catch(e){console.error("WA count err",e);}
+};
+loadWACfg();
 onAuthStateChanged(auth, handleUser);
 getRedirectResult(auth).then(result=>{
   if(result?.user) handleUser(result.user);
@@ -1310,7 +1401,7 @@ async function saveBill(sendWa){
     closeSh("sh-ab");
     ["ab_amt","ab_month","ab_due","ab_desc"].forEach(id=>{const el=$(id);if(el)el.value="";});
     $("ab_fix").style.display="none";$("ab_client").value="";
-    if(sendWa&&c.phone){openWA(c.phone,buildBillMsg(c,b));toast(...T.t_wa);}
+    if(sendWa&&c.phone){await sendWAMsg(c.phone,buildBillMsg(c,b));}
     else if(sendWa&&!c.phone){toast(...T.t_no_ph);}
     else{toast(T.t_bill_sv[0],T.t_bill_sv[1],c.name);}
   }catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
@@ -1347,16 +1438,93 @@ function buildRemMsg(c,up){
   const lines=up.map(b=>`  • ${b.month||"?"}: *$${fmt(b.amount)}* (due ${fmtD(b.dueDate)})`).join("\n");
   return `⚡ *Payment Reminder*\n\nDear *${c.name}*,\n📟 Meter: *${c.meter}*\n\n━━━━━━━━━━━\nYou have *${up.length}* unpaid bill${up.length>1?"s":""}:\n\n${lines}\n\n💰 *Total: $${fmt(tot)}*\n━━━━━━━━━━━\nPlease settle your balance soon.\n\nThank you 🙏\n_Electric Station — Accounting_`;
 }
+/* ════ WA COUNTER + API UI ════ */
+window.updateWACounter = function(){
+  const cfg=window.__waConfig||{};
+  const el=document.getElementById("wa-counter");if(!el)return;
+  if(cfg.instanceId&&cfg.apiToken){
+    const now=new Date();
+    const month=now.getFullYear()+"-"+(now.getMonth()+1).toString().padStart(2,"0");
+    const count=cfg.sentMonth===month?(cfg.sentCount||0):0;
+    const limit=cfg.limit||3000;
+    el.style.display="flex";
+    el.textContent="📲 "+count+"/"+limit;
+    el.className="wa-counter"+(count>limit*.9?" danger":count>limit*.7?" warn":"");
+  }else{el.style.display="none";}
+};
+window.updateWASendBtn = function(){
+  const cfg=window.__waConfig||{};
+  const hasApi=!!(cfg.instanceId&&cfg.apiToken);
+  const L=window.__L||"en";
+  const si=document.getElementById("wa_si"),sl=document.getElementById("wa_sl"),info=document.getElementById("wa_info");
+  if(si)si.textContent=hasApi?"📤":"📲";
+  if(sl)sl.textContent=hasApi?(L==="ar"?"إرسال تلقائي":"Send Automatically"):(L==="ar"?"فتح واتساب":"Open WhatsApp");
+  if(info)info.innerHTML=hasApi
+    ?("✅ "+(L==="ar"?"سيتم الإرسال تلقائياً عبر API بدون فتح واتساب.":"Message will be sent automatically — no app needed."))
+    :("ℹ️ "+(L==="ar"?"سيفتح واتساب جاهزاً. اضغط إرسال.":"WhatsApp opens ready. Just tap <strong>Send</strong>."));
+};
+window.loadWAConfig = function(){
+  const cfg=window.__waConfig||{};
+  const hasApi=!!(cfg.instanceId&&cfg.apiToken);
+  const st=document.getElementById("waapi_status");
+  if(st){st.className="wapi-status "+(hasApi?"on":"off");document.getElementById("waapi_st_txt").textContent=hasApi?"✅ Active — sends automatically":"⚪ Not configured";}
+  const idEl=document.getElementById("waapi_id"),tokEl=document.getElementById("waapi_tok"),limEl=document.getElementById("waapi_lim");
+  if(idEl)idEl.value=cfg.instanceId||"";
+  if(tokEl)tokEl.value=cfg.apiToken||"";
+  if(limEl)limEl.value=cfg.limit||3000;
+  const wrap=document.getElementById("waapi_usage_wrap");
+  if(wrap){
+    if(hasApi){
+      wrap.style.display="block";
+      const now=new Date();
+      const month=now.getFullYear()+"-"+(now.getMonth()+1).toString().padStart(2,"0");
+      const count=cfg.sentMonth===month?(cfg.sentCount||0):0;
+      const limit=cfg.limit||3000;
+      document.getElementById("waapi_usage_num").textContent=count+"/"+limit;
+      const bar=document.getElementById("waapi_bar");
+      bar.style.width=Math.min(100,count/limit*100)+"%";
+      bar.style.background=count>limit*.9?"var(--red)":count>limit*.7?"var(--yellow)":"var(--wa)";
+    }else{wrap.style.display="none";}
+  }
+  window.updateWASendBtn&&window.updateWASendBtn();
+};
+/* ════ AUTO-SEND VIA GREEN API ════ */
+async function sendWAMsg(phone,msg){
+  const cfg=window.__waConfig||{};
+  const clean=(phone||"").replace(/\D/g,"");
+  if(!clean){toast(...T.t_no_ph);return false;}
+  if(cfg.instanceId&&cfg.apiToken){
+    const chatId=clean+"@c.us";
+    const url="https://api.green-api.com/waInstance"+cfg.instanceId+"/sendMessage/"+cfg.apiToken;
+    try{
+      const resp=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,message:msg})});
+      const data=await resp.json();
+      if(data.idMessage){
+        await window.incrementWACount();
+        toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال رسالة واتساب تلقائياً":"WhatsApp message sent automatically");
+        return true;
+      }else{
+        toast("❌","API Error",data.message||"Failed — check Instance ID & Token.");
+        return false;
+      }
+    }catch(err){toast("❌","Error",err.message);return false;}
+  }else{
+    window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
+    return true;
+  }
+}
 function openWA(phone,msg){
   const clean=(phone||"").replace(/\D/g,"");
   window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`,"_blank");
 }
-function waForBill(id){
+async function waForBill(id){
   const b=gB().find(x=>x.id===id),c=b?gC().find(x=>x.id===b.clientId):null;
   if(!c)return;
   if(!c.phone||!c.phone.trim())return toast(...T.t_no_wa);
-  openWA(c.phone,buildBillMsg(c,b));
-  toast(...T.t_wa);
+  const cfg=window.__waConfig||{};
+  if(cfg.instanceId&&cfg.apiToken){
+    await sendWAMsg(c.phone,buildBillMsg(c,b));
+  }else{openWA(c.phone,buildBillMsg(c,b));toast(...T.t_wa);}
 }
 function sendRem(cid){
   const c=gC().find(x=>x.id===cid);if(!c)return;
@@ -1368,19 +1536,20 @@ function sendRem(cid){
   $("wa_phone").value=c.phone;
   openSh("sh-wa");
 }
-function doWa(){
+async function doWa(){
   const ph=v("wa_phone");if(!ph)return toast(...T.t_no_num);
-  openWA(ph,waBuf);closeSh("sh-wa");toast(...T.t_wa);
+  const ok=await sendWAMsg(ph,waBuf);
+  if(ok)closeSh("sh-wa");
 }
 function bulkWa(){
   bulkQ=gC().filter(c=>{const up=gB().filter(b=>b.clientId===c.id&&!b.paid);return up.length>0&&c.phone&&c.phone.trim();});
   if(!bulkQ.length)return toast(...T.t_no_snd);
   bulkI=0;nextBulk();
 }
-function nextBulk(){
+async function nextBulk(){
   if(bulkI>=bulkQ.length){toast(T.t_done[0],T.t_done[1],bulkQ.length+" "+(L==="ar"?"عملاء":"clients"));return;}
   const c=bulkQ[bulkI];
-  openWA(c.phone,buildRemMsg(c,gB().filter(b=>b.clientId===c.id&&!b.paid)));
+  await sendWAMsg(c.phone,buildRemMsg(c,gB().filter(b=>b.clientId===c.id&&!b.paid)));
   bulkI++;
   if(bulkI<bulkQ.length){
     setTimeout(()=>{if(confirm(T.conf_next.replace("{n}",c.name).replace("{x}",bulkQ[bulkI].name)))nextBulk();},900);
