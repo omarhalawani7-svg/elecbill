@@ -1123,6 +1123,14 @@ function requireAdmin(action){
   updateDots();
   openSh("sh-pin");
 }
+function rebootApp(){
+  if('caches' in window){
+    caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>location.reload(true));
+  } else {
+    location.reload(true);
+  }
+}
+
 function toggleAdmin(){
   if(__admin){
     __admin=false;
@@ -1333,6 +1341,7 @@ function openDet(id){
         <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="openSh('sh-chpin')">${T.change_pin}</button>
         <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="toggleAdmin()">${T.lock_admin}</button>
         ${(window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com")?`<button class="abtn a-blue" style="margin-top:0;width:100%;font-size:13px" onclick="loadAllowedEmails();openSh('sh-access')">👥 ${L==="ar"?"إدارة الوصول":"Manage Access"}</button><button class="abtn a-wa" style="margin-top:6px;width:100%;font-size:13px" onclick="loadWAConfig();openSh('sh-waapi')">📲 ${L==="ar"?"إعدادات واتساب API":"WhatsApp API Settings"}</button>`:""}
+        <button class="abtn a-ghost" style="margin-top:6px;width:100%;font-size:13px" onclick="rebootApp()">🔄 ${L==="ar"?"إعادة تشغيل التطبيق":"Reboot App"}</button>
       </div>`:""}
     </div>
     <div class="sechead">${cB.length} ${cB.length===1?T.bill_s:T.bills_s}</div>
