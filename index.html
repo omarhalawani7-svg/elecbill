@@ -341,7 +341,6 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 <header class="hdr">
   <div class="hbrand">
     <div class="hicon">⚡</div>
-    <div><div class="htitle">ElecBill Pro</div><div class="hsub" id="h_sub">Billing</div></div>
   </div>
   <div class="hright">
     <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
@@ -359,12 +358,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
   <div class="stat s3"><div class="sv" id="so">0</div><div class="sl" id="sl3">Overdue</div></div>
   <div class="stat s4"><div class="sv" id="sd">0</div><div class="sl" id="sl4">Paid</div></div>
 </div>
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab on" id="tab-c" onclick="gp('c')"><span class="ti">👥</span><span id="nt1">Clients</span></button>
-  <button class="tab"    id="tab-b" onclick="gp('b')"><span class="ti">📋</span><span id="nt2">Bills</span></button>
-  <button class="tab"    id="tab-s" onclick="gp('s')"><span class="ti">📊</span><span id="nt3">Summary</span></button>
-</div>
+
 <!-- PAGE: CLIENTS -->
 <div class="pg on" id="pg-c">
   <div style="height:12px"></div>
@@ -491,13 +485,14 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
       <div class="fixrow" style="margin-top:5px"><span class="fxl" id="ab_fp_l">WhatsApp</span><br><span class="fxw" id="ab_fp">—</span></div>
     </div>
     <div class="dlbl" id="ab_vl">📝 Variable Info</div>
-    <div class="fg"><div class="fl" id="ab_ml">Period <span class="freq">*</span></div><input class="fi" id="ab_month" type="text" oninput="rPrev()" autocomplete="off"></div>
+    <div class="fg"><div class="fl" id="ab_ml">Period <span class="freq">*</span></div><input class="fi" id="ab_month" type="text" oninput="rPrev()" autocomplete="off" placeholder="e.g. 3-4"></div>
     <div class="frow">
       <div class="fg"><div class="fl" id="ab_al">Amount ($) <span class="freq">*</span></div><input class="fi" id="ab_amt" type="number" min="0" oninput="rPrev()"></div>
-      <div class="fg"><div class="fl" id="ab_dl">Due Date <span class="freq">*</span></div><input class="fi" id="ab_due" type="date" oninput="rPrev()"></div>
+      <!-- Due date auto-calculated: today + 30 days -->
+      <input type="hidden" id="ab_due">
     </div>
-    <div class="fg"><div class="fl" id="ab_il">Issue Date</div><input class="fi" id="ab_date" type="date" oninput="rPrev()"></div>
-    <div class="fg"><div class="fl" id="ab_nl2">Note</div><input class="fi" id="ab_desc" type="text" oninput="rPrev()" autocomplete="off"></div>
+    <input type="hidden" id="ab_date">
+    <input type="hidden" id="ab_desc" value="">
     <div class="dlbl" id="ab_pvl">📲 WhatsApp Preview</div>
     <div class="wabox"><div class="wabox-hd">📱 <span id="ab_pvh">Message preview</span></div><div class="wabox-txt" id="ab_prev">—</div></div>
     <button class="abtn a-blue" id="ab_sv"   onclick="saveBill(false)" style="margin-top:0">💾 Save Bill Only</button>
@@ -511,6 +506,11 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <div class="sh"></div>
     <div class="stitle" id="wa_t">📲 <span>WhatsApp</span></div>
     <div class="wabox" style="margin-bottom:13px"><div class="wabox-hd">📱 <span id="wa_mh">Message</span></div><div class="wabox-txt" id="wa_prev">—</div></div>
+    <div class="fg">
+      <div class="fl" id="wa_nl">Note (optional)</div>
+      <input class="fi" id="wa_note" type="text" placeholder="Add a note to show unpaid bill details..." oninput="onWANote()" autocomplete="off">
+      <div class="fhint" id="wa_nh">Type a note to include the unpaid bill list in the message.</div>
+    </div>
     <div class="fg">
       <div class="fl" id="wa_pl">Phone Number</div>
       <input class="fi" id="wa_phone" type="tel" placeholder="213XXXXXXXXX">
@@ -1304,7 +1304,7 @@ function openDet(id){
       const cls=b.paid?"bcp":isOD(b)?"bco":"bcn";
       return `<div class="bc ${cls}">
         <div class="bc-top"><div><div class="bc-period">${esc(b.month||"—")}</div><div style="margin-top:4px">${bg(b)}</div></div><div class="bc-amt">$${fmt(b.amount)}</div></div>
-        <div class="bc-dates">${T.issued} ${fmtD(b.billDate)}&nbsp;·&nbsp;${T.due_lbl} ${fmtD(b.dueDate)}</div>
+        <div class="bc-dates">${T.due_lbl} ${fmtD(b.dueDate)}</div>
         ${b.desc?`<div class="bc-desc">💬 ${esc(b.desc)}</div>`:""}
         <div class="bc-acts">
           ${!b.paid&&hp?`<button class="bca bca-wa" data-action="wabill" data-id="${b.id}">${T.wa_btn}</button>`:""}
@@ -1408,24 +1408,35 @@ function onBC(){
   else box.style.display="none";
   rPrev();
 }
+function autoFillBillDates(){
+  const today=new Date();
+  const due=new Date(today);due.setDate(due.getDate()+30);
+  const fmt=d=>d.toISOString().split("T")[0];
+  if($("ab_date"))$("ab_date").value=fmt(today);
+  if($("ab_due"))$("ab_due").value=fmt(due);
+}
 function rPrev(){
   const cid=v("ab_client"),c=gC().find(x=>x.id===cid),amt=parseFloat(v("ab_amt"));
   const el=$("ab_prev");if(!el)return;
   if(!c||!amt){el.textContent=T.ab_pvh;return;}
-  el.textContent=buildBillMsg(c,{amount:amt,month:v("ab_month"),billDate:v("ab_date"),dueDate:v("ab_due"),desc:v("ab_desc")});
+  autoFillBillDates();
+  el.textContent=buildBillMsg(c,{amount:amt,month:v("ab_month"),dueDate:v("ab_due")});
 }
 async function saveBill(sendWa){
-  const cid=v("ab_client"),amount=parseFloat(v("ab_amt")),month=v("ab_month"),due=v("ab_due");
+  const cid=v("ab_client"),amount=parseFloat(v("ab_amt")),month=v("ab_month");
   const c=gC().find(x=>x.id===cid);
   if(!c)return toast(...T.t_no_c);
   if(!amount||amount<=0)return toast(...T.t_bad_a);
-  if(!due)return toast(...T.t_no_due);
   if(!month)return toast(...T.t_no_per);
-  const b={clientId:cid,amount,month,billDate:v("ab_date"),dueDate:due,desc:v("ab_desc"),paid:false};
+  autoFillBillDates();
+  const today=new Date();
+  const due=new Date(today);due.setDate(due.getDate()+30);
+  const fmt=d=>d.toISOString().split("T")[0];
+  const b={clientId:cid,amount,month,billDate:fmt(today),dueDate:fmt(due),paid:false};
   try{
     await window.DB.addBill(b);
     closeSh("sh-ab");
-    ["ab_amt","ab_month","ab_due","ab_desc"].forEach(id=>{const el=$(id);if(el)el.value="";});
+    ["ab_amt","ab_month"].forEach(id=>{const el=$(id);if(el)el.value="";});
     $("ab_fix").style.display="none";$("ab_client").value="";
     if(sendWa&&c.phone){await sendWAMsg(c.phone,buildBillMsg(c,b));}
     else if(sendWa&&!c.phone){toast(...T.t_no_ph);}
@@ -1451,18 +1462,18 @@ async function delBill(id){
 /* ════ WHATSAPP ════ */
 function buildBillMsg(c,b){
   if(L==="ar"){
-    return `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *${c.name}*،\n\n━━━━━━━━━━━\n🔒 *بيانات العميل:*\n👤 الاسم: *${c.name}*\n📟 رقم العداد: *${c.meter}*\n━━━━━━━━━━━\n📋 *تفاصيل الفاتورة:*\n📅 الفترة: *${b.month||"—"}*\n🗓 الإصدار: *${fmtD(b.billDate)}*\n💰 المبلغ: *$${fmt(b.amount)}*\n⏰ السداد قبل: *${fmtD(b.dueDate)}*${b.desc?"\n📝 "+b.desc:""}\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
+    return `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *${c.name}*،\n\n━━━━━━━━━━━\n👤 الاسم: *${c.name}*\n📟 رقم العداد: *${c.meter}*\n━━━━━━━━━━━\n📅 الفترة: *${b.month||"—"}*\n💰 المبلغ: *$${fmt(b.amount)}*\n⏰ السداد قبل: *${fmtD(b.dueDate)}*\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
   }
-  return `⚡ *New Electricity Bill*\n\nDear *${c.name}*,\n\n━━━━━━━━━━━\n🔒 *Client Info:*\n👤 Name: *${c.name}*\n📟 Meter No: *${c.meter}*\n━━━━━━━━━━━\n📋 *Bill Details:*\n📅 Period: *${b.month||"—"}*\n🗓 Issued: *${fmtD(b.billDate)}*\n💰 Amount: *$${fmt(b.amount)}*\n⏰ Pay Before: *${fmtD(b.dueDate)}*${b.desc?"\n📝 "+b.desc:""}\n━━━━━━━━━━━\nPlease pay before the due date.\n\nThank you 🙏\n_Electric Station — Accounting_`;
+  return `⚡ *New Electricity Bill*\n\nDear *${c.name}*,\n\n━━━━━━━━━━━\n👤 Name: *${c.name}*\n📟 Meter No: *${c.meter}*\n━━━━━━━━━━━\n📅 Period: *${b.month||"—"}*\n💰 Amount: *$${fmt(b.amount)}*\n⏰ Pay Before: *${fmtD(b.dueDate)}*\n━━━━━━━━━━━\nPlease pay before the due date.\n\nThank you 🙏\n_Electric Station — Accounting_`;
 }
-function buildRemMsg(c,up){
-  const tot=up.reduce((s,b)=>s+(b.amount||0),0);
+function buildRemMsg(c,up,note){
+  // Unpaid bill list only shown if admin typed a note
   if(L==="ar"){
-    const lines=up.map(b=>`  • ${b.month||"؟"}: *$${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n");
-    return `⚡ *تذكير بالدفع*\n\nعزيزي *${c.name}*،\n📟 رقم العداد: *${c.meter}*\n\n━━━━━━━━━━━\nلديك *${up.length}* فاتورة غير مسددة:\n\n${lines}\n\n💰 *الإجمالي: $${fmt(tot)}*\n━━━━━━━━━━━\nيرجى التسوية في أقرب وقت.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
+    const noteBlock=note?`\n📝 *ملاحظة:* ${note}\n\n━━━━━━━━━━━\n📋 *الفواتير غير المسددة (${up.length}):*\n`+up.map(b=>`  • ${b.month||"؟"}: *$${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n")+"\n":"";
+    return `⚡ *تذكير بالدفع*\n\nعزيزي *${c.name}*،\n📟 رقم العداد: *${c.meter}*\n\n━━━━━━━━━━━\nلديك فواتير كهرباء غير مسددة.${noteBlock}\n━━━━━━━━━━━\nيرجى التسوية في أقرب وقت.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
   }
-  const lines=up.map(b=>`  • ${b.month||"?"}: *$${fmt(b.amount)}* (due ${fmtD(b.dueDate)})`).join("\n");
-  return `⚡ *Payment Reminder*\n\nDear *${c.name}*,\n📟 Meter: *${c.meter}*\n\n━━━━━━━━━━━\nYou have *${up.length}* unpaid bill${up.length>1?"s":""}:\n\n${lines}\n\n💰 *Total: $${fmt(tot)}*\n━━━━━━━━━━━\nPlease settle your balance soon.\n\nThank you 🙏\n_Electric Station — Accounting_`;
+  const noteBlock=note?`\n📝 *Note:* ${note}\n\n━━━━━━━━━━━\n📋 *Unpaid Bills (${up.length}):*\n`+up.map(b=>`  • ${b.month||"?"}: *$${fmt(b.amount)}* (due ${fmtD(b.dueDate)})`).join("\n")+"\n":"";
+  return `⚡ *Payment Reminder*\n\nDear *${c.name}*,\n📟 Meter: *${c.meter}*\n\n━━━━━━━━━━━\nYou have unpaid electricity bills.${noteBlock}\n━━━━━━━━━━━\nPlease settle your balance soon.\n\nThank you 🙏\n_Electric Station — Accounting_`;
 }
 /* ════ WA COUNTER + API UI ════ */
 window.updateWACounter = function(){
@@ -1563,20 +1574,29 @@ async function waForBill(id){
     await sendWAMsg(c.phone,buildBillMsg(c,b));
   }else{openWA(c.phone,buildBillMsg(c,b));toast(...T.t_wa);}
 }
+let __remClient=null,__remUp=[];
 function sendRem(cid){
   const c=gC().find(x=>x.id===cid);if(!c)return;
   if(!c.phone||!c.phone.trim())return toast(...T.t_no_wa);
   const up=gB().filter(b=>b.clientId===cid&&!b.paid);
   if(!up.length)return toast(...T.t_all_pd);
-  waBuf=buildRemMsg(c,up);
+  __remClient=c;__remUp=up;
+  if($("wa_note"))$("wa_note").value="";
+  waBuf=buildRemMsg(c,up,"");
   $("wa_prev").textContent=waBuf;
   $("wa_phone").value=c.phone;
   openSh("sh-wa");
 }
+function onWANote(){
+  if(!__remClient)return;
+  const note=v("wa_note")||"";
+  waBuf=buildRemMsg(__remClient,__remUp,note);
+  $("wa_prev").textContent=waBuf;
+}
 async function doWa(){
   const ph=v("wa_phone");if(!ph)return toast(...T.t_no_num);
   const ok=await sendWAMsg(ph,waBuf);
-  if(ok)closeSh("sh-wa");
+  if(ok){closeSh("sh-wa");if($("wa_note"))$("wa_note").value="";}
 }
 function bulkWa(){
   bulkQ=gC().filter(c=>{const up=gB().filter(b=>b.clientId===c.id&&!b.paid);return up.length>0&&c.phone&&c.phone.trim();});
@@ -1586,7 +1606,7 @@ function bulkWa(){
 async function nextBulk(){
   if(bulkI>=bulkQ.length){toast(T.t_done[0],T.t_done[1],bulkQ.length+" "+(L==="ar"?"عملاء":"clients"));return;}
   const c=bulkQ[bulkI];
-  await sendWAMsg(c.phone,buildRemMsg(c,gB().filter(b=>b.clientId===c.id&&!b.paid)));
+  await sendWAMsg(c.phone,buildRemMsg(c,gB().filter(b=>b.clientId===c.id&&!b.paid),""));
   bulkI++;
   if(bulkI<bulkQ.length){
     setTimeout(()=>{if(confirm(T.conf_next.replace("{n}",c.name).replace("{x}",bulkQ[bulkI].name)))nextBulk();},900);
@@ -1605,55 +1625,4 @@ function rS(){
   $("s_bar").style.width=rate+"%";
   $("s_bt").textContent=all.length;$("s_bp").textContent=paid.length;
   $("s_bu").textContent=up.length;$("s_bo").textContent=ov.length;
-  const debtors=gC().map(c=>({...c,owed:gB().filter(b=>b.clientId===c.id&&!b.paid).reduce((s,b)=>s+(b.amount||0),0)})).filter(c=>c.owed>0).sort((a,b)=>b.owed-a.owed).slice(0,10);
-  const el=$("topd");if(!el)return;
-  if(!debtors.length){el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--green);font-size:14px;font-weight:700">${T.all_paid}</div>`;return;}
-  el.innerHTML=debtors.map(d=>`
-    <div class="drow">
-      <div><div class="dname">${esc(d.name)}</div><div class="dmt">${esc(d.meter)}</div></div>
-      <div class="drv"><div class="damt">$${fmt(d.owed)}</div>${d.phone?`<button class="dwa" onclick="sendRem('${d.id}')">📲</button>`:""}</div>
-    </div>`).join("");
-}
-
-/* ════ SHEET HELPERS ════ */
-function openSh(id){$(id).classList.add("on");}
-function closeSh(id){$(id).classList.remove("on");}
-
-/* ════ BILL ACTION DELEGATION ════ */
-document.addEventListener("click", e => {
-  const btn = e.target.closest("[data-action]");
-  if(!btn) return;
-  const action = btn.dataset.action;
-  const id = btn.dataset.id;
-  if(action === "paid")   markPaid(id);
-  if(action === "unpaid") markUnpaid(id);
-  if(action === "unpaid-confirm"){
-    const b=gB().find(x=>x.id===id);
-    const msg=L==="ar"
-      ?`⚠️ تأكيد\n\nهل تريد إلغاء الدفع لهذه الفاتورة؟\nالفترة: ${b?.month||"—"}\nالمبلغ: $${fmt(b?.amount)}\n\nسيتم إعادتها إلى قائمة غير المدفوعة.`
-      :`⚠️ Confirm\n\nMark this bill as UNPAID?\nPeriod: ${b?.month||"—"}\nAmount: $${fmt(b?.amount)}\n\nIt will move back to unpaid.`;
-    if(confirm(msg)) markUnpaid(id);
-  }
-  if(action === "delbill") delBill(id);
-  if(action === "wabill") waForBill(id);
-});
-/* ════ KEYBOARD PIN ════ */
-document.addEventListener("keydown", e => {
-  if(!$("sh-pin").classList.contains("on")) return;
-  if(e.key>="0"&&e.key<="9"){e.preventDefault();pinD(e.key);}
-  else if(e.key==="Backspace"){e.preventDefault();pinBack();}
-  else if(e.key==="Escape"){e.preventDefault();cancelPin();}
-});
-/* ════ AUTH — functions exposed by module via window.* ════ */
-/* ════ TOAST ════ */
-let tTm;
-function toast(icon,title,msg){
-  clearTimeout(tTm);
-  $("t_i").textContent=icon;$("t_t").textContent=title;$("t_m").textContent=msg||"";
-  const el=$("toast");el.classList.add("on");
-  tTm=setTimeout(()=>el.classList.remove("on"),3200);
-}
-window.toast = toast;
-</script>
-</body>
-</html>
+  const debtors=gC().map(c=>({...c,owed:gB().filter(b=>b.clientId===c.id&&!b.paid).reduce(
