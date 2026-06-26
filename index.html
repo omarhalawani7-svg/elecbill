@@ -55,6 +55,29 @@ button{cursor:pointer;}
 .ae-email{font-size:13px;color:var(--text);word-break:break-all;flex:1;margin-right:10px;}
 .ae-del{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;}
 .ae-admin-badge{font-size:10px;background:var(--bdim);color:var(--blue);border:1px solid rgba(34,197,94,.3);border-radius:5px;padding:2px 7px;font-weight:700;margin-left:6px;white-space:nowrap;}
+/* ── SETTINGS PANEL ── */
+.set-section{font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 8px;padding:0 2px;}
+html[lang="ar"] .set-section{text-transform:none;letter-spacing:0;font-size:11px;}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.set-row:last-child{border-bottom:none;}
+.set-row-l{flex:1;}
+.set-label{font-size:14px;font-weight:600;color:var(--text);}
+.set-sub{font-size:11px;color:var(--t3);margin-top:2px;}
+.set-toggle{display:flex;gap:5px;flex-shrink:0;}
+.seg-btn{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;border:1.5px solid var(--border2);background:var(--card2);color:var(--t2);transition:all .15s;cursor:pointer;}
+.seg-btn.on{background:var(--blue);border-color:var(--blue);color:#fff;}
+.set-input{background:var(--card2);border:1.5px solid var(--border2);border-radius:9px;padding:7px 10px;font-size:14px;font-weight:700;color:var(--text);width:72px;text-align:center;flex-shrink:0;}
+.set-btn{background:var(--card2);border:1.5px solid var(--border2);border-radius:11px;padding:12px 14px;font-size:14px;font-weight:600;color:var(--text);width:100%;text-align:left;display:flex;align-items:center;gap:10px;margin-bottom:8px;transition:background .15s;}
+html[lang="ar"] .set-btn{text-align:right;}
+.set-btn:active{background:var(--border);}
+.set-btn.danger{color:var(--red);border-color:rgba(239,68,68,.25);}
+.set-ver{text-align:center;padding:14px 0 4px;font-size:11px;color:var(--t3);}
+/* ── DARK MODE ── */
+:root[data-theme="dark"]{
+  --bg:#111111;--card:#1a1a1a;--card2:#252525;--border:#2a2a2a;--border2:#383838;
+  --text:#f0f0f0;--t2:#aaaaaa;--t3:#555555;
+}
+:root[data-theme="dark"] .hdr{background:rgba(17,17,17,.97);}
 /* ── WA COUNTER ── */
 .wa-counter{font-size:10px;font-weight:800;background:var(--wadim);color:var(--wa);border:1px solid rgba(37,211,102,.3);border-radius:6px;padding:3px 7px;white-space:nowrap;cursor:pointer;}
 .wa-counter.warn{color:var(--yellow);background:var(--ydim);border-color:rgba(245,158,11,.3);}
@@ -635,6 +658,67 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <button class="abtn a-ghost" onclick="closeSh('sh-access')" id="acc_cl">Close</button>
   </div>
 </div>
+<!-- SHEET: SETTINGS -->
+<div class="ov" id="sh-settings">
+  <div class="sheet" style="max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+    <div class="sh"></div>
+    <div class="stitle">⚙️ <span id="set_title">Settings</span></div>
+
+    <!-- Language -->
+    <div class="set-section" id="set_s_lang">🌐 Language</div>
+    <div class="set-row">
+      <div class="set-row-l"><div class="set-label" id="set_lang_l">Display Language</div></div>
+      <div class="set-toggle">
+        <button class="seg-btn" id="set_en" onclick="setLang('en')">EN</button>
+        <button class="seg-btn" id="set_ar" onclick="setLang('ar')">عربي</button>
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="set-section" id="set_s_app">🎨 Appearance</div>
+    <div class="set-row">
+      <div class="set-row-l"><div class="set-label" id="set_theme_l">Theme</div></div>
+      <div class="set-toggle">
+        <button class="seg-btn" id="set_light" onclick="setTheme('light')">☀️ Light</button>
+        <button class="seg-btn" id="set_dark" onclick="setTheme('dark')">🌙 Dark</button>
+      </div>
+    </div>
+
+    <!-- Billing -->
+    <div class="set-section" id="set_s_bil">💱 Billing</div>
+    <div class="set-row">
+      <div class="set-row-l"><div class="set-label" id="set_cur_l">Currency Symbol</div></div>
+      <input class="set-input" id="set_cur" type="text" maxlength="4" value="$" oninput="saveCurrency(this.value)">
+    </div>
+    <div class="set-row">
+      <div class="set-row-l"><div class="set-label" id="set_due_l">Default Due Days</div><div class="set-sub" id="set_due_s">Days after bill issue date</div></div>
+      <input class="set-input" id="set_due" type="number" min="1" max="365" value="30" oninput="saveDueDays(this.value)">
+    </div>
+
+    <!-- Security -->
+    <div class="set-section" id="set_s_sec">🔒 Security</div>
+    <button class="set-btn" onclick="closeSh('sh-settings');openSh('sh-chpin')">🔑 <span id="set_chpin">Change Admin PIN</span></button>
+    <button class="set-btn" onclick="lockAdminFromSettings()">🔒 <span id="set_lock">Lock Admin Mode</span></button>
+    <button class="set-btn danger" onclick="closeSh('sh-settings');window.gSignOut&&window.gSignOut()">↪️ <span id="set_signout">Sign Out</span></button>
+
+    <!-- WhatsApp -->
+    <div class="set-section" id="set_s_wa">📲 WhatsApp</div>
+    <button class="set-btn" onclick="closeSh('sh-settings');window.loadWAConfig&&window.loadWAConfig();openSh('sh-waapi')">📲 <span id="set_wa">WhatsApp API Settings</span></button>
+
+    <!-- Access (super-admin only) -->
+    <div id="set_access_wrap" style="display:none">
+      <div class="set-section" id="set_s_acc">👥 Access</div>
+      <button class="set-btn" onclick="closeSh('sh-settings');window.loadAllowedEmails&&window.loadAllowedEmails();openSh('sh-access')">👥 <span id="set_acc">Manage Access</span></button>
+    </div>
+
+    <!-- System -->
+    <div class="set-section" id="set_s_sys">🔄 System</div>
+    <button class="set-btn" onclick="closeSh('sh-settings');rebootApp()">🔄 <span id="set_reboot">Reboot App</span></button>
+    <div class="set-ver">ElecBill Pro • v2.0</div>
+
+    <button class="abtn a-ghost" onclick="closeSh('sh-settings')" id="set_close" style="margin-top:4px">Close</button>
+  </div>
+</div>
 <!-- TOAST -->
 <div class="toast" id="toast"><div class="ti" id="t_i">✅</div><div><div class="tt" id="t_t"></div><div class="tm" id="t_m"></div></div></div>
 
@@ -1058,6 +1142,8 @@ function boot(lang){
 }
 function switchLang(){ boot(L==="en"?"ar":"en"); }
 window.addEventListener("DOMContentLoaded",()=>{
+  // Apply saved theme immediately
+  applyTheme(localStorage.getItem("eb_theme")||"light");
   $("h_date").textContent=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
   $("ab_date").value=new Date().toISOString().split("T")[0];
   document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)closeSh(o.id);}));
@@ -1133,10 +1219,7 @@ function rebootApp(){
 
 function toggleAdmin(){
   if(__admin){
-    __admin=false;
-    updateAdminBtn();
-    toast(...T.t_adm_off);
-    if(detId) openDet(detId);
+    openSettings();
   } else {
     __pendingAction=null;
     __pinBuf="";
@@ -1181,7 +1264,7 @@ function checkPin(){
 }
 function updateAdminBtn(){
   const btn=$("h_adm");if(!btn)return;
-  if(__admin){btn.textContent="🔓";btn.classList.add("on");}
+  if(__admin){btn.textContent="⚙️";btn.classList.add("on");}
   else{btn.textContent="🔒";btn.classList.remove("on");}
 }
 function saveNewPin(){
@@ -1193,6 +1276,77 @@ function saveNewPin(){
   toast(...T.t_pin_changed);
 }
 
+/* ════ SETTINGS FUNCTIONS ════ */
+function getCurrency(){return localStorage.getItem("eb_cur")||"$";}
+function getDueDays(){return parseInt(localStorage.getItem("eb_due")||"30");}
+function saveCurrency(val){if(val)localStorage.setItem("eb_cur",val);renderAll();}
+function saveDueDays(val){const d=parseInt(val)||30;localStorage.setItem("eb_due",d);}
+function applyTheme(t){
+  document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");
+}
+function setTheme(t){
+  applyTheme(t);
+  localStorage.setItem("eb_theme",t);
+  const l=$("set_light"),d=$("set_dark");
+  if(l)l.classList.toggle("on",t==="light");
+  if(d)d.classList.toggle("on",t==="dark");
+}
+function setLang(lang){
+  boot(lang);
+  updateSettingsUI();
+}
+function lockAdminFromSettings(){
+  closeSh("sh-settings");
+  __admin=false;
+  updateAdminBtn();
+  toast(...T.t_adm_off);
+  if(detId) openDet(detId);
+}
+function openSettings(){
+  // Show/hide admin-only section
+  const isSuper=window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com";
+  const wrap=$("set_access_wrap");if(wrap)wrap.style.display=isSuper?"block":"none";
+  // Sync theme buttons
+  const theme=localStorage.getItem("eb_theme")||"light";
+  const sl=$("set_light"),sd=$("set_dark");
+  if(sl)sl.classList.toggle("on",theme==="light");
+  if(sd)sd.classList.toggle("on",theme==="dark");
+  // Sync language buttons
+  const en=$("set_en"),ar=$("set_ar");
+  if(en)en.classList.toggle("on",L==="en");
+  if(ar)ar.classList.toggle("on",L==="ar");
+  // Sync currency + due days inputs
+  const curEl=$("set_cur");if(curEl)curEl.value=getCurrency();
+  const dueEl=$("set_due");if(dueEl)dueEl.value=getDueDays();
+  updateSettingsUI();
+  openSh("sh-settings");
+}
+function updateSettingsUI(){
+  const a=L==="ar";
+  const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
+  s("set_title","Settings","الإعدادات");
+  s("set_s_lang","🌐 Language","🌐 اللغة");
+  s("set_lang_l","Display Language","لغة التطبيق");
+  s("set_s_app","🎨 Appearance","🎨 المظهر");
+  s("set_theme_l","Theme","السمة");
+  s("set_light","☀️ Light","☀️ فاتح");
+  s("set_dark","🌙 Dark","🌙 داكن");
+  s("set_s_bil","💱 Billing","💱 الفوترة");
+  s("set_cur_l","Currency Symbol","رمز العملة");
+  s("set_due_l","Default Due Days","أيام الاستحقاق");
+  s("set_due_s","Days after bill issue date","أيام بعد تاريخ الإصدار");
+  s("set_s_sec","🔒 Security","🔒 الأمان");
+  s("set_chpin","Change Admin PIN","تغيير رمز PIN");
+  s("set_lock","Lock Admin Mode","قفل وضع المدير");
+  s("set_signout","Sign Out","تسجيل الخروج");
+  s("set_s_wa","📲 WhatsApp","📲 واتساب");
+  s("set_wa","WhatsApp API Settings","إعدادات واتساب API");
+  s("set_s_acc","👥 Access","👥 الوصول");
+  s("set_acc","Manage User Access","إدارة وصول المستخدمين");
+  s("set_s_sys","🔄 System","🔄 النظام");
+  s("set_reboot","Reboot App","إعادة تشغيل التطبيق");
+  s("set_close","Close","إغلاق");
+}
 /* ════ NAVIGATION ════ */
 function gp(p){
   if(p!=="d") prevP=(curP==="d")?prevP:curP;
@@ -1265,7 +1419,7 @@ function rC(){
     const st=getSt(c.id),ut=unpaidT(c.id),bc=gB().filter(b=>b.clientId===c.id).length;
     return `<div class="cc ${stMap[st]}" onclick="openDet('${c.id}')">
       <div class="cc-top"><div class="cc-name">${esc(c.name)}</div><div class="cc-meter">${esc(c.meter)}</div></div>
-      <div class="cc-row">${badgeMap[st]}${ut>0?`<span class="cc-amt">$${fmt(ut)}</span>`:""}
+      <div class="cc-row">${badgeMap[st]}${ut>0?`<span class="cc-amt">${getCurrency()}${fmt(ut)}</span>`:""}
       <span style="font-size:11px;color:var(--t3)">${bc} ${bc===1?T.bill_s:T.bills_s}</span></div>
       ${c.phone?`<div class="cc-phone">📲 ${esc(c.phone)}</div>`:`<div class="cc-nophone">${T.no_phone_c}</div>`}
     </div>`;
@@ -1291,7 +1445,7 @@ function rB(){
     return `<div class="abl">
       <div class="abl-top">
         <div><div class="abl-name">${esc(b.c.name)}</div><div class="abl-sub">${esc(b.c.meter)} · ${esc(b.month||"—")}</div></div>
-        <div><div class="abl-amt">$${fmt(b.amount)}</div><div class="abl-due">${T.due_lbl} ${fmtD(b.dueDate)}</div></div>
+        <div><div class="abl-amt">${getCurrency()}${fmt(b.amount)}</div><div class="abl-due">${T.due_lbl} ${fmtD(b.dueDate)}</div></div>
       </div>
       <div class="abl-foot">${bg(b)}${b.desc?`<span style="font-size:11px;color:var(--t3);font-style:italic">${esc(b.desc)}</span>`:""}${!b.paid&&hp?`<button class="abl-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}${!b.paid?`<button class="abl-pay" data-action="paid" data-id="${b.id}">✅ ${T.mark_paid}</button>`:`<button class="abl-unpay" data-action="unpaid-confirm" data-id="${b.id}">↩ ${T.mark_unpaid}</button>`}</div>
     </div>`;
@@ -1313,7 +1467,7 @@ function openDet(id){
     bH=cB.map(b=>{
       const cls=b.paid?"bcp":isOD(b)?"bco":"bcn";
       return `<div class="bc ${cls}">
-        <div class="bc-top"><div><div class="bc-period">${esc(b.month||"—")}</div><div style="margin-top:4px">${bg(b)}</div></div><div class="bc-amt">$${fmt(b.amount)}</div></div>
+        <div class="bc-top"><div><div class="bc-period">${esc(b.month||"—")}</div><div style="margin-top:4px">${bg(b)}</div></div><div class="bc-amt">${getCurrency()}${fmt(b.amount)}</div></div>
         <div class="bc-dates">${T.due_lbl} ${fmtD(b.dueDate)}</div>
         ${b.desc?`<div class="bc-desc">💬 ${esc(b.desc)}</div>`:""}
         <div class="bc-acts">
@@ -1330,18 +1484,15 @@ function openDet(id){
       ${c.address?`<div class="prow">📍 <strong>${esc(c.address)}</strong></div>`:""}
       ${hp?`<div class="prow">📲 <strong>${esc(c.phone)}</strong></div>`:`<div style="font-size:12px;color:var(--red);margin-top:8px;padding:8px 12px;background:var(--rdim);border-radius:8px">${T.no_wa_warn}</div>`}
       <div class="totals">
-        <div class="tbox tu"><div class="tv">$${fmt(ut)}</div><div class="tl">${T.da_unpaid}</div></div>
-        <div class="tbox tp"><div class="tv">$${fmt(pt)}</div><div class="tl">${T.da_paid}</div></div>
+        <div class="tbox tu"><div class="tv">${getCurrency()}${fmt(ut)}</div><div class="tl">${T.da_unpaid}</div></div>
+        <div class="tbox tp"><div class="tv">${getCurrency()}${fmt(pt)}</div><div class="tl">${T.da_paid}</div></div>
       </div>
       <button class="abtn a-blue" onclick="openAddBillFor('${c.id}')" style="margin-top:0">${T.add_bill}</button>
       ${hp&&ut>0?`<button class="abtn a-wa" onclick="sendRem('${c.id}')">${T.send_reminder}</button>`:""}
       <button class="abtn a-ghost" onclick="requireAdmin(()=>openEditC('${c.id}'))">${T.edit_client}</button>
       <button class="abtn a-danger" onclick="requireAdmin(()=>delClient('${c.id}'))">${T.del_client}</button>
-      ${__admin?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="openSh('sh-chpin')">${T.change_pin}</button>
-        <button class="abtn a-ghost" style="margin-top:0;flex:1;font-size:13px" onclick="toggleAdmin()">${T.lock_admin}</button>
-        ${(window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com")?`<button class="abtn a-blue" style="margin-top:0;width:100%;font-size:13px" onclick="loadAllowedEmails();openSh('sh-access')">👥 ${L==="ar"?"إدارة الوصول":"Manage Access"}</button><button class="abtn a-wa" style="margin-top:6px;width:100%;font-size:13px" onclick="loadWAConfig();openSh('sh-waapi')">📲 ${L==="ar"?"إعدادات واتساب API":"WhatsApp API Settings"}</button>`:""}
-        <button class="abtn a-ghost" style="margin-top:6px;width:100%;font-size:13px" onclick="rebootApp()">🔄 ${L==="ar"?"إعادة تشغيل التطبيق":"Reboot App"}</button>
+      ${__admin?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+        <button class="abtn a-ghost" style="font-size:13px" onclick="openSettings()">⚙️ ${L==="ar"?"الإعدادات":"Settings"}</button>
       </div>`:""}
     </div>
     <div class="sechead">${cB.length} ${cB.length===1?T.bill_s:T.bills_s}</div>
@@ -1421,7 +1572,7 @@ function onBC(){
 }
 function autoFillBillDates(){
   const today=new Date();
-  const due=new Date(today);due.setDate(due.getDate()+30);
+  const due=new Date(today);due.setDate(due.getDate()+getDueDays());
   const f=d=>d.toISOString().split("T")[0];
   if($("ab_date"))$("ab_date").value=f(today);
   if($("ab_due"))$("ab_due").value=f(due);
@@ -1441,7 +1592,7 @@ async function saveBill(sendWa){
   if(!month)return toast(...T.t_no_per);
   autoFillBillDates();
   const today=new Date();
-  const due=new Date(today);due.setDate(due.getDate()+30);
+  const due=new Date(today);due.setDate(due.getDate()+getDueDays());
   const f=d=>d.toISOString().split("T")[0];
   const b={clientId:cid,amount,month,billDate:f(today),dueDate:f(due),paid:false};
   try{
@@ -1472,17 +1623,19 @@ async function delBill(id){
 
 /* ════ WHATSAPP ════ */
 function buildBillMsg(c,b){
+  const cur=getCurrency();
   if(L==="ar"){
-    return `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *${c.name}*،\n\n━━━━━━━━━━━\n👤 الاسم: *${c.name}*\n📟 رقم العداد: *${c.meter}*\n━━━━━━━━━━━\n📅 الفترة: *${b.month||"—"}*\n💰 المبلغ: *$${fmt(b.amount)}*\n⏰ السداد قبل: *${fmtD(b.dueDate)}*\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
+    return `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *${c.name}*،\n\n━━━━━━━━━━━\n👤 الاسم: *${c.name}*\n📟 رقم العداد: *${c.meter}*\n━━━━━━━━━━━\n📅 الفترة: *${b.month||"—"}*\n💰 المبلغ: *${cur}${fmt(b.amount)}*\n⏰ السداد قبل: *${fmtD(b.dueDate)}*\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
   }
-  return `⚡ *New Electricity Bill*\n\nDear *${c.name}*,\n\n━━━━━━━━━━━\n👤 Name: *${c.name}*\n📟 Meter No: *${c.meter}*\n━━━━━━━━━━━\n📅 Period: *${b.month||"—"}*\n💰 Amount: *$${fmt(b.amount)}*\n⏰ Pay Before: *${fmtD(b.dueDate)}*\n━━━━━━━━━━━\nPlease pay before the due date.\n\nThank you 🙏\n_Electric Station — Accounting_`;
+  return `⚡ *New Electricity Bill*\n\nDear *${c.name}*,\n\n━━━━━━━━━━━\n👤 Name: *${c.name}*\n📟 Meter No: *${c.meter}*\n━━━━━━━━━━━\n📅 Period: *${b.month||"—"}*\n💰 Amount: *${cur}${fmt(b.amount)}*\n⏰ Pay Before: *${fmtD(b.dueDate)}*\n━━━━━━━━━━━\nPlease pay before the due date.\n\nThank you 🙏\n_Electric Station — Accounting_`;
 }
 function buildRemMsg(c,up,note){
+  const cur=getCurrency();
   if(L==="ar"){
-    const noteBlock=note?`\n📝 *ملاحظة:* ${note}\n\n━━━━━━━━━━━\n📋 *الفواتير غير المسددة (${up.length}):*\n`+up.map(b=>`  • ${b.month||"؟"}: *$${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n")+"\n":"";
+    const noteBlock=note?`\n📝 *ملاحظة:* ${note}\n\n━━━━━━━━━━━\n📋 *الفواتير غير المسددة (${up.length}):*\n`+up.map(b=>`  • ${b.month||"؟"}: *${cur}${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n")+"\n":"";
     return `⚡ *تذكير بالدفع*\n\nعزيزي *${c.name}*،\n📟 رقم العداد: *${c.meter}*\n\n━━━━━━━━━━━\nلديك فواتير كهرباء غير مسددة.${noteBlock}\n━━━━━━━━━━━\nيرجى التسوية في أقرب وقت.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
   }
-  const noteBlock=note?`\n📝 *Note:* ${note}\n\n━━━━━━━━━━━\n📋 *Unpaid Bills (${up.length}):*\n`+up.map(b=>`  • ${b.month||"?"}: *$${fmt(b.amount)}* (due ${fmtD(b.dueDate)})`).join("\n")+"\n":"";
+  const noteBlock=note?`\n📝 *Note:* ${note}\n\n━━━━━━━━━━━\n📋 *Unpaid Bills (${up.length}):*\n`+up.map(b=>`  • ${b.month||"?"}: *${cur}${fmt(b.amount)}* (due ${fmtD(b.dueDate)})`).join("\n")+"\n":"";
   return `⚡ *Payment Reminder*\n\nDear *${c.name}*,\n📟 Meter: *${c.meter}*\n\n━━━━━━━━━━━\nYou have unpaid electricity bills.${noteBlock}\n━━━━━━━━━━━\nPlease settle your balance soon.\n\nThank you 🙏\n_Electric Station — Accounting_`;
 }
 /* ════ WA COUNTER + API UI ════ */
@@ -1517,26 +1670,26 @@ window.updateWASendBtn = function(){
 window.loadWAConfig = function(){
   const cfg=window.__waConfig||{};
   const hasApi=!!(cfg.instanceId&&cfg.apiToken);
-  const st=document.getElementById("waapi_status");
-  if(st){st.className="wapi-status "+(hasApi?"on":"off");document.getElementById("waapi_st_txt").textContent=hasApi?"✅ Active — sends automatically":"⚪ Not configured";}
-  const idEl=document.getElementById("waapi_id"),tokEl=document.getElementById("waapi_tok"),limEl=document.getElementById("waapi_lim");
-  if(idEl)idEl.value=cfg.instanceId||"";
-  if(tokEl)tokEl.value=cfg.apiToken||"";
-  if(limEl)limEl.value=cfg.limit||3000;
-  const wrap=document.getElementById("waapi_usage_wrap");
-  if(wrap){
-    if(hasApi){
-      wrap.style.display="block";
-      const now=new Date();
-      const month=now.getFullYear()+"-"+(now.getMonth()+1).toString().padStart(2,"0");
-      const count=cfg.sentMonth===month?(cfg.sentCount||0):0;
-      const limit=cfg.limit||3000;
-      document.getElementById("waapi_usage_num").textContent=count+"/"+limit;
-      const bar=document.getElementById("waapi_bar");
-      bar.style.width=Math.min(100,count/limit*100)+"%";
-      bar.style.background=count>limit*.9?"var(--red)":count>limit*.7?"var(--yellow)":"var(--wa)";
-    }else{wrap.style.display="none";}
+  const L=window.__L||"en";
+  document.getElementById("waapi_status").className="wapi-status "+(hasApi?"on":"off");
+  document.getElementById("waapi_st_txt").textContent=hasApi
+    ?(L==="ar"?"✅ مُفعَّل":"✅ Connected & Active")
+    :(L==="ar"?"⚪ غير مُكوَّن":"⚪ Not configured");
+  if(hasApi){
+    document.getElementById("waapi_id").value=cfg.instanceId||"";
   }
+  const wrap=document.getElementById("waapi_usage_wrap");
+  if(hasApi){
+    wrap.style.display="block";
+    const now=new Date();
+    const month=now.getFullYear()+"-"+(now.getMonth()+1).toString().padStart(2,"0");
+    const count=cfg.sentMonth===month?(cfg.sentCount||0):0;
+    const limit=cfg.limit||3000;
+    document.getElementById("waapi_usage_num").textContent=count+"/"+limit;
+    const bar=document.getElementById("waapi_bar");
+    bar.style.width=Math.min(100,count/limit*100)+"%";
+    bar.style.background=count>limit*.9?"var(--red)":count>limit*.7?"var(--yellow)":"var(--wa)";
+  }else{wrap.style.display="none";}
   window.updateWASendBtn&&window.updateWASendBtn();
 };
 /* ════ AUTO-SEND VIA GREEN API ════ */
@@ -1544,7 +1697,6 @@ async function sendWAMsg(phone,msg){
   const cfg=window.__waConfig||{};
   let clean=(phone||"").replace(/\D/g,"").replace(/^0+/,"");
   if(!clean){toast(...T.t_no_ph);return false;}
-  // Fallback: prepend 961 for legacy numbers stored without country code
   if(clean.length<=8){clean="961"+clean;}
   if(clean.length<10){
     toast("⚠️","Invalid Number",L==="ar"?"رقم الهاتف غير صحيح":"Invalid phone number — check client record.");
@@ -1630,8 +1782,9 @@ function rS(){
   const all=gB(),paid=all.filter(b=>b.paid),up=all.filter(b=>!b.paid),ov=all.filter(b=>isOD(b));
   const tB=all.reduce((s,b)=>s+(b.amount||0),0),tC=paid.reduce((s,b)=>s+(b.amount||0),0);
   const rate=tB>0?Math.round((tC/tB)*100):0;
-  $("s_tb").textContent="$"+fmt(tB);$("s_tc").textContent="$"+fmt(tC);
-  $("s_to").textContent="$"+fmt(tB-tC);$("s_rate").textContent=rate+"%";
+  const cur=getCurrency();
+  $("s_tb").textContent=cur+fmt(tB);$("s_tc").textContent=cur+fmt(tC);
+  $("s_to").textContent=cur+fmt(tB-tC);$("s_rate").textContent=rate+"%";
   $("s_bar").style.width=rate+"%";
   $("s_bt").textContent=all.length;$("s_bp").textContent=paid.length;
   $("s_bu").textContent=up.length;$("s_bo").textContent=ov.length;
@@ -1641,7 +1794,7 @@ function rS(){
   el.innerHTML=debtors.map(d=>`
     <div class="drow">
       <div><div class="dname">${esc(d.name)}</div><div class="dmt">${esc(d.meter)}</div></div>
-      <div class="drv"><div class="damt">$${fmt(d.owed)}</div>${d.phone?`<button class="dwa" onclick="sendRem('${d.id}')">📲</button>`:""}</div>
+      <div class="drv"><div class="damt">${getCurrency()}${fmt(d.owed)}</div>${d.phone?`<button class="dwa" onclick="sendRem('${d.id}')">📲</button>`:""}</div>
     </div>`).join("");
 }
 
@@ -1659,9 +1812,10 @@ document.addEventListener("click", e => {
   if(action === "unpaid") markUnpaid(id);
   if(action === "unpaid-confirm"){
     const b=gB().find(x=>x.id===id);
+    const cur=getCurrency();
     const msg=L==="ar"
-      ?`⚠️ تأكيد\n\nهل تريد إلغاء الدفع لهذه الفاتورة؟\nالفترة: ${b?.month||"—"}\nالمبلغ: $${fmt(b?.amount)}\n\nسيتم إعادتها إلى قائمة غير المدفوعة.`
-      :`⚠️ Confirm\n\nMark this bill as UNPAID?\nPeriod: ${b?.month||"—"}\nAmount: $${fmt(b?.amount)}\n\nIt will move back to unpaid.`;
+      ?`⚠️ تأكيد\n\nهل تريد إلغاء الدفع لهذه الفاتورة؟\nالفترة: ${b?.month||"—"}\nالمبلغ: ${cur}${fmt(b?.amount)}\n\nسيتم إعادتها إلى قائمة غير المدفوعة.`
+      :`⚠️ Confirm\n\nMark this bill as UNPAID?\nPeriod: ${b?.month||"—"}\nAmount: ${cur}${fmt(b?.amount)}\n\nIt will move back to unpaid.`;
     if(confirm(msg)) markUnpaid(id);
   }
   if(action === "delbill") delBill(id);
