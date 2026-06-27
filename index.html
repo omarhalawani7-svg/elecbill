@@ -323,6 +323,22 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 .shake{animation:shake .42s ease;}
 /* ── CHANGE PIN ── */
 .chpin-info{font-size:13px;color:var(--t2);background:var(--card2);border-radius:9px;padding:11px;margin-bottom:14px;line-height:1.6;border:1px solid var(--border);}
+/* ── PERIOD ── */
+.hperiod{background:var(--bdim);border:1.5px solid rgba(34,197,94,.35);color:var(--blue);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:800;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:background .15s;}
+.hperiod:active{background:var(--bglow);}
+.period-hd{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-top:8px;}
+html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
+.period-hd::after{content:'';flex:1;height:1px;background:var(--border);}
+.period-cnt{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;color:var(--t3);}
+.preset-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+.preset-btn{padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;border:1.5px solid var(--border2);background:var(--card2);color:var(--t2);cursor:pointer;transition:all .15s;}
+.preset-btn:active,.preset-btn.on{background:var(--blue);border-color:var(--blue);color:#fff;}
+.period-sum-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.period-sum-row:last-child{border-bottom:none;}
+.period-sum-name{font-weight:700;color:var(--text);}
+.period-sum-vals{display:flex;gap:10px;align-items:center;}
+.period-sum-unpaid{color:var(--yellow);font-weight:700;font-size:12px;}
+.period-sum-paid{color:var(--green);font-weight:700;font-size:12px;}
 </style>
 </head>
 <body>
@@ -369,6 +385,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <div class="hicon">⚡</div>
   </div>
   <div class="hright">
+    <button class="hperiod" id="h_period" onclick="openPeriodPicker()" title="Billing Period">🗓️ —</button>
     <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
     <button class="hadm" id="h_adm" onclick="toggleAdmin()" title="Admin">🔒</button>
     <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
@@ -432,6 +449,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
     <div class="sr"><span class="sr-l" id="s_bo_l">Overdue</span><span class="sr-v" id="s_bo" style="color:var(--red)">0</span></div>
   </div>
   <div class="scard"><div class="scard-t" id="s_top">🔴 Top Unpaid</div><div id="topd"></div></div>
+  <div class="scard"><div class="scard-t">📅 <span id="s_per_t">By Period</span></div><div id="s_periods"></div></div>
   <div class="scard">
     <div class="scard-t" id="s_bk_t">📲 Bulk WhatsApp</div>
     <p style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:13px" id="s_bk_d">Send reminders to all unpaid clients at once.</p>
@@ -510,7 +528,14 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
       <div class="fixrow" style="margin-top:5px"><span class="fxl" id="ab_fp_l">WhatsApp</span><br><span class="fxw" id="ab_fp">—</span></div>
     </div>
     <div class="dlbl" id="ab_vl">📝 Variable Info</div>
-    <div class="fg"><div class="fl" id="ab_ml">Period <span class="freq">*</span></div><input class="fi" id="ab_month" type="text" oninput="rPrev()" autocomplete="off"></div>
+    <div class="fg">
+      <div class="fl" id="ab_ml">Period <span class="freq">*</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input class="fi" id="ab_month" type="text" oninput="rPrev()" autocomplete="off" style="flex:1">
+        <button type="button" style="padding:9px 11px;border-radius:9px;border:1.5px solid var(--border2);background:var(--bdim);color:var(--blue);font-size:12px;font-weight:800;white-space:nowrap;flex-shrink:0" onclick="usePeriod()" id="ab_use_per" title="Use active period">🗓️ Use</button>
+      </div>
+      <div class="fhint" id="ab_period_hint" style="color:var(--blue);font-weight:600"></div>
+    </div>
     <div class="frow">
       <div class="fg"><div class="fl" id="ab_al">Amount ($) <span class="freq">*</span></div><input class="fi" id="ab_amt" type="number" min="0" oninput="rPrev()"></div>
       <!-- Due date auto-calculated: today + 30 days -->
@@ -656,6 +681,21 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
       </div>
     </div>
     <button class="abtn a-ghost" onclick="closeSh('sh-access')" id="acc_cl">Close</button>
+  </div>
+</div>
+<!-- SHEET: PERIOD PICKER -->
+<div class="ov" id="sh-period">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div class="stitle">🗓️ <span id="per_title">Billing Period</span></div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.6" id="per_sub">Choose the billing period for this session. All new bills will use this period automatically.</div>
+    <div class="fg" style="margin-bottom:10px">
+      <div class="fl" id="per_lbl">Period</div>
+      <input class="fi" id="per_input" type="text" autocomplete="off" placeholder="e.g. March-April 2025">
+    </div>
+    <div class="preset-row" id="per_presets"></div>
+    <button class="abtn a-blue" onclick="confirmPeriod()" style="margin-top:0" id="per_ok">✅ Confirm Period</button>
+    <button class="abtn a-ghost" onclick="closeSh('sh-period')" id="per_skip">Skip</button>
   </div>
 </div>
 <!-- SHEET: SETTINGS -->
@@ -1137,8 +1177,12 @@ function boot(lang){
   document.documentElement.dir=lang==="ar"?"rtl":"ltr";
   applyTx();
   updateAdminBtn();
+  window.__period=getPeriod();
+  setPeriod(window.__period); // refresh chip display
   window.__render=renderAll;
   renderAll();
+  // Show period picker every boot
+  setTimeout(()=>openPeriodPicker(),500);
 }
 function switchLang(){ boot(L==="en"?"ar":"en"); }
 window.addEventListener("DOMContentLoaded",()=>{
@@ -1276,6 +1320,65 @@ function saveNewPin(){
   toast(...T.t_pin_changed);
 }
 
+/* ════ BILLING PERIOD ════ */
+const EN_M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const AR_M=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function getPeriod(){return localStorage.getItem("eb_period")||"";}
+function setPeriod(p){
+  localStorage.setItem("eb_period",p);
+  window.__period=p;
+  const chip=$("h_period");
+  if(chip)chip.textContent="🗓️ "+(p||"—");
+}
+function genPresets(){
+  const now=new Date();
+  const m=now.getMonth(),y=now.getFullYear();
+  const M=L==="ar"?AR_M:EN_M;
+  const pm=(m-1+12)%12,py=m===0?y-1:y;
+  const pm2=(m-2+12)%12,py2=m<=1?y-1:y;
+  return[
+    M[m]+" "+y,
+    M[pm]+" "+py,
+    M[pm]+"-"+M[m]+" "+y,
+    M[pm2]+"-"+M[m]+" "+y,
+    (pm+1)+"-"+(m+1)+"/"+y
+  ];
+}
+function openPeriodPicker(){
+  // Update translations
+  const a=L==="ar";
+  const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
+  s("per_title","Billing Period","فترة الفوترة");
+  s("per_sub","Choose the billing period for this session. All new bills will use this period automatically.","اختر فترة الفوترة لهذه الجلسة. ستُستخدم في جميع الفواتير الجديدة تلقائياً.");
+  s("per_lbl","Period","الفترة");
+  s("per_ok","✅ Confirm Period","✅ تأكيد الفترة");
+  s("per_skip","Skip","تخطي");
+  // Fill input with current period
+  const inp=$("per_input");
+  if(inp){inp.value=getPeriod();inp.placeholder=a?"مثال: مارس-أبريل 2025":"e.g. March-April 2025";}
+  // Generate presets
+  const pr=$("per_presets");
+  if(pr){
+    const presets=genPresets();
+    const cur=getPeriod();
+    pr.innerHTML=presets.map(p=>`<button class="preset-btn${p===cur?" on":""}" onclick="selectPreset(this,'${p.replace(/'/g,"\\'")}')">${p}</button>`).join("");
+  }
+  openSh("sh-period");
+  setTimeout(()=>{const inp=$("per_input");if(inp)inp.focus();},300);
+}
+function selectPreset(btn,val){
+  document.querySelectorAll(".preset-btn").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  const inp=$("per_input");if(inp)inp.value=val;
+}
+function confirmPeriod(){
+  const val=(($("per_input")||{}).value||"").trim();
+  if(!val)return toast("⚠️",L==="ar"?"الفترة مطلوبة":"Period required",L==="ar"?"أدخل فترة الفوترة":"Enter a billing period.");
+  setPeriod(val);
+  closeSh("sh-period");
+  renderAll();
+  toast("🗓️",L==="ar"?"تم تحديد الفترة":"Period set",val);
+}
 /* ════ SETTINGS FUNCTIONS ════ */
 function getCurrency(){return localStorage.getItem("eb_cur")||"$";}
 function getDueDays(){return parseInt(localStorage.getItem("eb_due")||"30");}
@@ -1440,15 +1543,29 @@ function rB(){
     return;
   }
   const bg=b=>b.paid?`<span class="badge bd">${T.bd_t}</span>`:isOD(b)?`<span class="badge bo">${T.bo_t}</span>`:`<span class="badge bp">${T.bp_t}</span>`;
-  el.innerHTML=list.map(b=>{
+  // Group by period
+  const groups={};
+  const order=[];
+  list.forEach(b=>{
+    const p=b.month||"—";
+    if(!groups[p]){groups[p]=[];order.push(p);}
+    groups[p].push(b);
+  });
+  const renderBill=b=>{
     const hp=b.c.phone&&b.c.phone.trim();
     return `<div class="abl">
       <div class="abl-top">
-        <div><div class="abl-name">${esc(b.c.name)}</div><div class="abl-sub">${esc(b.c.meter)} · ${esc(b.month||"—")}</div></div>
+        <div><div class="abl-name">${esc(b.c.name)}</div><div class="abl-sub">${esc(b.c.meter)}</div></div>
         <div><div class="abl-amt">${getCurrency()}${fmt(b.amount)}</div><div class="abl-due">${T.due_lbl} ${fmtD(b.dueDate)}</div></div>
       </div>
       <div class="abl-foot">${bg(b)}${b.desc?`<span style="font-size:11px;color:var(--t3);font-style:italic">${esc(b.desc)}</span>`:""}${!b.paid&&hp?`<button class="abl-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}${!b.paid?`<button class="abl-pay" data-action="paid" data-id="${b.id}">✅ ${T.mark_paid}</button>`:`<button class="abl-unpay" data-action="unpaid-confirm" data-id="${b.id}">↩ ${T.mark_unpaid}</button>`}</div>
     </div>`;
+  };
+  el.innerHTML=order.map(p=>{
+    const bills=groups[p];
+    const tot=bills.reduce((s,b)=>s+(b.amount||0),0);
+    return `<div class="period-hd">📅 ${esc(p)} <span class="period-cnt">${bills.length}</span> <span style="margin-left:auto;font-size:11px;color:var(--t2);font-weight:700">${getCurrency()}${fmt(tot)}</span></div>`
+      +bills.map(renderBill).join("");
   }).join("");
 }
 
@@ -1553,7 +1670,24 @@ async function delClient(id){
 }
 
 /* ════ ADD BILL ════ */
-function openAddBillFor(cid){populateSel(cid);openSh("sh-ab");}
+function usePeriod(){
+  const p=getPeriod();
+  const inp=$("ab_month");if(inp)inp.value=p;
+  rPrev();
+}
+function updatePeriodHint(){
+  const hint=$("ab_period_hint");
+  const p=getPeriod();
+  if(hint)hint.textContent=p?(L==="ar"?"🗓️ الفترة الحالية: "+p:"🗓️ Active period: "+p):"";
+}
+function openAddBillFor(cid){
+  populateSel(cid);
+  // Auto-fill active period
+  const p=getPeriod();
+  const inp=$("ab_month");if(inp)inp.value=p||"";
+  updatePeriodHint();
+  openSh("sh-ab");
+}
 function populateSel(preId){
   const sel=$("ab_client");
   sel.innerHTML=`<option value="">${T.ab_sel_ph}</option>`;
@@ -1790,12 +1924,29 @@ function rS(){
   $("s_bu").textContent=up.length;$("s_bo").textContent=ov.length;
   const debtors=gC().map(c=>({...c,owed:gB().filter(b=>b.clientId===c.id&&!b.paid).reduce((s,b)=>s+(b.amount||0),0)})).filter(c=>c.owed>0).sort((a,b)=>b.owed-a.owed).slice(0,10);
   const el=$("topd");if(!el)return;
-  if(!debtors.length){el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--green);font-size:14px;font-weight:700">${T.all_paid}</div>`;return;}
-  el.innerHTML=debtors.map(d=>`
+  if(!debtors.length){el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--green);font-size:14px;font-weight:700">${T.all_paid}</div>`;}
+  else el.innerHTML=debtors.map(d=>`
     <div class="drow">
       <div><div class="dname">${esc(d.name)}</div><div class="dmt">${esc(d.meter)}</div></div>
       <div class="drv"><div class="damt">${getCurrency()}${fmt(d.owed)}</div>${d.phone?`<button class="dwa" onclick="sendRem('${d.id}')">📲</button>`:""}</div>
     </div>`).join("");
+  // Per-period breakdown
+  const pcard=$("s_periods");
+  if(pcard){
+    const allB=gB();
+    const pmap={};
+    allB.forEach(b=>{const p=b.month||"—";if(!pmap[p])pmap[p]={billed:0,paid:0,cnt:0};pmap[p].billed+=(b.amount||0);if(b.paid)pmap[p].paid+=(b.amount||0);pmap[p].cnt++;});
+    const periods=Object.entries(pmap).sort((a,b)=>b[0].localeCompare(a[0]));
+    if(!periods.length){pcard.innerHTML=`<div style="color:var(--t3);font-size:13px;padding:12px 0;text-align:center">${L==="ar"?"لا توجد بيانات":"No data yet"}</div>`;return;}
+    pcard.innerHTML=periods.map(([p,d])=>`
+      <div class="period-sum-row">
+        <div class="period-sum-name">📅 ${p} <span style="font-size:10px;color:var(--t3);font-weight:600">(${d.cnt})</span></div>
+        <div class="period-sum-vals">
+          <span class="period-sum-paid">✅ ${cur}${fmt(d.paid)}</span>
+          <span class="period-sum-unpaid">⏳ ${cur}${fmt(d.billed-d.paid)}</span>
+        </div>
+      </div>`).join("");
+  }
 }
 
 /* ════ SHEET HELPERS ════ */
