@@ -849,7 +849,8 @@ window.DB = {
   addBill:      d      => addDoc(collection(db,"bills"), {...d, createdAt:serverTimestamp()}),
   updateBill:   (id,d) => updateDoc(doc(db,"bills",id), d),
   deleteBill:   id     => deleteDoc(doc(db,"bills",id)),
-  saveSettings: obj    => setDoc(doc(db,"config","settings"), obj, {merge:true})
+  saveSettings: obj    => setDoc(doc(db,"config","settings"), obj, {merge:true}),
+  getSettings:  ()     => getDoc(doc(db,"config","settings")).then(s=>s.exists()?s.data():{})
 };
 
 /* ════ BOOT-TIME SETTINGS MIGRATION ════ */
@@ -1422,6 +1423,15 @@ function setPeriod(p){
   // Sync active period to Firestore
   window.DB&&window.DB.saveSettings({period:p});
 }
+function renderPeriodChips(hist){
+  const cur=getPeriod();
+  const a=L==="ar";
+  const hw=$("per_hist_wrap"),hrow=$("per_hist");
+  if(!hrow)return;
+  if(hw)hw.style.display=hist.length?"block":"none";
+  if($("per_hist_lbl"))$("per_hist_lbl").textContent=a?"فترات سابقة":"Previous periods";
+  hrow.innerHTML=hist.map(p=>`<button class="period-hist-btn${p===cur?" active":""}" onclick="quickPeriod('${p.replace(/'/g,"\\'")}')">📅 ${p}</button>`).join("");
+}
 function openPeriodPicker(){
   const a=L==="ar";
   const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
@@ -1432,17 +1442,24 @@ function openPeriodPicker(){
   s("per_lbl",a?"فترة جديدة":"New period","فترة جديدة");
   s("per_ok","✅ Confirm Period","✅ تأكيد الفترة");
   s("per_skip","Skip","تخطي");
-  // History chips
-  const hist=getPeriodHistory();
-  const cur=getPeriod();
-  const hw=$("per_hist_wrap"),hrow=$("per_hist");
-  if(hw)hw.style.display=hist.length?"block":"none";
-  if($("per_hist_lbl"))$("per_hist_lbl").textContent=a?"فترات سابقة":"Previous periods";
-  if(hrow)hrow.innerHTML=hist.map(p=>`<button class="period-hist-btn${p===cur?" active":""}" onclick="quickPeriod('${p.replace(/'/g,"\\'")}')">📅 ${p}</button>`).join("");
+  // Show local history immediately
+  renderPeriodChips(getPeriodHistory());
   const inp=$("per_input");
   if(inp){inp.value="";inp.placeholder=a?"مثال: 3-4 أو 5-6":"e.g. 3-4 or 5-6";}
   openSh("sh-period");
   setTimeout(()=>{const inp=$("per_input");if(inp)inp.focus();},300);
+  // Also fetch fresh from Firestore and update chips (catches any missed syncs)
+  if(window.DB&&window.DB.getSettings){
+    window.DB.getSettings().then(data=>{
+      if(data.periodHist&&data.periodHist.length){
+        localStorage.setItem("eb_period_hist",JSON.stringify(data.periodHist));
+        renderPeriodChips(data.periodHist);
+      }
+      if(data.period&&!getPeriod()){
+        setPeriod(data.period);
+      }
+    }).catch(()=>{});
+  }
 }
 function quickPeriod(val){
   savePeriodHistory(val);
@@ -2049,12 +2066,12 @@ document.addEventListener("click", e => {
   const id = btn.dataset.id;
   if(action === "paid")   markPaid(id);
   if(action === "unpaid") markUnpaid(id);
-  if(action === "unpaid-confirm"){
+    if(action === "unpaid-confirm"){
     const b=gB().find(x=>x.id===id);
     const cur=getCurrency();
     const msg=L==="ar"
-      ?`⚠️ تأكيد\n\nهل تريد إلغاء الدفع لهذه الفاتورة؟\nالفترة: ${b?.month||"—"}\nالمبلغ: ${cur}${fmt(b?.amount)}\n\nسيتم إعادتها إلى قائمة غير المدفوعة.`
-      :`⚠️ Confirm\n\nMark this bill as UNPAID?\nPeriod: ${b?.month||"—"}\nAmount: ${cur}${fmt(b?.amount)}\n\nIt will move back to unpaid.`;
+      ?
+      :;
     if(confirm(msg)) markUnpaid(id);
   }
   if(action === "delbill") delBill(id);
@@ -2067,7 +2084,6 @@ document.addEventListener("keydown", e => {
   else if(e.key==="Backspace"){e.preventDefault();pinBack();}
   else if(e.key==="Escape"){e.preventDefault();cancelPin();}
 });
-/* ════ AUTH — functions exposed by module via window.* ════ */
 /* ════ TOAST ════ */
 let tTm;
 function toast(icon,title,msg){
