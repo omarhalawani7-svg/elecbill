@@ -324,8 +324,14 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 /* ── CHANGE PIN ── */
 .chpin-info{font-size:13px;color:var(--t2);background:var(--card2);border-radius:9px;padding:11px;margin-bottom:14px;line-height:1.6;border:1px solid var(--border);}
 /* ── PERIOD ── */
-.hperiod{background:var(--bdim);border:1.5px solid rgba(34,197,94,.35);color:var(--blue);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:800;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:background .15s;}
+.hperiod{display:flex;align-items:center;gap:5px;background:var(--bdim);border:1.5px solid rgba(34,197,94,.45);color:var(--blue);border-radius:9px;padding:5px 10px;font-size:12px;font-weight:900;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:background .15s;}
 .hperiod:active{background:var(--bglow);}
+.hperiod-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+.hperiod.no-period{background:var(--card2);border-color:var(--border2);color:var(--t3);}
+.period-hist-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;margin-bottom:14px;}
+.period-hist-btn{padding:9px 16px;border-radius:10px;font-size:14px;font-weight:800;border:2px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;transition:all .15s;}
+.period-hist-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.period-hist-btn:active{opacity:.75;}
 .period-hd{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-top:8px;}
 html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 .period-hd::after{content:'';flex:1;height:1px;background:var(--border);}
@@ -382,7 +388,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="hicon">⚡</div>
   </div>
   <div class="hright">
-    <button class="hperiod" id="h_period" onclick="openPeriodPicker()" title="Billing Period">🗓️ —</button>
+    <button class="hperiod no-period" id="h_period" onclick="openPeriodPicker()" title="Billing Period"><span class="hperiod-dot"></span><span id="h_period_txt">—</span></button>
     <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
     <button class="hadm" id="h_adm" onclick="toggleAdmin()" title="Admin">🔒</button>
     <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
@@ -686,8 +692,12 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="sh"></div>
     <div class="stitle">🗓️ <span id="per_title">Billing Period</span></div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.6" id="per_sub">Choose the billing period for this session. All new bills will use this period automatically.</div>
+    <div id="per_hist_wrap" style="display:none;margin-bottom:6px">
+      <div class="fl" id="per_hist_lbl" style="margin-bottom:8px">Previous periods</div>
+      <div class="period-hist-row" id="per_hist"></div>
+    </div>
     <div class="fg" style="margin-bottom:10px">
-      <div class="fl" id="per_lbl">Period</div>
+      <div class="fl" id="per_lbl">New period</div>
       <input class="fi" id="per_input" type="text" autocomplete="off" placeholder="e.g. 3-4 or 5-6">
     </div>
     <button class="abtn a-blue" onclick="confirmPeriod()" style="margin-top:0" id="per_ok">✅ Confirm Period</button>
@@ -1318,30 +1328,58 @@ function saveNewPin(){
 
 /* ════ BILLING PERIOD ════ */
 function getPeriod(){return localStorage.getItem("eb_period")||"";}
+function getPeriodHistory(){try{return JSON.parse(localStorage.getItem("eb_period_hist")||"[]");}catch{return[];}}
+function savePeriodHistory(p){
+  if(!p)return;
+  let h=getPeriodHistory().filter(x=>x!==p);
+  h.unshift(p);
+  if(h.length>15)h=h.slice(0,15);
+  localStorage.setItem("eb_period_hist",JSON.stringify(h));
+}
 function setPeriod(p){
   localStorage.setItem("eb_period",p);
   window.__period=p;
   const chip=$("h_period");
-  if(chip)chip.textContent="🗓️ "+(p||"—");
+  const txt=$("h_period_txt");
+  if(txt)txt.textContent=p||"—";
+  if(chip){
+    if(p){chip.classList.remove("no-period");}
+    else{chip.classList.add("no-period");}
+  }
 }
 function openPeriodPicker(){
   const a=L==="ar";
   const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
   s("per_title","Billing Period","فترة الفوترة");
   s("per_sub",
-    "Enter month numbers for this period (e.g. 3-4 or 5-6 or 3-4-5-6). Bills will be filtered to this period.",
-    "أدخل أرقام الأشهر للفترة (مثل 3-4 أو 5-6 أو 3-4-5-6). ستُعرض فقط فواتير هذه الفترة.");
-  s("per_lbl",a?"الفترة":"Period","الفترة");
+    "Tap a previous period or type a new one (e.g. 3-4 or 5-6).",
+    "اضغط على فترة سابقة أو أدخل فترة جديدة (مثل 3-4 أو 5-6).");
+  s("per_lbl",a?"فترة جديدة":"New period","فترة جديدة");
   s("per_ok","✅ Confirm Period","✅ تأكيد الفترة");
   s("per_skip","Skip","تخطي");
+  // History chips
+  const hist=getPeriodHistory();
+  const cur=getPeriod();
+  const hw=$("per_hist_wrap"),hrow=$("per_hist");
+  if(hw)hw.style.display=hist.length?"block":"none";
+  if($("per_hist_lbl"))$("per_hist_lbl").textContent=a?"فترات سابقة":"Previous periods";
+  if(hrow)hrow.innerHTML=hist.map(p=>`<button class="period-hist-btn${p===cur?" active":""}" onclick="quickPeriod('${p.replace(/'/g,"\\'")}')">📅 ${p}</button>`).join("");
   const inp=$("per_input");
-  if(inp){inp.value=getPeriod();inp.placeholder=a?"مثال: 3-4 أو 5-6":"e.g. 3-4 or 5-6";}
+  if(inp){inp.value="";inp.placeholder=a?"مثال: 3-4 أو 5-6":"e.g. 3-4 or 5-6";}
   openSh("sh-period");
   setTimeout(()=>{const inp=$("per_input");if(inp)inp.focus();},300);
+}
+function quickPeriod(val){
+  savePeriodHistory(val);
+  setPeriod(val);
+  closeSh("sh-period");
+  renderAll();
+  toast("🗓️",L==="ar"?"تم تحديد الفترة":"Period set",val);
 }
 function confirmPeriod(){
   const val=(($("per_input")||{}).value||"").trim();
   if(!val)return toast("⚠️",L==="ar"?"الفترة مطلوبة":"Period required",L==="ar"?"أدخل أرقام الأشهر مثل 3-4":"Enter months e.g. 3-4");
+  savePeriodHistory(val);
   setPeriod(val);
   closeSh("sh-period");
   renderAll();
