@@ -809,8 +809,52 @@ window.DB = {
   },
   addBill:    d  => addDoc(collection(db,"bills"), {...d, createdAt:serverTimestamp()}),
   updateBill: (id,d) => updateDoc(doc(db,"bills",id), d),
-  deleteBill: id => deleteDoc(doc(db,"bills",id))
+  deleteBill: id => deleteDoc(doc(db,"bills",id)),
+  saveSettings: fields => {
+    const ref = doc(db,"config","whatsapp");
+    return updateDoc(ref, fields).catch(()=>setDoc(ref, fields, {merge:true}));
+  }
 };
+
+/* ════ SETTINGS SYNC (real-time, via config/whatsapp) ════ */
+let __syncApplying = false;
+onSnapshot(doc(db,"config","whatsapp"), snap => {
+  if(!snap.exists()) return;
+  if(__syncApplying) return;
+  __syncApplying = true;
+  const d = snap.data();
+  let needsRender = false;
+  if(d.eb_period !== undefined && d.eb_period !== localStorage.getItem("eb_period")){
+    const p = d.eb_period || "";
+    localStorage.setItem("eb_period", p);
+    window.__period = p;
+    const chip = document.getElementById("h_period");
+    const txt  = document.getElementById("h_period_txt");
+    if(txt) txt.textContent = p || "—";
+    if(chip){ if(p) chip.classList.remove("no-period"); else chip.classList.add("no-period"); }
+    needsRender = true;
+  }
+  if(d.eb_period_hist !== undefined){
+    const rh = JSON.stringify(d.eb_period_hist || []);
+    if(rh !== (localStorage.getItem("eb_period_hist")||"[]")){ localStorage.setItem("eb_period_hist", rh); needsRender = true; }
+  }
+  if(d.eb_cur !== undefined && d.eb_cur !== localStorage.getItem("eb_cur")){
+    localStorage.setItem("eb_cur", d.eb_cur); needsRender = true;
+  }
+  if(d.eb_due !== undefined && String(d.eb_due) !== localStorage.getItem("eb_due")){
+    localStorage.setItem("eb_due", String(d.eb_due)); needsRender = true;
+  }
+  if(d.eb_theme !== undefined && d.eb_theme !== localStorage.getItem("eb_theme")){
+    localStorage.setItem("eb_theme", d.eb_theme);
+    document.documentElement.setAttribute("data-theme", d.eb_theme==="dark"?"dark":"light");
+    needsRender = true;
+  }
+  if(d.eb_adm !== undefined && d.eb_adm !== localStorage.getItem("eb_adm")){
+    localStorage.setItem("eb_adm", d.eb_adm);
+  }
+  if(needsRender && window.__render) window.__render();
+  setTimeout(()=>{ __syncApplying = false; }, 150);
+}, err => { console.warn("settings sync err", err); });
 
 /* ════ GOOGLE AUTH (module scope — has access to auth, db, etc.) ════ */
 const ADMIN_EMAIL = "omar.halawani.7@gmail.com";
@@ -1323,6 +1367,7 @@ function saveNewPin(){
   if(np!==cp) return toast(...T.t_pin_mismatch);
   const encoded = btoa(np.split('').reverse().join(''));
   localStorage.setItem("eb_adm", encoded);
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_adm:encoded});
   closeSh("sh-chpin");
   toast(...T.t_pin_changed);
 }
@@ -1336,6 +1381,7 @@ function savePeriodHistory(p){
   h.unshift(p);
   if(h.length>15)h=h.slice(0,15);
   localStorage.setItem("eb_period_hist",JSON.stringify(h));
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_period_hist:h});
 }
 function setPeriod(p){
   localStorage.setItem("eb_period",p);
@@ -1347,6 +1393,7 @@ function setPeriod(p){
     if(p){chip.classList.remove("no-period");}
     else{chip.classList.add("no-period");}
   }
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_period:p});
 }
 function renderPeriodChips(hist){
   const cur=getPeriod();
@@ -1396,11 +1443,13 @@ function getDueDays(){return parseInt(localStorage.getItem("eb_due")||"30");}
 function saveCurrency(val){
   if(!val)return;
   localStorage.setItem("eb_cur",val);
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_cur:val});
   renderAll();
 }
 function saveDueDays(val){
   const d=parseInt(val)||30;
   localStorage.setItem("eb_due",d);
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_due:d});
 }
 function applyTheme(t){
   document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");
@@ -1408,6 +1457,7 @@ function applyTheme(t){
 function setTheme(t){
   applyTheme(t);
   localStorage.setItem("eb_theme",t);
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_theme:t});
   const l=$("set_light"),d=$("set_dark");
   if(l)l.classList.toggle("on",t==="light");
   if(d)d.classList.toggle("on",t==="dark");
