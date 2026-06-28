@@ -784,45 +784,6 @@ const app = initializeApp({
 const db = getFirestore(app);
 const auth = getAuth(app);
 window.__C = []; window.__B = [];
-/* ── REAL-TIME SETTINGS SYNC ── */
-onSnapshot(doc(db,"config","access"), snap => {
-  if(!snap.exists()) return;
-  const d = snap.data();
-  // PIN
-  if(d.pin !== undefined) localStorage.setItem("eb_adm", d.pin);
-  // Currency
-  if(d.currency !== undefined) localStorage.setItem("eb_cur", d.currency);
-  // Due days
-  if(d.dueDays !== undefined) localStorage.setItem("eb_due", String(d.dueDays));
-  // Theme
-  if(d.theme !== undefined){
-    localStorage.setItem("eb_theme", d.theme);
-    window.applyTheme && window.applyTheme(d.theme);
-    const l=document.getElementById("set_light"), dk=document.getElementById("set_dark");
-    if(l) l.classList.toggle("on", d.theme==="light");
-    if(dk) dk.classList.toggle("on", d.theme==="dark");
-  }
-  // Currency input in settings
-  const ci=document.getElementById("set_cur_inp");
-  if(ci && d.currency !== undefined) ci.value=d.currency;
-  // Due days input in settings
-  const di=document.getElementById("set_due_inp");
-  if(di && d.dueDays !== undefined) di.value=d.dueDays;
-  // Active period
-  if(d.period !== undefined){
-    localStorage.setItem("eb_period", d.period);
-    window.__period = d.period;
-    const txt=document.getElementById("h_period_txt");
-    if(txt) txt.textContent = d.period||"—";
-    const chip=document.getElementById("h_period");
-    if(chip){ if(d.period){chip.classList.remove("no-period");}else{chip.classList.add("no-period");} }
-  }
-  // Period history
-  if(d.periodHist !== undefined){
-    localStorage.setItem("eb_period_hist", JSON.stringify(d.periodHist));
-  }
-  window.__render && window.__render();
-});
 onSnapshot(query(collection(db,"clients"), orderBy("name")), snap => {
   window.__C = snap.docs.map(d => ({ id:d.id, ...d.data() }));
   window.__render && window.__render();
@@ -846,39 +807,10 @@ window.DB = {
     (window.__B||[]).filter(b=>b.clientId===id).forEach(b => batch.delete(doc(db,"bills",b.id)));
     await batch.commit();
   },
-  addBill:      d      => addDoc(collection(db,"bills"), {...d, createdAt:serverTimestamp()}),
-  updateBill:   (id,d) => updateDoc(doc(db,"bills",id), d),
-  deleteBill:   id     => deleteDoc(doc(db,"bills",id)),
-  saveSettings: obj    => setDoc(doc(db,"config","access"), obj, {merge:true}),
-  getSettings:  ()     => getDoc(doc(db,"config","access")).then(s=>s.exists()?s.data():{})
+  addBill:    d  => addDoc(collection(db,"bills"), {...d, createdAt:serverTimestamp()}),
+  updateBill: (id,d) => updateDoc(doc(db,"bills",id), d),
+  deleteBill: id => deleteDoc(doc(db,"bills",id))
 };
-
-/* ════ BOOT-TIME SETTINGS MIGRATION ════ */
-// Runs once after auth — pushes any local settings to Firestore so all devices sync
-async function migrateLocalSettings(){
-  try{
-    const snap = await getDoc(doc(db,"config","access"));
-    const ex = snap.exists() ? snap.data() : {};
-    const save = {};
-    // PIN
-    if(!ex.pin){ const v=localStorage.getItem("eb_adm"); if(v) save.pin=v; }
-    // Currency
-    if(!ex.currency){ const v=localStorage.getItem("eb_cur"); if(v) save.currency=v; }
-    // Due days
-    if(!ex.dueDays){ const v=localStorage.getItem("eb_due"); if(v) save.dueDays=parseInt(v)||30; }
-    // Theme
-    if(!ex.theme){ const v=localStorage.getItem("eb_theme"); if(v) save.theme=v; }
-    // Active period
-    if(!ex.period){ const v=localStorage.getItem("eb_period"); if(v) save.period=v; }
-    // Period history
-    if(!ex.periodHist){
-      try{ const h=JSON.parse(localStorage.getItem("eb_period_hist")||"[]"); if(h.length) save.periodHist=h; }catch(e){}
-    }
-    if(Object.keys(save).length>0){
-      await setDoc(doc(db,"config","access"), save, {merge:true});
-    }
-  }catch(e){ console.error("Settings migration:",e); }
-}
 
 /* ════ GOOGLE AUTH (module scope — has access to auth, db, etc.) ════ */
 const ADMIN_EMAIL = "omar.halawani.7@gmail.com";
@@ -918,7 +850,6 @@ async function handleUser(user){
       av.textContent = user.email.charAt(0).toUpperCase();
     }
     av.style.display="flex";
-    migrateLocalSettings(); // push local data to Firestore on first load
     window.bootAfterAuth && window.bootAfterAuth();
   } else {
     $("auth-screen").style.display="none";
@@ -1392,8 +1323,6 @@ function saveNewPin(){
   if(np!==cp) return toast(...T.t_pin_mismatch);
   const encoded = btoa(np.split('').reverse().join(''));
   localStorage.setItem("eb_adm", encoded);
-  // Sync to Firestore — all devices update instantly
-  window.DB&&window.DB.saveSettings({pin: encoded});
   closeSh("sh-chpin");
   toast(...T.t_pin_changed);
 }
@@ -1407,8 +1336,6 @@ function savePeriodHistory(p){
   h.unshift(p);
   if(h.length>15)h=h.slice(0,15);
   localStorage.setItem("eb_period_hist",JSON.stringify(h));
-  // Sync history to Firestore → all devices see the same quick-select chips
-  window.DB&&window.DB.saveSettings({periodHist:h});
 }
 function setPeriod(p){
   localStorage.setItem("eb_period",p);
@@ -1420,8 +1347,6 @@ function setPeriod(p){
     if(p){chip.classList.remove("no-period");}
     else{chip.classList.add("no-period");}
   }
-  // Sync active period to Firestore
-  window.DB&&window.DB.saveSettings({period:p});
 }
 function renderPeriodChips(hist){
   const cur=getPeriod();
@@ -1448,18 +1373,6 @@ function openPeriodPicker(){
   if(inp){inp.value="";inp.placeholder=a?"مثال: 3-4 أو 5-6":"e.g. 3-4 or 5-6";}
   openSh("sh-period");
   setTimeout(()=>{const inp=$("per_input");if(inp)inp.focus();},300);
-  // Also fetch fresh from Firestore and update chips (catches any missed syncs)
-  if(window.DB&&window.DB.getSettings){
-    window.DB.getSettings().then(data=>{
-      if(data.periodHist&&data.periodHist.length){
-        localStorage.setItem("eb_period_hist",JSON.stringify(data.periodHist));
-        renderPeriodChips(data.periodHist);
-      }
-      if(data.period&&!getPeriod()){
-        setPeriod(data.period);
-      }
-    }).catch(()=>{});
-  }
 }
 function quickPeriod(val){
   savePeriodHistory(val);
@@ -1483,25 +1396,21 @@ function getDueDays(){return parseInt(localStorage.getItem("eb_due")||"30");}
 function saveCurrency(val){
   if(!val)return;
   localStorage.setItem("eb_cur",val);
-  window.DB&&window.DB.saveSettings({currency:val});
   renderAll();
 }
 function saveDueDays(val){
   const d=parseInt(val)||30;
   localStorage.setItem("eb_due",d);
-  window.DB&&window.DB.saveSettings({dueDays:d});
 }
 function applyTheme(t){
   document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");
 }
-window.applyTheme=applyTheme;
 function setTheme(t){
   applyTheme(t);
   localStorage.setItem("eb_theme",t);
   const l=$("set_light"),d=$("set_dark");
   if(l)l.classList.toggle("on",t==="light");
   if(d)d.classList.toggle("on",t==="dark");
-  window.DB&&window.DB.saveSettings({theme:t});
 }
 function setLang(lang){
   boot(lang);
@@ -2095,4 +2004,4 @@ function toast(icon,title,msg){
 window.toast = toast;
 </script>
 </body>
-</html>
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
