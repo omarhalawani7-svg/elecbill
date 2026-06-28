@@ -1231,8 +1231,8 @@ function boot(lang){
   setPeriod(window.__period); // refresh chip display
   window.__render=renderAll;
   renderAll();
-  // Show period picker every boot
-  setTimeout(()=>openPeriodPicker(),500);
+  // Show period picker only if no period set yet
+  if(!getPeriod()) setTimeout(()=>openPeriodPicker(),500);
 }
 function switchLang(){ boot(L==="en"?"ar":"en"); }
 window.addEventListener("DOMContentLoaded",()=>{
