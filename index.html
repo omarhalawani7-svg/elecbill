@@ -764,6 +764,14 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <!-- Appearance -->
     <div class="set-section" id="set_s_app">🎨 Appearance</div>
     <div class="set-row">
+      <div class="set-row-l"><div class="set-label" id="set_fsize_l">Text Size</div></div>
+      <div class="set-toggle">
+        <button class="seg-btn" id="set_fs_s" onclick="setFontSize('small')" id="set_fs_s">A</button>
+        <button class="seg-btn" id="set_fs_m" onclick="setFontSize('medium')" style="font-size:15px">A</button>
+        <button class="seg-btn" id="set_fs_l" onclick="setFontSize('large')" style="font-size:18px">A</button>
+      </div>
+    </div>
+    <div class="set-row">
       <div class="set-row-l"><div class="set-label" id="set_theme_l">Theme</div></div>
       <div class="set-toggle">
         <button class="seg-btn" id="set_light" onclick="setTheme('light')">☀️ Light</button>
@@ -891,6 +899,10 @@ onSnapshot(doc(db,"config","whatsapp"), snap => {
     localStorage.setItem("eb_theme", d.eb_theme);
     document.documentElement.setAttribute("data-theme", d.eb_theme==="dark"?"dark":"light");
     needsRender = true;
+  }
+  if(d.eb_fsize !== undefined && d.eb_fsize !== localStorage.getItem("eb_fsize")){
+    localStorage.setItem("eb_fsize", d.eb_fsize);
+    if(window.applyFontSize) window.applyFontSize(d.eb_fsize);
   }
   if(d.eb_adm !== undefined && d.eb_adm !== localStorage.getItem("eb_adm")){
     localStorage.setItem("eb_adm", d.eb_adm);
@@ -1287,6 +1299,7 @@ function switchLang(){ boot(L==="en"?"ar":"en"); }
 window.addEventListener("DOMContentLoaded",()=>{
   // Apply saved theme immediately
   applyTheme(localStorage.getItem("eb_theme")||"light");
+  applyFontSize(localStorage.getItem("eb_fsize")||"medium");
   $("h_date").textContent=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
   $("ab_date").value=new Date().toISOString().split("T")[0];
   document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)closeSh(o.id);}));
@@ -1572,6 +1585,20 @@ function setTheme(t){
   if(l)l.classList.toggle("on",t==="light");
   if(d)d.classList.toggle("on",t==="dark");
 }
+function applyFontSize(s){
+  const z=s==="small"?0.88:s==="large"?1.14:1;
+  document.body.style.zoom=z;
+}
+window.applyFontSize=applyFontSize;
+function setFontSize(s){
+  applyFontSize(s);
+  localStorage.setItem("eb_fsize",s);
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_fsize:s});
+  ["small","medium","large"].forEach(k=>{
+    const btn=$("set_fs_"+k[0]);
+    if(btn)btn.classList.toggle("on",k===s);
+  });
+}
 function setLang(lang){
   boot(lang);
   updateSettingsUI();
@@ -1592,6 +1619,9 @@ function openSettings(){
   const sl=$("set_light"),sd=$("set_dark");
   if(sl)sl.classList.toggle("on",theme==="light");
   if(sd)sd.classList.toggle("on",theme==="dark");
+  // Sync font size buttons
+  const fsize=localStorage.getItem("eb_fsize")||"medium";
+  ["small","medium","large"].forEach(k=>{const b=$("set_fs_"+k[0]);if(b)b.classList.toggle("on",k===fsize);});
   // Sync language buttons
   const en=$("set_en"),ar=$("set_ar");
   if(en)en.classList.toggle("on",L==="en");
