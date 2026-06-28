@@ -111,8 +111,8 @@ html[lang="ar"] .set-btn{text-align:right;}
 html[lang="ar"] .hsub{text-transform:none;letter-spacing:0;font-size:10px;}
 .hright{display:flex;align-items:center;gap:7px;}
 .hlang{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--t2);}
-.hadm{background:transparent;border:1.5px solid var(--border2);border-radius:7px;padding:4px 9px;font-size:15px;color:var(--t2);transition:all .18s;}
-.hadm.on{border-color:var(--blue);color:var(--blue);background:var(--bdim);}
+.hadm{border:none;cursor:pointer;transition:all .2s;filter:grayscale(1) brightness(.6);}
+.hadm.on{filter:none;}
 .hdb{font-size:11px;font-weight:700;}
 .hdate{font-size:11px;color:var(--t3);background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;}
 /* ── STATS ── */
@@ -385,12 +385,11 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 <!-- HEADER -->
 <header class="hdr">
   <div class="hbrand">
-    <div class="hicon">⚡</div>
+    <button class="hadm hicon" id="h_adm" onclick="toggleAdmin()" title="Admin">⚡</button>
   </div>
   <div class="hright">
     <button class="hperiod no-period" id="h_period" onclick="openPeriodPicker()" title="Billing Period"><span class="hperiod-dot"></span><span id="h_period_txt">—</span></button>
     <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
-    <button class="hadm" id="h_adm" onclick="toggleAdmin()" title="Admin">🔒</button>
     <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
     <div class="hdate" id="h_date"></div>
     <div class="wa-counter" id="wa-counter" title="WhatsApp API Settings" style="display:none" onclick="requireAdmin(()=>{loadWAConfig();openSh('sh-waapi');})"></div>
@@ -1358,8 +1357,8 @@ function checkPin(){
 }
 function updateAdminBtn(){
   const btn=$("h_adm");if(!btn)return;
-  if(__admin){btn.textContent="⚙️";btn.classList.add("on");}
-  else{btn.textContent="🔒";btn.classList.remove("on");}
+  if(__admin){btn.classList.add("on");}
+  else{btn.classList.remove("on");}
 }
 function saveNewPin(){
   const np=v("chpin_new"), cp=v("chpin_conf");
