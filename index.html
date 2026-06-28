@@ -703,6 +703,29 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <button class="abtn a-ghost" onclick="closeSh('sh-period')" id="per_skip">Skip</button>
   </div>
 </div>
+<!-- SHEET: DELETE PERIOD -->
+<div class="ov" id="sh-del-period">
+  <div class="sheet">
+    <div class="sh"></div>
+    <div style="text-align:center;margin-bottom:4px">
+      <div style="font-size:48px;margin-bottom:8px">⚠️</div>
+      <div style="font-size:18px;font-weight:900;color:var(--red)" id="dper_title">Delete Period</div>
+      <div style="font-size:13px;font-weight:800;color:var(--red);background:var(--rdim);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:8px 14px;margin:12px 0" id="dper_name_wrap">—</div>
+    </div>
+    <div style="background:var(--rdim);border:1.5px solid rgba(239,68,68,.25);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px" id="dper_warn1">⛔ This will permanently delete:</div>
+      <div style="font-size:13px;color:var(--text);font-weight:600" id="dper_billcount">— bills for this period</div>
+      <div style="font-size:11px;color:var(--t2);margin-top:6px;line-height:1.5" id="dper_warn2">This action cannot be undone. All bill records for this period will be erased from the database on all devices.</div>
+    </div>
+    <div class="fg" style="margin-bottom:14px">
+      <div class="fl" id="dper_input_lbl">Type the period to confirm:</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:6px;font-weight:600" id="dper_input_hint"></div>
+      <input class="fi" id="dper_confirm_input" type="text" autocomplete="off" oninput="checkDelPeriodInput()" style="border-color:rgba(239,68,68,.4)">
+    </div>
+    <button class="abtn" id="dper_confirm_btn" onclick="confirmDeletePeriod()" disabled style="background:var(--rdim);color:var(--red);border:1.5px solid rgba(239,68,68,.4);opacity:.5;margin-top:0" id="dper_ok">🗑️ <span id="dper_btn_txt">Delete Period</span></button>
+    <button class="abtn a-ghost" onclick="closeSh('sh-del-period')" id="dper_cancel">Cancel</button>
+  </div>
+</div>
 <!-- SHEET: SETTINGS -->
 <div class="ov" id="sh-settings">
   <div class="sheet" style="max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
@@ -1402,6 +1425,67 @@ function renderPeriodChips(hist){
   if(hw)hw.style.display=hist.length?"block":"none";
   if($("per_hist_lbl"))$("per_hist_lbl").textContent=a?"فترات سابقة":"Previous periods";
   hrow.innerHTML=hist.map(p=>`<button class="period-hist-btn${p===cur?" active":""}" onclick="quickPeriod('${p.replace(/'/g,"\\'")}')">📅 ${p}</button>`).join("");
+  // Long-press (800ms) to trigger hidden delete
+  hrow.querySelectorAll(".period-hist-btn").forEach((btn,i)=>{
+    const p=hist[i];
+    let timer;
+    const start=()=>{ timer=setTimeout(()=>openDeletePeriod(p),800); };
+    const cancel=()=>clearTimeout(timer);
+    btn.addEventListener("touchstart",start,{passive:true});
+    btn.addEventListener("touchend",cancel);
+    btn.addEventListener("touchmove",cancel);
+    btn.addEventListener("mousedown",start);
+    btn.addEventListener("mouseup",cancel);
+    btn.addEventListener("mouseleave",cancel);
+  });
+}
+function openDeletePeriod(p){
+  const a=L==="ar";
+  window.__delPeriod=p;
+  const bills=(window.__B||[]).filter(b=>(b.month||"")===p);
+  const nw=$("dper_name_wrap"),inp=$("dper_confirm_input"),bc=$("dper_billcount"),btn=$("dper_confirm_btn");
+  if(nw)nw.textContent=p;
+  if(inp){inp.value="";inp.placeholder=p;}
+  if(bc)bc.textContent=a?`${bills.length} فاتورة في هذه الفترة`:`${bills.length} bill(s) in this period`;
+  if(btn){btn.disabled=true;btn.style.opacity=".5";btn.style.background="var(--rdim)";btn.style.color="var(--red)";}
+  if($("dper_title"))$("dper_title").textContent=a?"حذف الفترة":"Delete Period";
+  if($("dper_warn1"))$("dper_warn1").textContent=a?"⛔ سيتم حذف ما يلي نهائياً:":"⛔ This will permanently delete:";
+  if($("dper_warn2"))$("dper_warn2").textContent=a?"هذا الإجراء لا يمكن التراجع عنه. سيتم مسح جميع الفواتير من قاعدة البيانات على جميع الأجهزة.":"This cannot be undone. All bill records will be erased from the database on all devices.";
+  if($("dper_input_lbl"))$("dper_input_lbl").textContent=a?"اكتب الفترة للتأكيد:":"Type the period name to confirm:";
+  if($("dper_input_hint"))$("dper_input_hint").textContent=p;
+  if($("dper_btn_txt"))$("dper_btn_txt").textContent=a?"حذف الفترة":"Delete Period";
+  if($("dper_cancel"))$("dper_cancel").textContent=a?"إلغاء":"Cancel";
+  openSh("sh-del-period");
+}
+function checkDelPeriodInput(){
+  const inp=$("dper_confirm_input"),btn=$("dper_confirm_btn");
+  if(!inp||!btn)return;
+  const match=inp.value.trim()===window.__delPeriod;
+  btn.disabled=!match;
+  btn.style.opacity=match?"1":".5";
+  btn.style.background=match?"var(--red)":"var(--rdim)";
+  btn.style.color=match?"#fff":"var(--red)";
+}
+function confirmDeletePeriod(){
+  const p=window.__delPeriod;
+  const inp=$("dper_confirm_input");
+  if(!p||!inp||inp.value.trim()!==p)return;
+  const bills=(window.__B||[]).filter(b=>(b.month||"")===p);
+  let h=getPeriodHistory().filter(x=>x!==p);
+  localStorage.setItem("eb_period_hist",JSON.stringify(h));
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_period_hist:h});
+  if(getPeriod()===p){
+    setPeriod("");
+    window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_period:""});
+  }
+  Promise.all(bills.map(b=>window.DB.deleteBill(b.id))).then(()=>{
+    closeSh("sh-del-period");
+    closeSh("sh-period");
+    renderAll();
+    const a=L==="ar";
+    toast("🗑️",a?"تم الحذف":"Deleted",`${p} — ${bills.length} ${a?"فاتورة":"bill(s)"}`);
+  });
+  delete window.__delPeriod;
 }
 function openPeriodPicker(){
   const a=L==="ar";
