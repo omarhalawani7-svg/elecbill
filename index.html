@@ -785,7 +785,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 window.__C = []; window.__B = [];
 /* ── REAL-TIME SETTINGS SYNC ── */
-onSnapshot(doc(db,"config","settings"), snap => {
+onSnapshot(doc(db,"config","access"), snap => {
   if(!snap.exists()) return;
   const d = snap.data();
   // PIN
@@ -849,15 +849,15 @@ window.DB = {
   addBill:      d      => addDoc(collection(db,"bills"), {...d, createdAt:serverTimestamp()}),
   updateBill:   (id,d) => updateDoc(doc(db,"bills",id), d),
   deleteBill:   id     => deleteDoc(doc(db,"bills",id)),
-  saveSettings: obj    => setDoc(doc(db,"config","settings"), obj, {merge:true}),
-  getSettings:  ()     => getDoc(doc(db,"config","settings")).then(s=>s.exists()?s.data():{})
+  saveSettings: obj    => setDoc(doc(db,"config","access"), obj, {merge:true}),
+  getSettings:  ()     => getDoc(doc(db,"config","access")).then(s=>s.exists()?s.data():{})
 };
 
 /* ════ BOOT-TIME SETTINGS MIGRATION ════ */
 // Runs once after auth — pushes any local settings to Firestore so all devices sync
 async function migrateLocalSettings(){
   try{
-    const snap = await getDoc(doc(db,"config","settings"));
+    const snap = await getDoc(doc(db,"config","access"));
     const ex = snap.exists() ? snap.data() : {};
     const save = {};
     // PIN
@@ -875,7 +875,7 @@ async function migrateLocalSettings(){
       try{ const h=JSON.parse(localStorage.getItem("eb_period_hist")||"[]"); if(h.length) save.periodHist=h; }catch(e){}
     }
     if(Object.keys(save).length>0){
-      await setDoc(doc(db,"config","settings"), save, {merge:true});
+      await setDoc(doc(db,"config","access"), save, {merge:true});
     }
   }catch(e){ console.error("Settings migration:",e); }
 }
