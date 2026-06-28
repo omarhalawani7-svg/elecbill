@@ -784,6 +784,32 @@ const app = initializeApp({
 const db = getFirestore(app);
 const auth = getAuth(app);
 window.__C = []; window.__B = [];
+/* ── REAL-TIME SETTINGS SYNC ── */
+onSnapshot(doc(db,"config","settings"), snap => {
+  if(!snap.exists()) return;
+  const d = snap.data();
+  // PIN
+  if(d.pin !== undefined) localStorage.setItem("eb_adm", d.pin);
+  // Currency
+  if(d.currency !== undefined) localStorage.setItem("eb_cur", d.currency);
+  // Due days
+  if(d.dueDays !== undefined) localStorage.setItem("eb_due", String(d.dueDays));
+  // Theme
+  if(d.theme !== undefined){
+    localStorage.setItem("eb_theme", d.theme);
+    window.applyTheme && window.applyTheme(d.theme);
+    const l=document.getElementById("set_light"), dk=document.getElementById("set_dark");
+    if(l) l.classList.toggle("on", d.theme==="light");
+    if(dk) dk.classList.toggle("on", d.theme==="dark");
+  }
+  // Currency input in settings
+  const ci=document.getElementById("set_cur_inp");
+  if(ci && d.currency !== undefined) ci.value=d.currency;
+  // Due days input in settings
+  const di=document.getElementById("set_due_inp");
+  if(di && d.dueDays !== undefined) di.value=d.dueDays;
+  window.__render && window.__render();
+});
 onSnapshot(query(collection(db,"clients"), orderBy("name")), snap => {
   window.__C = snap.docs.map(d => ({ id:d.id, ...d.data() }));
   window.__render && window.__render();
@@ -807,9 +833,10 @@ window.DB = {
     (window.__B||[]).filter(b=>b.clientId===id).forEach(b => batch.delete(doc(db,"bills",b.id)));
     await batch.commit();
   },
-  addBill:    d  => addDoc(collection(db,"bills"), {...d, createdAt:serverTimestamp()}),
-  updateBill: (id,d) => updateDoc(doc(db,"bills",id), d),
-  deleteBill: id => deleteDoc(doc(db,"bills",id))
+  addBill:      d      => addDoc(collection(db,"bills"), {...d, createdAt:serverTimestamp()}),
+  updateBill:   (id,d) => updateDoc(doc(db,"bills",id), d),
+  deleteBill:   id     => deleteDoc(doc(db,"bills",id)),
+  saveSettings: obj    => setDoc(doc(db,"config","settings"), obj, {merge:true})
 };
 
 /* ════ GOOGLE AUTH (module scope — has access to auth, db, etc.) ════ */
@@ -1321,7 +1348,10 @@ function saveNewPin(){
   const np=v("chpin_new"), cp=v("chpin_conf");
   if(np.length!==4||!/^\d{4}$/.test(np)) return toast(...T.t_pin_short);
   if(np!==cp) return toast(...T.t_pin_mismatch);
-  localStorage.setItem("eb_adm", btoa(np.split('').reverse().join('')));
+  const encoded = btoa(np.split('').reverse().join(''));
+  localStorage.setItem("eb_adm", encoded);
+  // Sync to Firestore — all devices update instantly
+  window.DB&&window.DB.saveSettings({pin: encoded});
   closeSh("sh-chpin");
   toast(...T.t_pin_changed);
 }
@@ -1388,17 +1418,28 @@ function confirmPeriod(){
 /* ════ SETTINGS FUNCTIONS ════ */
 function getCurrency(){return localStorage.getItem("eb_cur")||"$";}
 function getDueDays(){return parseInt(localStorage.getItem("eb_due")||"30");}
-function saveCurrency(val){if(val)localStorage.setItem("eb_cur",val);renderAll();}
-function saveDueDays(val){const d=parseInt(val)||30;localStorage.setItem("eb_due",d);}
+function saveCurrency(val){
+  if(!val)return;
+  localStorage.setItem("eb_cur",val);
+  window.DB&&window.DB.saveSettings({currency:val});
+  renderAll();
+}
+function saveDueDays(val){
+  const d=parseInt(val)||30;
+  localStorage.setItem("eb_due",d);
+  window.DB&&window.DB.saveSettings({dueDays:d});
+}
 function applyTheme(t){
   document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");
 }
+window.applyTheme=applyTheme;
 function setTheme(t){
   applyTheme(t);
   localStorage.setItem("eb_theme",t);
   const l=$("set_light"),d=$("set_dark");
   if(l)l.classList.toggle("on",t==="light");
   if(d)d.classList.toggle("on",t==="dark");
+  window.DB&&window.DB.saveSettings({theme:t});
 }
 function setLang(lang){
   boot(lang);
