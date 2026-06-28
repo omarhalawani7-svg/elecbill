@@ -1979,8 +1979,8 @@ document.addEventListener("click", e => {
     const b=gB().find(x=>x.id===id);
     const cur=getCurrency();
     const msg=L==="ar"
-      ?
-      :;
+      ?`⚠️ تأكيد\n\nهل تريد إلغاء الدفع لهذه الفاتورة؟\nالفترة: ${b?.month||"—"}\nالمبلغ: ${cur}${fmt(b?.amount)}\n\nسيتم إعادتها إلى قائمة غير المدفوعة.`
+      :`⚠️ Confirm\n\nMark this bill as UNPAID?\nPeriod: ${b?.month||"—"}\nAmount: ${cur}${fmt(b?.amount)}\n\nIt will move back to unpaid.`;
     if(confirm(msg)) markUnpaid(id);
   }
   if(action === "delbill") delBill(id);
