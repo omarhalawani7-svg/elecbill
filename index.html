@@ -732,7 +732,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="sh"></div>
     <div class="stitle">✏️ <span id="msgtpl_title">Bill Message Template</span></div>
     <div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6" id="msgtpl_sub">Customize the WhatsApp message. Use these placeholders:</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+    <div id="msgtpl_chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
       <code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">{name}</code>
       <code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">{meter}</code>
       <code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">{period}</code>
@@ -791,7 +791,8 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <!-- WhatsApp -->
     <div class="set-section" id="set_s_wa">📲 WhatsApp</div>
     <button class="set-btn" onclick="closeSh('sh-settings');window.loadWAConfig&&window.loadWAConfig();openSh('sh-waapi')">📲 <span id="set_wa">WhatsApp API Settings</span></button>
-    <button class="set-btn" onclick="openMsgTemplate()" id="set_msgtpl_btn">✏️ <span id="set_msgtpl">Edit Bill Message Template</span></button>
+    <button class="set-btn" onclick="openMsgTemplate('bill')" id="set_msgtpl_btn">✏️ <span id="set_msgtpl">Edit Bill Message Template</span></button>
+    <button class="set-btn" onclick="openMsgTemplate('rem')" id="set_remtpl_btn">✏️ <span id="set_remtpl">Edit Reminder Template</span></button>
 
     <!-- Access (super-admin only) -->
     <div id="set_access_wrap" style="display:none">
@@ -896,6 +897,9 @@ onSnapshot(doc(db,"config","whatsapp"), snap => {
   }
   if(d.eb_msgtpl !== undefined && d.eb_msgtpl !== localStorage.getItem("eb_msgtpl")){
     localStorage.setItem("eb_msgtpl", d.eb_msgtpl);
+  }
+  if(d.eb_remtpl !== undefined && d.eb_remtpl !== localStorage.getItem("eb_remtpl")){
+    localStorage.setItem("eb_remtpl", d.eb_remtpl);
   }
   if(needsRender && window.__render) window.__render();
   setTimeout(()=>{ __syncApplying = false; }, 150);
@@ -1925,33 +1929,52 @@ async function delBill(id){
 /* ════ WHATSAPP ════ */
 const DEFAULT_BILL_TEMPLATE = `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *{name}*،\n\n━━━━━━━━━━━\n👤 الاسم: *{name}*\n📟 رقم العداد: *{meter}*\n━━━━━━━━━━━\n📅 الفترة: *{period}*\n💰 المبلغ: *{amount}*\n⏰ السداد قبل: *{due}*\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
 function getMsgTemplate(){return localStorage.getItem("eb_msgtpl")||DEFAULT_BILL_TEMPLATE;}
-function openMsgTemplate(){
-  const a=L==="ar";
-  if($("msgtpl_title"))$("msgtpl_title").textContent=a?"قالب رسالة الفاتورة":"Bill Message Template";
+const DEFAULT_REM_TEMPLATE=`⚡ *تذكير بالدفع*\n\nعزيزي *{name}*،\n📟 رقم العداد: *{meter}*\n\n━━━━━━━━━━━\nلديك فواتير كهرباء غير مسددة.{note_block}\n━━━━━━━━━━━\nيرجى التسوية في أقرب وقت.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
+function getRemTemplate(){return localStorage.getItem("eb_remtpl")||DEFAULT_REM_TEMPLATE;}
+const TPL_KEYS={
+  bill:{lsKey:"eb_msgtpl",def:()=>DEFAULT_BILL_TEMPLATE,
+    titleAr:"قالب رسالة الفاتورة",titleEn:"Bill Message Template",
+    chips:["{name}","{meter}","{period}","{amount}","{due}"]},
+  rem:{lsKey:"eb_remtpl",def:()=>DEFAULT_REM_TEMPLATE,
+    titleAr:"قالب رسالة التذكير",titleEn:"Reminder Message Template",
+    chips:["{name}","{meter}","{note_block}"]}
+};
+function openMsgTemplate(key){
+  key=key||"bill";
+  window.__tplKey=key;
+  const a=L==="ar", cfg=TPL_KEYS[key];
+  if($("msgtpl_title"))$("msgtpl_title").textContent=a?cfg.titleAr:cfg.titleEn;
   if($("msgtpl_sub"))$("msgtpl_sub").textContent=a?"خصّص رسالة الواتساب. استخدم هذه المتغيرات:":"Customize the WhatsApp message. Use these placeholders:";
   if($("msgtpl_save"))$("msgtpl_save").textContent=a?"💾 حفظ القالب":"💾 Save Template";
   if($("msgtpl_reset"))$("msgtpl_reset").textContent=a?"↺ إعادة الضبط":"↺ Reset to Default";
   if($("msgtpl_cancel"))$("msgtpl_cancel").textContent=a?"إغلاق":"Close";
+  // Update placeholder chips
+  const chipsEl=$("msgtpl_chips");
+  if(chipsEl)chipsEl.innerHTML=cfg.chips.map(p=>`<code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">${p}</code>`).join("");
   const inp=$("msgtpl_input");
-  if(inp)inp.value=getMsgTemplate().replace(/\\n/g,"\n");
+  if(inp)inp.value=(localStorage.getItem(cfg.lsKey)||cfg.def()).replace(/\\n/g,"\n");
   closeSh("sh-settings");
   openSh("sh-msgtpl");
 }
 function saveMsgTemplate(){
+  const key=window.__tplKey||"bill", cfg=TPL_KEYS[key];
   const inp=$("msgtpl_input");
   if(!inp)return;
   const val=inp.value.trim();
   if(!val)return;
-  localStorage.setItem("eb_msgtpl",val.replace(/\n/g,"\\n"));
-  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_msgtpl:val.replace(/\n/g,"\\n")});
+  const stored=val.replace(/\n/g,"\\n");
+  localStorage.setItem(cfg.lsKey,stored);
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({[cfg.lsKey]:stored});
   closeSh("sh-msgtpl");
-  toast("✅",L==="ar"?"تم الحفظ":"Saved",L==="ar"?"تم حفظ قالب الرسالة":"Message template saved");
+  toast("✅",L==="ar"?"تم الحفظ":"Saved",L==="ar"?"تم حفظ القالب":"Template saved");
 }
 function resetMsgTemplate(){
-  localStorage.setItem("eb_msgtpl",DEFAULT_BILL_TEMPLATE);
-  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_msgtpl:DEFAULT_BILL_TEMPLATE});
+  const key=window.__tplKey||"bill", cfg=TPL_KEYS[key];
+  const def=cfg.def();
+  localStorage.setItem(cfg.lsKey,def);
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({[cfg.lsKey]:def});
   const inp=$("msgtpl_input");
-  if(inp)inp.value=DEFAULT_BILL_TEMPLATE.replace(/\\n/g,"\n");
+  if(inp)inp.value=def.replace(/\\n/g,"\n");
   toast("↺",L==="ar"?"تمت إعادة الضبط":"Reset","");
 }
 function buildBillMsg(c,b){
@@ -1966,12 +1989,14 @@ function buildBillMsg(c,b){
 }
 function buildRemMsg(c,up,note){
   const cur=getCurrency();
-  if(L==="ar"){
-    const noteBlock=note?`\n📝 *ملاحظة:* ${note}\n\n━━━━━━━━━━━\n📋 *الفواتير غير المسددة (${up.length}):*\n`+up.map(b=>`  • ${b.month||"؟"}: *${cur}${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n")+"\n":"";
-    return `⚡ *تذكير بالدفع*\n\nعزيزي *${c.name}*،\n📟 رقم العداد: *${c.meter}*\n\n━━━━━━━━━━━\nلديك فواتير كهرباء غير مسددة.${noteBlock}\n━━━━━━━━━━━\nيرجى التسوية في أقرب وقت.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
-  }
-  const noteBlock=note?`\n📝 *Note:* ${note}\n\n━━━━━━━━━━━\n📋 *Unpaid Bills (${up.length}):*\n`+up.map(b=>`  • ${b.month||"?"}: *${cur}${fmt(b.amount)}* (due ${fmtD(b.dueDate)})`).join("\n")+"\n":"";
-  return `⚡ *Payment Reminder*\n\nDear *${c.name}*,\n📟 Meter: *${c.meter}*\n\n━━━━━━━━━━━\nYou have unpaid electricity bills.${noteBlock}\n━━━━━━━━━━━\nPlease settle your balance soon.\n\nThank you 🙏\n_Electric Station — Accounting_`;
+  const tpl=getRemTemplate().replace(/\\n/g,"\n");
+  const noteBlock=note
+    ?`\n📝 *ملاحظة:* ${note}\n\n━━━━━━━━━━━\n📋 *الفواتير غير المسددة (${up.length}):*\n`+up.map(b=>`  • ${b.month||"؟"}: *${cur}${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n")+"\n"
+    :"";
+  return tpl
+    .replace(/\{name\}/g,c.name||"")
+    .replace(/\{meter\}/g,c.meter||"")
+    .replace(/\{note_block\}/g,noteBlock);
 }
 /* ════ WA COUNTER + API UI ════ */
 window.updateWACounter = function(){
