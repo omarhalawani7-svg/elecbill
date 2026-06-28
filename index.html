@@ -726,6 +726,25 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <button class="abtn a-ghost" onclick="closeSh('sh-del-period')" id="dper_cancel">Cancel</button>
   </div>
 </div>
+<!-- SHEET: MESSAGE TEMPLATE -->
+<div class="ov" id="sh-msgtpl">
+  <div class="sheet" style="max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+    <div class="sh"></div>
+    <div class="stitle">✏️ <span id="msgtpl_title">Bill Message Template</span></div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6" id="msgtpl_sub">Customize the WhatsApp message. Use these placeholders:</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+      <code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">{name}</code>
+      <code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">{meter}</code>
+      <code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">{period}</code>
+      <code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">{amount}</code>
+      <code style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--blue)">{due}</code>
+    </div>
+    <textarea id="msgtpl_input" style="width:100%;min-height:260px;background:var(--card2);border:1.5px solid var(--border2);border-radius:12px;padding:12px;font-size:13px;font-family:var(--font);color:var(--text);resize:vertical;line-height:1.6;direction:rtl;text-align:right" placeholder="..."></textarea>
+    <button class="abtn a-blue" onclick="saveMsgTemplate()" style="margin-top:10px" id="msgtpl_save">💾 Save Template</button>
+    <button class="abtn a-ghost" onclick="resetMsgTemplate()" id="msgtpl_reset">↺ Reset to Default</button>
+    <button class="abtn a-ghost" onclick="closeSh('sh-msgtpl')" id="msgtpl_cancel">Close</button>
+  </div>
+</div>
 <!-- SHEET: SETTINGS -->
 <div class="ov" id="sh-settings">
   <div class="sheet" style="max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
@@ -772,6 +791,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <!-- WhatsApp -->
     <div class="set-section" id="set_s_wa">📲 WhatsApp</div>
     <button class="set-btn" onclick="closeSh('sh-settings');window.loadWAConfig&&window.loadWAConfig();openSh('sh-waapi')">📲 <span id="set_wa">WhatsApp API Settings</span></button>
+    <button class="set-btn" onclick="openMsgTemplate()" id="set_msgtpl_btn">✏️ <span id="set_msgtpl">Edit Bill Message Template</span></button>
 
     <!-- Access (super-admin only) -->
     <div id="set_access_wrap" style="display:none">
@@ -873,6 +893,9 @@ onSnapshot(doc(db,"config","whatsapp"), snap => {
   }
   if(d.eb_adm !== undefined && d.eb_adm !== localStorage.getItem("eb_adm")){
     localStorage.setItem("eb_adm", d.eb_adm);
+  }
+  if(d.eb_msgtpl !== undefined && d.eb_msgtpl !== localStorage.getItem("eb_msgtpl")){
+    localStorage.setItem("eb_msgtpl", d.eb_msgtpl);
   }
   if(needsRender && window.__render) window.__render();
   setTimeout(()=>{ __syncApplying = false; }, 150);
@@ -1900,12 +1923,46 @@ async function delBill(id){
 }
 
 /* ════ WHATSAPP ════ */
+const DEFAULT_BILL_TEMPLATE = `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *{name}*،\n\n━━━━━━━━━━━\n👤 الاسم: *{name}*\n📟 رقم العداد: *{meter}*\n━━━━━━━━━━━\n📅 الفترة: *{period}*\n💰 المبلغ: *{amount}*\n⏰ السداد قبل: *{due}*\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
+function getMsgTemplate(){return localStorage.getItem("eb_msgtpl")||DEFAULT_BILL_TEMPLATE;}
+function openMsgTemplate(){
+  const a=L==="ar";
+  if($("msgtpl_title"))$("msgtpl_title").textContent=a?"قالب رسالة الفاتورة":"Bill Message Template";
+  if($("msgtpl_sub"))$("msgtpl_sub").textContent=a?"خصّص رسالة الواتساب. استخدم هذه المتغيرات:":"Customize the WhatsApp message. Use these placeholders:";
+  if($("msgtpl_save"))$("msgtpl_save").textContent=a?"💾 حفظ القالب":"💾 Save Template";
+  if($("msgtpl_reset"))$("msgtpl_reset").textContent=a?"↺ إعادة الضبط":"↺ Reset to Default";
+  if($("msgtpl_cancel"))$("msgtpl_cancel").textContent=a?"إغلاق":"Close";
+  const inp=$("msgtpl_input");
+  if(inp)inp.value=getMsgTemplate().replace(/\\n/g,"\n");
+  closeSh("sh-settings");
+  openSh("sh-msgtpl");
+}
+function saveMsgTemplate(){
+  const inp=$("msgtpl_input");
+  if(!inp)return;
+  const val=inp.value.trim();
+  if(!val)return;
+  localStorage.setItem("eb_msgtpl",val.replace(/\n/g,"\\n"));
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_msgtpl:val.replace(/\n/g,"\\n")});
+  closeSh("sh-msgtpl");
+  toast("✅",L==="ar"?"تم الحفظ":"Saved",L==="ar"?"تم حفظ قالب الرسالة":"Message template saved");
+}
+function resetMsgTemplate(){
+  localStorage.setItem("eb_msgtpl",DEFAULT_BILL_TEMPLATE);
+  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_msgtpl:DEFAULT_BILL_TEMPLATE});
+  const inp=$("msgtpl_input");
+  if(inp)inp.value=DEFAULT_BILL_TEMPLATE.replace(/\\n/g,"\n");
+  toast("↺",L==="ar"?"تمت إعادة الضبط":"Reset","");
+}
 function buildBillMsg(c,b){
   const cur=getCurrency();
-  if(L==="ar"){
-    return `⚡ *فاتورة كهرباء جديدة*\n\nعزيزي *${c.name}*،\n\n━━━━━━━━━━━\n👤 الاسم: *${c.name}*\n📟 رقم العداد: *${c.meter}*\n━━━━━━━━━━━\n📅 الفترة: *${b.month||"—"}*\n💰 المبلغ: *${cur}${fmt(b.amount)}*\n⏰ السداد قبل: *${fmtD(b.dueDate)}*\n━━━━━━━━━━━\nيرجى السداد قبل التاريخ المحدد.\n\nشكراً 🙏\n_مديرية الكهرباء — المحاسبة_`;
-  }
-  return `⚡ *New Electricity Bill*\n\nDear *${c.name}*,\n\n━━━━━━━━━━━\n👤 Name: *${c.name}*\n📟 Meter No: *${c.meter}*\n━━━━━━━━━━━\n📅 Period: *${b.month||"—"}*\n💰 Amount: *${cur}${fmt(b.amount)}*\n⏰ Pay Before: *${fmtD(b.dueDate)}*\n━━━━━━━━━━━\nPlease pay before the due date.\n\nThank you 🙏\n_Electric Station — Accounting_`;
+  const tpl=getMsgTemplate().replace(/\\n/g,"\n");
+  return tpl
+    .replace(/\{name\}/g,c.name||"")
+    .replace(/\{meter\}/g,c.meter||"")
+    .replace(/\{period\}/g,b.month||"—")
+    .replace(/\{amount\}/g,`${cur}${fmt(b.amount)}`)
+    .replace(/\{due\}/g,fmtD(b.dueDate));
 }
 function buildRemMsg(c,up,note){
   const cur=getCurrency();
