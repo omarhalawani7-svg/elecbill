@@ -852,6 +852,33 @@ window.DB = {
   saveSettings: obj    => setDoc(doc(db,"config","settings"), obj, {merge:true})
 };
 
+/* ════ BOOT-TIME SETTINGS MIGRATION ════ */
+// Runs once after auth — pushes any local settings to Firestore so all devices sync
+async function migrateLocalSettings(){
+  try{
+    const snap = await getDoc(doc(db,"config","settings"));
+    const ex = snap.exists() ? snap.data() : {};
+    const save = {};
+    // PIN
+    if(!ex.pin){ const v=localStorage.getItem("eb_adm"); if(v) save.pin=v; }
+    // Currency
+    if(!ex.currency){ const v=localStorage.getItem("eb_cur"); if(v) save.currency=v; }
+    // Due days
+    if(!ex.dueDays){ const v=localStorage.getItem("eb_due"); if(v) save.dueDays=parseInt(v)||30; }
+    // Theme
+    if(!ex.theme){ const v=localStorage.getItem("eb_theme"); if(v) save.theme=v; }
+    // Active period
+    if(!ex.period){ const v=localStorage.getItem("eb_period"); if(v) save.period=v; }
+    // Period history
+    if(!ex.periodHist){
+      try{ const h=JSON.parse(localStorage.getItem("eb_period_hist")||"[]"); if(h.length) save.periodHist=h; }catch(e){}
+    }
+    if(Object.keys(save).length>0){
+      await setDoc(doc(db,"config","settings"), save, {merge:true});
+    }
+  }catch(e){ console.error("Settings migration:",e); }
+}
+
 /* ════ GOOGLE AUTH (module scope — has access to auth, db, etc.) ════ */
 const ADMIN_EMAIL = "omar.halawani.7@gmail.com";
 
@@ -890,6 +917,7 @@ async function handleUser(user){
       av.textContent = user.email.charAt(0).toUpperCase();
     }
     av.style.display="flex";
+    migrateLocalSettings(); // push local data to Firestore on first load
     window.bootAfterAuth && window.bootAfterAuth();
   } else {
     $("auth-screen").style.display="none";
@@ -2032,7 +2060,6 @@ document.addEventListener("click", e => {
   if(action === "delbill") delBill(id);
   if(action === "wabill") waForBill(id);
 });
-
 /* ════ KEYBOARD PIN ════ */
 document.addEventListener("keydown", e => {
   if(!$("sh-pin").classList.contains("on")) return;
