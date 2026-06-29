@@ -34,14 +34,14 @@ button,input,select,textarea{font-family:var(--font);border:none;outline:none;}
 button{cursor:pointer;}
 ::-webkit-scrollbar{width:0;height:0;}
 /* ── AUTH SCREEN ── */
-#auth-screen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+#auth-screen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:0;}
 #denied-screen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;}
-.auth-logo{font-size:64px;margin-bottom:16px;}
-.auth-title{font-size:30px;font-weight:900;letter-spacing:-.6px;margin-bottom:6px;}
-.auth-sub{font-size:14px;color:var(--t3);margin-bottom:48px;text-align:center;line-height:1.5;}
-.google-btn{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e0e0e0;border-radius:14px;padding:14px 28px;font-size:16px;font-weight:700;color:#333;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.08);transition:transform .1s,box-shadow .2s;}
-.google-btn:active{transform:scale(.96);}
-.auth-note{font-size:12px;color:var(--t3);margin-top:20px;text-align:center;line-height:1.6;}
+.auth-logo{margin-bottom:40px;filter:drop-shadow(0 8px 24px rgba(251,140,0,.45));}
+.auth-title{display:none;}
+.auth-sub{display:none;}
+.google-btn{display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #e8e8e8;border-radius:50%;width:54px;height:54px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.12);transition:transform .15s,box-shadow .2s;padding:0;}
+.google-btn:active{transform:scale(.92);box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.auth-note{display:none;}
 .denied-icon{font-size:56px;margin-bottom:16px;}
 .denied-title{font-size:22px;font-weight:900;color:var(--red);margin-bottom:10px;}
 .denied-msg{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:28px;}
@@ -107,6 +107,8 @@ html[lang="ar"] .set-btn{text-align:right;}
 .hbrand{display:flex;align-items:center;gap:6px;}
 .hrefresh{background:transparent;border:none;font-size:16px;padding:4px 5px;border-radius:8px;color:var(--t3);transition:all .18s;opacity:.6;}
 .hrefresh:active{opacity:1;transform:rotate(180deg);}
+.scanbtn{background:var(--bdim);border:1.5px solid rgba(34,197,94,.35);border-radius:10px;padding:9px 12px;font-size:18px;color:var(--blue);transition:all .15s;}
+.scanbtn:active{opacity:.7;}
 .hicon{width:34px;height:34px;background:var(--blue);border-radius:9px;font-size:17px;display:flex;align-items:center;justify-content:center;}
 .htitle{font-size:17px;font-weight:900;letter-spacing:-.4px;}
 .hsub{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-top:1px;}
@@ -349,14 +351,25 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 <body>
 <!-- AUTH SCREEN -->
 <div id="auth-screen">
-  <div class="auth-logo">⚡</div>
-  <div class="auth-title">ElecBill Pro</div>
-  <div class="auth-sub">Sign in with your Google account<br>to access the app</div>
-  <button class="google-btn" onclick="gSignIn()">
-    <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.9 3 4 11.9 4 23s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.2-2.7-.5-3z"/><path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16.2 19.2 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 16.3 3 9.7 7.9 6.3 14.7z"/><path fill="#FBBC05" d="M24 43c5.6 0 10.5-1.9 14.4-5l-6.7-5.5C29.8 34.4 27 35.5 24 35.5c-5.7 0-10.6-3.8-12.3-9.1l-7.1 5.5C8.1 39.3 15.5 43 24 43z"/><path fill="#EA4335" d="M43.6 20H24v8.5h11.9c-.9 2.6-2.6 4.8-4.9 6.3l6.7 5.5C41.5 36.7 44 30.3 44 23c0-1-.1-2-.4-3z"/></svg>
-    Sign in with Google
+  <div class="auth-logo">
+    <svg width="120" height="160" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="boltG" x1="0%" y1="0%" x2="60%" y2="100%">
+          <stop offset="0%" stop-color="#FFD54F"/>
+          <stop offset="45%" stop-color="#FB8C00"/>
+          <stop offset="100%" stop-color="#E53935"/>
+        </linearGradient>
+        <filter id="boltGlow" x="-30%" y="-20%" width="160%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <polygon points="72,4 18,88 56,88 48,156 102,68 64,68" fill="url(#boltG)" filter="url(#boltGlow)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <button class="google-btn" onclick="gSignIn()" title="Sign in with Google">
+    <svg width="26" height="26" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.9 3 4 11.9 4 23s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.2-2.7-.5-3z"/><path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16.2 19.2 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 16.3 3 9.7 7.9 6.3 14.7z"/><path fill="#FBBC05" d="M24 43c5.6 0 10.5-1.9 14.4-5l-6.7-5.5C29.8 34.4 27 35.5 24 35.5c-5.7 0-10.6-3.8-12.3-9.1l-7.1 5.5C8.1 39.3 15.5 43 24 43z"/><path fill="#EA4335" d="M43.6 20H24v8.5h11.9c-.9 2.6-2.6 4.8-4.9 6.3l6.7 5.5C41.5 36.7 44 30.3 44 23c0-1-.1-2-.4-3z"/></svg>
   </button>
-  <div class="auth-note">Only authorized accounts can access this app.</div>
 </div>
 <!-- ACCESS DENIED SCREEN -->
 <div id="denied-screen">
@@ -404,8 +417,10 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
   <div style="height:12px"></div>
   <div class="srow">
     <div class="sbox"><span class="sico">🔍</span><input type="search" id="cs" oninput="rC()" autocomplete="off"></div>
+    <button class="scanbtn" onclick="requireAdmin(openScanner)" title="Scan Receipt">📷</button>
     <button class="addbtn" onclick="requireAdmin(()=>openSh('sh-ac'))">+</button>
   </div>
+  <input type="file" id="scan-input" accept="image/*" capture="environment" style="display:none;position:absolute" onchange="handleScanFile(this)">
   <div class="chips" id="cchips">
     <button class="chip on-b" onclick="cf('all',this)">—</button>
     <button class="chip"      onclick="cf('pending',this)">—</button>
@@ -800,12 +815,53 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
       <button class="set-btn" onclick="closeSh('sh-settings');window.loadAllowedEmails&&window.loadAllowedEmails();openSh('sh-access')">👥 <span id="set_acc">Manage Access</span></button>
     </div>
 
+    <!-- AI Scan -->
+    <div class="set-section" id="set_s_ai">📷 AI Scan</div>
+    <div class="set-row" style="flex-direction:column;align-items:stretch;gap:6px;padding:10px 0">
+      <div class="set-label" id="set_ai_l">Anthropic API Key</div>
+      <div class="set-sub" id="set_ai_s">Required for scanning receipts</div>
+      <input class="fi" id="set_aikey" type="password" placeholder="sk-ant-..." style="margin-top:6px" oninput="saveAIKey(this.value)">
+    </div>
+
     <!-- System -->
     <div class="set-section" id="set_s_sys">🔄 System</div>
     <button class="set-btn" onclick="closeSh('sh-settings');rebootApp()">🔄 <span id="set_reboot">Reboot App</span></button>
     <div class="set-ver">ElecBill Pro • v2.0</div>
 
     <button class="abtn a-ghost" onclick="closeSh('sh-settings')" id="set_close" style="margin-top:4px">Close</button>
+  </div>
+</div>
+<!-- SHEET: SCAN RECEIPT -->
+<div class="ov" id="sh-scan">
+  <div class="sheet" style="max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+    <div class="sh"></div>
+    <div class="stitle">📷 <span id="scan_title">Scan Receipt</span></div>
+    <div id="scan_img_wrap" style="margin-bottom:12px;text-align:center;display:none">
+      <img id="scan_preview" style="max-width:100%;max-height:160px;border-radius:10px;object-fit:contain;border:1px solid var(--border)">
+    </div>
+    <!-- Loading -->
+    <div id="scan_loading" style="text-align:center;padding:28px;display:none">
+      <div class="spin" style="margin:0 auto 14px"></div>
+      <div style="font-size:13px;color:var(--t2)" id="scan_loading_txt">Reading receipt…</div>
+    </div>
+    <!-- Error -->
+    <div id="scan_error" style="display:none;text-align:center;padding:16px">
+      <div style="font-size:40px;margin-bottom:10px">❌</div>
+      <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:6px" id="scan_error_msg">Could not read receipt</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:16px" id="scan_error_sub">Check your API key or try a clearer photo</div>
+      <button class="abtn a-ghost" onclick="closeSh('sh-scan')" id="scan_err_close">Close</button>
+    </div>
+    <!-- Form -->
+    <div id="scan_form" style="display:none">
+      <div id="scan_match_info" style="display:none;font-size:12px;font-weight:700;background:var(--bdim);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 12px;margin-bottom:12px;color:var(--blue)"></div>
+      <div class="fg"><div class="fl" id="scan_name_l">Name</div><input class="fi" id="scan_name" type="text" autocomplete="off"></div>
+      <div class="fg"><div class="fl" id="scan_meter_l">Meter No</div><input class="fi" id="scan_meter" type="text" autocomplete="off"></div>
+      <div class="fg"><div class="fl" id="scan_amount_l">Amount</div><input class="fi" id="scan_amount" type="number" min="0"></div>
+      <div class="fg"><div class="fl" id="scan_period_l">Period</div><input class="fi" id="scan_period" type="text" autocomplete="off"></div>
+      <div class="fg"><div class="fl" id="scan_phone_l">Phone (optional)</div><input class="fi" id="scan_phone" type="tel" autocomplete="off"></div>
+      <button class="abtn a-blue" onclick="saveScanResult()" style="margin-top:4px" id="scan_save">💾 Save Client + Bill</button>
+      <button class="abtn a-ghost" onclick="closeSh('sh-scan')" id="scan_cancel">Cancel</button>
+    </div>
   </div>
 </div>
 <!-- TOAST -->
@@ -1631,6 +1687,8 @@ function openSettings(){
   if(ar)ar.classList.toggle("on",L==="ar");
   // Sync currency input
   const curEl=$("set_cur");if(curEl)curEl.value=getCurrency();
+  // Load AI key
+  const aiEl=$("set_aikey");if(aiEl)aiEl.value=getAIKey();
   updateSettingsUI();
   openSh("sh-settings");
 }
@@ -1657,6 +1715,9 @@ function updateSettingsUI(){
   s("set_wa","WhatsApp API Settings","إعدادات واتساب API");
   s("set_s_acc","👥 Access","👥 الوصول");
   s("set_acc","Manage User Access","إدارة وصول المستخدمين");
+  s("set_s_ai","📷 AI Scan","📷 مسح الفواتير");
+  s("set_ai_l","Anthropic API Key","مفتاح Anthropic API");
+  s("set_ai_s","Required for scanning receipts","مطلوب لمسح الفواتير بالكاميرا");
   s("set_s_sys","🔄 System","🔄 النظام");
   s("set_reboot","Reboot App","إعادة تشغيل التطبيق");
   s("set_close","Close","إغلاق");
@@ -2236,6 +2297,120 @@ document.addEventListener("click", e => {
   if(action === "delbill") delBill(id);
   if(action === "wabill") waForBill(id);
 });
+/* ════ AI RECEIPT SCANNER ════ */
+function getAIKey(){return localStorage.getItem("eb_aikey")||"";}
+function saveAIKey(val){localStorage.setItem("eb_aikey",val);}
+function openScanner(){
+  const inp=$("scan-input");
+  if(inp)inp.click();
+}
+function handleScanFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  input.value="";
+  const key=getAIKey();
+  if(!key){
+    toast("⚠️",L==="ar"?"مفتاح API مطلوب":"API Key Required",L==="ar"?"أضف مفتاح Anthropic من الإعدادات":"Add Anthropic key in Settings → AI Scan");
+    return;
+  }
+  openSh("sh-scan");
+  $("scan_loading").style.display="block";
+  $("scan_form").style.display="none";
+  $("scan_error").style.display="none";
+  $("scan_img_wrap").style.display="none";
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const dataUrl=e.target.result;
+    $("scan_preview").src=dataUrl;
+    $("scan_img_wrap").style.display="block";
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=1200;
+      let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){const r=Math.min(MAX/w,MAX/h);w=Math.round(w*r);h=Math.round(h*r);}
+      const canvas=document.createElement("canvas");
+      canvas.width=w;canvas.height=h;
+      canvas.getContext("2d").drawImage(img,0,0,w,h);
+      sendToClaudeVision(canvas.toDataURL("image/jpeg",0.88).split(",")[1]);
+    };
+    img.src=dataUrl;
+  };
+  reader.readAsDataURL(file);
+}
+async function sendToClaudeVision(base64){
+  const a=L==="ar";
+  if($("scan_loading_txt"))$("scan_loading_txt").textContent=a?"جارٍ قراءة الفاتورة…":"Reading receipt…";
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":getAIKey(),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({
+        model:"claude-haiku-4-5-20251001",max_tokens:400,
+        messages:[{role:"user",content:[
+          {type:"image",source:{type:"base64",media_type:"image/jpeg",data:base64}},
+          {type:"text",text:'This is an electricity bill receipt (may be in Arabic). Extract these fields and return ONLY raw JSON, no extra text:\n{"name":"subscriber full name","meter":"meter number or subscription code","amount":total_amount_as_number_only,"period":"billing period if shown e.g. 3-4 else null"}\nIf a field is not found use null.'}
+        ]}]
+      })
+    });
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error.message);
+    const text=data.content[0].text.trim();
+    const match=text.match(/\{[\s\S]*?\}/);
+    if(!match)throw new Error("Could not parse response");
+    showScanForm(JSON.parse(match[0]));
+  }catch(err){
+    $("scan_loading").style.display="none";
+    $("scan_error").style.display="block";
+    if($("scan_error_msg"))$("scan_error_msg").textContent=err.message||"Scan failed";
+    console.error("scan",err);
+  }
+}
+function showScanForm(ex){
+  $("scan_loading").style.display="none";
+  $("scan_form").style.display="block";
+  const a=L==="ar";
+  if($("scan_name"))$("scan_name").value=ex.name||"";
+  if($("scan_meter"))$("scan_meter").value=ex.meter||"";
+  if($("scan_amount"))$("scan_amount").value=ex.amount||"";
+  if($("scan_period"))$("scan_period").value=ex.period||getPeriod()||"";
+  if($("scan_phone"))$("scan_phone").value="";
+  const meter=(ex.meter||"").trim();
+  const existing=meter?gC().find(c=>(c.meter||"").trim()===meter):null;
+  const mi=$("scan_match_info");
+  if(mi){
+    if(existing){mi.style.display="block";mi.textContent=a?`✅ عميل موجود: ${existing.name} — سيتم إضافة الفاتورة فقط`:`✅ Existing client found: ${existing.name} — will add bill only`;}
+    else{mi.style.display="none";}
+  }
+  if($("scan_title"))$("scan_title").textContent=a?"راجع البيانات":"Review Data";
+  if($("scan_name_l"))$("scan_name_l").textContent=a?"الاسم":"Name";
+  if($("scan_meter_l"))$("scan_meter_l").textContent=a?"رقم العداد":"Meter No";
+  if($("scan_amount_l"))$("scan_amount_l").textContent=a?"المبلغ":"Amount";
+  if($("scan_period_l"))$("scan_period_l").textContent=a?"الفترة":"Period";
+  if($("scan_phone_l"))$("scan_phone_l").textContent=a?"رقم الهاتف (اختياري)":"Phone (optional)";
+  if($("scan_save"))$("scan_save").textContent=a?"💾 حفظ العميل والفاتورة":"💾 Save Client + Bill";
+  if($("scan_cancel"))$("scan_cancel").textContent=a?"إلغاء":"Cancel";
+}
+async function saveScanResult(){
+  const name=($("scan_name").value||"").trim();
+  const meter=($("scan_meter").value||"").trim();
+  const amount=parseFloat($("scan_amount").value)||0;
+  const period=($("scan_period").value||"").trim();
+  const phone=($("scan_phone").value||"").trim();
+  const a=L==="ar";
+  if(!name)return toast("⚠️",a?"الاسم مطلوب":"Name required","");
+  if(!meter)return toast("⚠️",a?"رقم العداد مطلوب":"Meter required","");
+  if(!amount)return toast("⚠️",a?"المبلغ مطلوب":"Amount required","");
+  try{
+    let clientId;
+    const existing=gC().find(c=>(c.meter||"").trim()===meter);
+    if(existing){clientId=existing.id;}
+    else{const ref=await window.DB.addClient({name,meter,phone,address:""});clientId=ref.id;}
+    const due=new Date();due.setDate(due.getDate()+30);
+    await window.DB.addBill({clientId,month:period,amount,dueDate:due.toISOString().split("T")[0],paid:false,desc:""});
+    closeSh("sh-scan");renderAll();
+    toast("✅",a?"تم الحفظ":"Saved",`${name} — ${getCurrency()}${fmt(amount)}`);
+  }catch(err){toast("❌",a?"خطأ":"Error",err.message);}
+}
 /* ════ KEYBOARD PIN ════ */
 document.addEventListener("keydown", e => {
   if(!$("sh-pin").classList.contains("on")) return;
