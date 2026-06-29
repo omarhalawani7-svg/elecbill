@@ -1423,7 +1423,7 @@ function requireAdmin(action){
   __pinBuf="";
   updateDots();
   openSh("sh-pin");
-  setTimeout(updateFaceIDBtn,80);
+  setTimeout(()=>{updateFaceIDBtn();autoFaceID();},200);
 }
 function rebootApp(){
   if('caches' in window){
@@ -1441,7 +1441,7 @@ function toggleAdmin(){
     __pinBuf="";
     updateDots();
     openSh("sh-pin");
-    setTimeout(updateFaceIDBtn,80);
+    setTimeout(()=>{updateFaceIDBtn();autoFaceID();},200);
   }
 }
 function cancelPin(){
@@ -2504,6 +2504,11 @@ async function tryFaceID(){
   }catch(err){
     if(err.name!=="NotAllowedError") toast("❌",a?"فشل التحقق":"Biometric failed",err.message);
   }
+}
+async function autoFaceID(){
+  if(!localStorage.getItem("eb_bioid"))return;
+  if(!await checkBiometricSupport())return;
+  tryFaceID();
 }
 /* ════ KEYBOARD PIN ════ */
 document.addEventListener("keydown", e => {
