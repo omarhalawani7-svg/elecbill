@@ -104,7 +104,9 @@ html[lang="ar"] .set-btn{text-align:right;}
 .sp-hint{font-size:11px;color:var(--t3);}
 /* ── HEADER ── */
 .hdr{position:sticky;top:0;z-index:80;background:rgba(245,245,245,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;}
-.hbrand{display:flex;align-items:center;gap:10px;}
+.hbrand{display:flex;align-items:center;gap:6px;}
+.hrefresh{background:transparent;border:none;font-size:16px;padding:4px 5px;border-radius:8px;color:var(--t3);transition:all .18s;opacity:.6;}
+.hrefresh:active{opacity:1;transform:rotate(180deg);}
 .hicon{width:34px;height:34px;background:var(--blue);border-radius:9px;font-size:17px;display:flex;align-items:center;justify-content:center;}
 .htitle{font-size:17px;font-weight:900;letter-spacing:-.4px;}
 .hsub{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-top:1px;}
@@ -386,6 +388,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 <header class="hdr">
   <div class="hbrand">
     <button class="hadm hicon" id="h_adm" onclick="toggleAdmin()" title="Admin">⚡</button>
+    <button class="hrefresh" onclick="location.reload()" title="Refresh">🔄</button>
   </div>
   <div class="hright">
     <button class="hperiod no-period" id="h_period" onclick="openPeriodPicker()" title="Billing Period"><span class="hperiod-dot"></span><span id="h_period_txt">—</span></button>
@@ -396,13 +399,6 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="uavatar" id="h_avatar" onclick="gSignOut()" title="Sign out" style="cursor:pointer;display:none"></div>
   </div>
 </header>
-<!-- STATS -->
-<div class="stats">
-  <div class="stat s1"><div class="sv" id="sc">0</div><div class="sl" id="sl1">Clients</div></div>
-  <div class="stat s2"><div class="sv" id="sp">0</div><div class="sl" id="sl2">Pending</div></div>
-  <div class="stat s3"><div class="sv" id="so">0</div><div class="sl" id="sl3">Overdue</div></div>
-  <div class="stat s4"><div class="sv" id="sd">0</div><div class="sl" id="sl4">Paid</div></div>
-</div>
 <!-- PAGE: CLIENTS -->
 <div class="pg on" id="pg-c">
   <div style="height:12px"></div>
@@ -785,10 +781,6 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
       <div class="set-row-l"><div class="set-label" id="set_cur_l">Currency Symbol</div></div>
       <input class="set-input" id="set_cur" type="text" maxlength="4" value="$" oninput="saveCurrency(this.value)">
     </div>
-    <div class="set-row">
-      <div class="set-row-l"><div class="set-label" id="set_due_l">Default Due Days</div><div class="set-sub" id="set_due_s">Days after bill issue date</div></div>
-      <input class="set-input" id="set_due" type="number" min="1" max="365" value="30" oninput="saveDueDays(this.value)">
-    </div>
 
     <!-- Security -->
     <div class="set-section" id="set_s_sec">🔒 Security</div>
@@ -899,10 +891,6 @@ onSnapshot(doc(db,"config","whatsapp"), snap => {
     localStorage.setItem("eb_theme", d.eb_theme);
     document.documentElement.setAttribute("data-theme", d.eb_theme==="dark"?"dark":"light");
     needsRender = true;
-  }
-  if(d.eb_fsize !== undefined && d.eb_fsize !== localStorage.getItem("eb_fsize")){
-    localStorage.setItem("eb_fsize", d.eb_fsize);
-    if(window.applyFontSize) window.applyFontSize(d.eb_fsize);
   }
   if(d.eb_adm !== undefined && d.eb_adm !== localStorage.getItem("eb_adm")){
     localStorage.setItem("eb_adm", d.eb_adm);
@@ -1273,9 +1261,17 @@ const v=id=>(document.getElementById(id)?.value||"").trim();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const fmt=n=>Number(n||0).toLocaleString("en-US");
+const AR_MONTHS=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
 const fmtD=d=>{
   if(!d) return "—";
-  try{return new Date(d).toLocaleDateString(L==="ar"?"ar-DZ":"en-GB",{day:"2-digit",month:"short",year:"numeric"});}catch(e){return d;}
+  try{
+    const dt=new Date(d);
+    if(L==="ar"){
+      const day=String(dt.getDate()).padStart(2,"0");
+      return `${day} ${AR_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`;
+    }
+    return dt.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+  }catch(e){return d;}
 };
 
 /* ════ BOOT ════ */
@@ -1402,11 +1398,19 @@ function updateDots(){
   const el=$("pin_dots");if(!el)return;
   el.innerHTML=[0,1,2,3].map(i=>`<span class="pdot ${i<__pinBuf.length?'filled':''}"></span>`).join('');
 }
+let __lockTimer=null;
+function startAutoLock(){
+  clearTimeout(__lockTimer);
+  __lockTimer=setTimeout(()=>{
+    if(__admin){__admin=false;updateAdminBtn();toast("🔒",L==="ar"?"تم القفل تلقائياً":"Auto-locked","");}
+  },20000);
+}
 function checkPin(){
   if(__pinBuf===getPin()){
     __admin=true; __pinBuf="";
     closeSh("sh-pin");
     updateAdminBtn();
+    startAutoLock();
     toast(...T.t_adm_on);
     if(__pendingAction){const a=__pendingAction;__pendingAction=null;setTimeout(a,280);}
     else if(detId){setTimeout(()=>openDet(detId),280);}
@@ -1562,7 +1566,7 @@ function confirmPeriod(){
 }
 /* ════ SETTINGS FUNCTIONS ════ */
 function getCurrency(){return localStorage.getItem("eb_cur")||"$";}
-function getDueDays(){return parseInt(localStorage.getItem("eb_due")||"30");}
+function getDueDays(){return 30;}
 function saveCurrency(val){
   if(!val)return;
   localStorage.setItem("eb_cur",val);
@@ -1593,7 +1597,6 @@ window.applyFontSize=applyFontSize;
 function setFontSize(s){
   applyFontSize(s);
   localStorage.setItem("eb_fsize",s);
-  window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_fsize:s});
   ["small","medium","large"].forEach(k=>{
     const btn=$("set_fs_"+k[0]);
     if(btn)btn.classList.toggle("on",k===s);
@@ -1626,9 +1629,8 @@ function openSettings(){
   const en=$("set_en"),ar=$("set_ar");
   if(en)en.classList.toggle("on",L==="en");
   if(ar)ar.classList.toggle("on",L==="ar");
-  // Sync currency + due days inputs
+  // Sync currency input
   const curEl=$("set_cur");if(curEl)curEl.value=getCurrency();
-  const dueEl=$("set_due");if(dueEl)dueEl.value=getDueDays();
   updateSettingsUI();
   openSh("sh-settings");
 }
@@ -1638,14 +1640,15 @@ function updateSettingsUI(){
   s("set_title","Settings","الإعدادات");
   s("set_s_lang","🌐 Language","🌐 اللغة");
   s("set_lang_l","Display Language","لغة التطبيق");
-  s("set_s_app","🎨 Appearance","🎨 المظهر");
-  s("set_theme_l","Theme","السمة");
+  s("set_s_app","🎨 Appearance","🎨 الشكل والعرض");
+  s("set_fsize_l","Text Size","حجم الخط");
+  s("set_theme_l","Theme","وضع العرض");
   s("set_light","☀️ Light","☀️ فاتح");
   s("set_dark","🌙 Dark","🌙 داكن");
   s("set_s_bil","💱 Billing","💱 الفوترة");
   s("set_cur_l","Currency Symbol","رمز العملة");
-  s("set_due_l","Default Due Days","أيام الاستحقاق");
-  s("set_due_s","Days after bill issue date","أيام بعد تاريخ الإصدار");
+  s("set_msgtpl","Edit Bill Message Template","تعديل رسالة الفاتورة");
+  s("set_remtpl","Edit Reminder Template","تعديل رسالة التذكير");
   s("set_s_sec","🔒 Security","🔒 الأمان");
   s("set_chpin","Change Admin PIN","تغيير رمز PIN");
   s("set_lock","Lock Admin Mode","قفل وضع المدير");
@@ -1691,13 +1694,15 @@ const unpaidT=cid=>gB().filter(b=>b.clientId===cid&&!b.paid).reduce((s,b)=>s+(b.
 const paidT=cid=>gB().filter(b=>b.clientId===cid&&b.paid).reduce((s,b)=>s+(b.amount||0),0);
 
 /* ════ RENDER ALL ════ */
-function renderAll(){rStats();rC();rB();if(curP==="s")rS();if(detId)openDet(detId);}
-function rStats(){
+function renderAll(){rChipCounts();rC();rB();if(curP==="s")rS();if(detId)openDet(detId);}
+function rChipCounts(){
   const cl=gC();
-  $("sc").textContent=cl.length;
-  $("sp").textContent=cl.filter(c=>getSt(c.id)==="pending").length;
-  $("so").textContent=cl.filter(c=>getSt(c.id)==="overdue").length;
-  $("sd").textContent=gB().filter(b=>b.paid).length;
+  const n={all:cl.length,pending:0,overdue:0,paid:0,none:0};
+  cl.forEach(c=>{const st=getSt(c.id);if(n[st]!==undefined)n[st]++;});
+  const chips=document.querySelectorAll("#cchips .chip");
+  const labels=[T.cc_all,T.cc_pend,T.cc_over,T.cc_paid,T.cc_none];
+  const counts=[n.all,n.pending,n.overdue,n.paid,n.none];
+  chips.forEach((chip,i)=>{chip.textContent=`${labels[i]||""} ${counts[i]!==undefined?"("+counts[i]+")":""}`;});
 }
 
 /* ════ CHIPS / FILTERS ════ */
