@@ -620,6 +620,10 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
         <button class="pkey pkey-del" onclick="pinBack()">⌫</button>
       </div>
     </div>
+    <button id="faceid_btn" onclick="tryFaceID()" style="display:none;align-items:center;justify-content:center;gap:8px;margin:16px auto 0;padding:12px 28px;background:var(--bdim);border:1.5px solid var(--blue);border-radius:50px;color:var(--blue);font-size:14px;font-weight:700;cursor:pointer;width:auto">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3"/><path d="M6.5 17.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M4 4c0-1.1.9-2 2-2"/><path d="M20 4c0-1.1-.9-2-2-2"/><path d="M4 20c0 1.1.9 2 2 2"/><path d="M20 20c0 1.1-.9 2-2 2"/></svg>
+      <span id="faceid_lbl">Face ID</span>
+    </button>
   </div>
 </div>
 <!-- SHEET: CHANGE PIN -->
@@ -802,6 +806,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <!-- Security -->
     <div class="set-section" id="set_s_sec">🔒 Security</div>
     <button class="set-btn" onclick="closeSh('sh-settings');openSh('sh-chpin')">🔑 <span id="set_chpin">Change Admin PIN</span></button>
+    <button class="set-btn" id="set_bio_btn" onclick="toggleBiometric()">🔐 <span id="set_bio_lbl">Enable Face ID / Biometrics</span></button>
     <button class="set-btn" onclick="lockAdminFromSettings()">🔒 <span id="set_lock">Lock Admin Mode</span></button>
     <button class="set-btn danger" onclick="closeSh('sh-settings');window.gSignOut&&window.gSignOut()">↪️ <span id="set_signout">Sign Out</span></button>
 
@@ -1418,6 +1423,7 @@ function requireAdmin(action){
   __pinBuf="";
   updateDots();
   openSh("sh-pin");
+  setTimeout(updateFaceIDBtn,80);
 }
 function rebootApp(){
   if('caches' in window){
@@ -1431,10 +1437,11 @@ function toggleAdmin(){
   if(__admin){
     openSettings();
   } else {
-    __pendingAction=null;
+    __pendingAction=()=>openSettings();
     __pinBuf="";
     updateDots();
     openSh("sh-pin");
+    setTimeout(updateFaceIDBtn,80);
   }
 }
 function cancelPin(){
@@ -1676,6 +1683,7 @@ function lockAdminFromSettings(){
   if(detId) openDet(detId);
 }
 function openSettings(){
+  updateBioSettingBtn();
   // Show/hide admin-only section
   const isSuper=window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com";
   const wrap=$("set_access_wrap");if(wrap)wrap.style.display=isSuper?"block":"none";
@@ -2416,6 +2424,86 @@ async function saveScanResult(){
     closeSh("sh-scan");renderAll();
     toast("✅",a?"تم الحفظ":"Saved",`${name} — ${getCurrency()}${fmt(amount)}`);
   }catch(err){toast("❌",a?"خطأ":"Error",err.message);}
+}
+/* ════ FACE ID / BIOMETRICS ════ */
+async function checkBiometricSupport(){
+  return !!(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(()=>false));
+}
+async function updateFaceIDBtn(){
+  const btn=$("faceid_btn");if(!btn)return;
+  const sup=await checkBiometricSupport();
+  const has=!!localStorage.getItem("eb_bioid");
+  btn.style.display=(sup&&has)?"flex":"none";
+  const a=L==="ar";
+  if($("faceid_lbl"))$("faceid_lbl").textContent=a?"الوجه / البصمة":"Face ID / Biometrics";
+}
+async function updateBioSettingBtn(){
+  const lbl=$("set_bio_lbl");if(!lbl)return;
+  const sup=await checkBiometricSupport();
+  const has=!!localStorage.getItem("eb_bioid");
+  const a=L==="ar";
+  const btn=$("set_bio_btn");
+  if(!sup){if(btn)btn.style.display="none";return;}
+  if(btn)btn.style.display="flex";
+  lbl.textContent=has?(a?"🔐 تعطيل Face ID / البصمة":"🔐 Disable Face ID / Biometrics"):(a?"🔐 تفعيل Face ID / البصمة":"🔐 Enable Face ID / Biometrics");
+}
+async function toggleBiometric(){
+  if(localStorage.getItem("eb_bioid")){
+    localStorage.removeItem("eb_bioid");
+    toast("🔒",L==="ar"?"تم التعطيل":"Disabled",L==="ar"?"Face ID / البصمة":"Face ID / Biometrics");
+    updateBioSettingBtn();
+  } else {
+    await registerBiometric();
+  }
+}
+async function registerBiometric(){
+  const a=L==="ar";
+  if(!await checkBiometricSupport()){
+    toast("⚠️",a?"غير مدعوم":"Not supported",a?"جهازك لا يدعم المصادقة البيومترية":"Device doesn't support biometrics");
+    return;
+  }
+  try{
+    const challenge=crypto.getRandomValues(new Uint8Array(32));
+    const cred=await navigator.credentials.create({
+      publicKey:{
+        challenge,
+        rp:{name:"ElecBill Pro",id:location.hostname},
+        user:{id:new Uint8Array([1,0,0,0]),name:"admin",displayName:"Admin"},
+        pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],
+        authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required"},
+        timeout:60000
+      }
+    });
+    localStorage.setItem("eb_bioid",btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
+    toast("✅",a?"تم التفعيل":"Enabled",a?"يمكنك الآن استخدام Face ID للدخول":"You can now use Face ID to unlock");
+    updateBioSettingBtn();
+  }catch(err){
+    if(err.name!=="NotAllowedError") toast("❌",a?"فشل التسجيل":"Registration failed",err.message);
+  }
+}
+async function tryFaceID(){
+  const a=L==="ar";
+  const credId=localStorage.getItem("eb_bioid");
+  if(!credId){
+    toast("⚠️",a?"Face ID غير مفعّل":"Face ID not set up",a?"فعّله من الإعدادات":"Enable it in Settings first");
+    return;
+  }
+  try{
+    const rawId=Uint8Array.from(atob(credId),c=>c.charCodeAt(0));
+    const challenge=crypto.getRandomValues(new Uint8Array(32));
+    await navigator.credentials.get({
+      publicKey:{challenge,allowCredentials:[{id:rawId,type:"public-key"}],userVerification:"required",timeout:60000}
+    });
+    __admin=true;__pinBuf="";
+    closeSh("sh-pin");
+    updateAdminBtn();
+    startAutoLock();
+    toast("✅",a?"تم التحقق":"Verified","");
+    if(__pendingAction){const fn=__pendingAction;__pendingAction=null;setTimeout(fn,280);}
+    else setTimeout(()=>openSettings(),280);
+  }catch(err){
+    if(err.name!=="NotAllowedError") toast("❌",a?"فشل التحقق":"Biometric failed",err.message);
+  }
 }
 /* ════ KEYBOARD PIN ════ */
 document.addEventListener("keydown", e => {
