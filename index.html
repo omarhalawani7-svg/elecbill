@@ -420,7 +420,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <button class="scanbtn" onclick="requireAdmin(openScanner)" title="Scan Receipt">📷</button>
     <button class="addbtn" onclick="requireAdmin(()=>openSh('sh-ac'))">+</button>
   </div>
-  <input type="file" id="scan-input" accept="image/*" capture="environment" style="display:none;position:absolute" onchange="handleScanFile(this)">
+  <input type="file" id="scan-input" accept="image/*" style="display:none;position:absolute" onchange="handleScanFile(this)">
   <div class="chips" id="cchips">
     <button class="chip on-b" onclick="cf('all',this)">—</button>
     <button class="chip"      onclick="cf('pending',this)">—</button>
