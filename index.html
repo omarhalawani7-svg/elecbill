@@ -1533,23 +1533,20 @@ function renderPeriodChips(hist){
   if(!hrow)return;
   if(hw)hw.style.display=hist.length?"block":"none";
   if($("per_hist_lbl"))$("per_hist_lbl").textContent=a?"فترات سابقة":"Previous periods";
-  hrow.innerHTML=hist.map(p=>`<button class="period-hist-btn${p===cur?" active":""}" onclick="quickPeriod('${p.replace(/'/g,"\\'")}')">📅 ${p}</button>`).join("");
-  // Long-press (800ms) to trigger hidden delete
+  hrow.innerHTML=hist.map(p=>`<button class="period-hist-btn${p===cur?" active":""}">📅 ${p}</button>`).join("");
+  // Long-press (800ms) to trigger hidden delete; short tap = select period
   hrow.querySelectorAll(".period-hist-btn").forEach((btn,i)=>{
     const p=hist[i];
-    let timer;
-    const start=(e)=>{ e.preventDefault(); timer=setTimeout(()=>openDeletePeriod(p),800); };
-    const cancel=()=>clearTimeout(timer);
-    btn.style.userSelect="none";
-    btn.style.webkitUserSelect="none";
-    btn.style.webkitTouchCallout="none";
-    btn.addEventListener("touchstart",start,{passive:false});
-    btn.addEventListener("touchend",cancel);
-    btn.addEventListener("touchmove",cancel);
+    let timer, moved=false;
+    btn.style.userSelect="none";btn.style.webkitUserSelect="none";btn.style.webkitTouchCallout="none";
+    btn.addEventListener("click",()=>quickPeriod(p));
+    btn.addEventListener("touchstart",()=>{moved=false;timer=setTimeout(()=>openDeletePeriod(p),800);},{passive:true});
+    btn.addEventListener("touchmove",()=>{moved=true;clearTimeout(timer);});
+    btn.addEventListener("touchend",()=>clearTimeout(timer));
     btn.addEventListener("contextmenu",e=>e.preventDefault());
-    btn.addEventListener("mousedown",start);
-    btn.addEventListener("mouseup",cancel);
-    btn.addEventListener("mouseleave",cancel);
+    btn.addEventListener("mousedown",()=>{timer=setTimeout(()=>openDeletePeriod(p),800);});
+    btn.addEventListener("mouseup",()=>clearTimeout(timer));
+    btn.addEventListener("mouseleave",()=>clearTimeout(timer));
   });
 }
 function openDeletePeriod(p){
