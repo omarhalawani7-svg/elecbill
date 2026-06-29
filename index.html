@@ -417,7 +417,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
   <div style="height:12px"></div>
   <div class="srow">
     <div class="sbox"><span class="sico">🔍</span><input type="search" id="cs" oninput="rC()" autocomplete="off"></div>
-    <button class="scanbtn" onclick="requireAdmin(openScanner)" title="Scan Receipt">📷</button>
+    <button class="scanbtn" onclick="openScanner()" title="Scan Receipt">📷</button>
     <button class="addbtn" onclick="requireAdmin(()=>openSh('sh-ac'))">+</button>
   </div>
   <input type="file" id="scan-input" accept="image/*" style="display:none;position:absolute" onchange="handleScanFile(this)">
@@ -2305,6 +2305,11 @@ document.addEventListener("click", e => {
 function getAIKey(){return localStorage.getItem("eb_aikey")||"";}
 function saveAIKey(val){localStorage.setItem("eb_aikey",val);}
 function openScanner(){
+  const key=getAIKey();
+  if(!key){
+    toast("⚠️",L==="ar"?"مفتاح API مطلوب":"API Key Required",L==="ar"?"أضف مفتاح Anthropic من الإعدادات":"Add Anthropic key in Settings → 📷 AI Scan");
+    return;
+  }
   const inp=$("scan-input");
   if(inp)inp.click();
 }
@@ -2312,11 +2317,6 @@ function handleScanFile(input){
   const file=input.files[0];
   if(!file)return;
   input.value="";
-  const key=getAIKey();
-  if(!key){
-    toast("⚠️",L==="ar"?"مفتاح API مطلوب":"API Key Required",L==="ar"?"أضف مفتاح Anthropic من الإعدادات":"Add Anthropic key in Settings → AI Scan");
-    return;
-  }
   openSh("sh-scan");
   $("scan_loading").style.display="block";
   $("scan_form").style.display="none";
