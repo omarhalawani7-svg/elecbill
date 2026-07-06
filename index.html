@@ -168,6 +168,27 @@ html[dir="ltr"] .cc::before{left:0;}
 html[dir="rtl"] .cc::before{right:0;left:auto;}
 .cc.sp::before{background:var(--yellow);} .cc.so::before{background:var(--red);}
 .cc.sd::before{background:var(--green);}  .cc.sn::before{background:var(--border2);}
+.cc.sc2::before{background:#7B0000;}
+/* Swipe-to-pay */
+.cc-wrap{position:relative;overflow:hidden;border-radius:var(--rl);margin-bottom:9px;}
+.cc-wrap .cc{margin-bottom:0;border-radius:var(--rl);will-change:transform;}
+.cc-swipe-bg{position:absolute;inset:0;background:var(--green);display:flex;align-items:center;padding:0 22px;gap:10px;}
+.cc-swipe-icon{font-size:26px;color:#fff;font-weight:900;}
+.cc-swipe-lbl{font-size:13px;font-weight:800;color:#fff;}
+/* Bulk select */
+.cc.selected{border-color:var(--blue)!important;background:var(--bdim)!important;}
+.cc.selected::after{content:"✓";position:absolute;top:10px;right:12px;width:22px;height:22px;background:var(--blue);color:#fff;border-radius:50%;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+html[lang="ar"] .cc.selected::after{right:auto;left:12px;}
+.selectbtn{background:var(--card2);border:1.5px solid var(--border2);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;color:var(--t2);transition:all .15s;white-space:nowrap;}
+.selectbtn.on{background:var(--bdim);border-color:var(--blue);color:var(--blue);}
+/* Bulk action bar */
+.bulk-bar{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:200;background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:10px 16px;box-shadow:0 8px 32px rgba(0,0,0,.22);display:none;gap:10px;align-items:center;white-space:nowrap;}
+.bulk-bar.on{display:flex;}
+.bulk-count{font-size:13px;font-weight:800;color:var(--text);}
+/* Critical overdue badge */
+.badge.bc{background:rgba(123,0,0,.15);color:#7B0000;border-color:rgba(123,0,0,.4);font-weight:900;}
+/* Payment date on bills */
+.bc-paiddate{font-size:11px;color:var(--green);margin-top:4px;font-weight:700;}
 .cc:active{transform:scale(.984);}
 .cc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
 .cc-name{font-size:16px;font-weight:700;line-height:1.2;}
@@ -420,9 +441,12 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
   <div class="srow">
     <div class="sbox"><span class="sico">🔍</span><input type="search" id="cs" oninput="rC()" autocomplete="off"></div>
     <button class="scanbtn" onclick="openScanner()" title="Scan Receipt">📷</button>
+    <button class="selectbtn" id="select_btn" onclick="toggleSelectMode()" title="Select">☑️</button>
     <button class="addbtn" onclick="requireAdmin(()=>openSh('sh-ac'))">+</button>
   </div>
   <input type="file" id="scan-input" accept="image/*" style="display:none;position:absolute" onchange="handleScanFile(this)">
+  <!-- Bulk remind button (shown below chips when unpaid clients exist) -->
+  <div id="remind_bar" style="display:none;padding:0 12px 8px;"><button class="abtn a-wa" id="remind_all_btn" onclick="requireAdmin(sendBulkReminders)" style="margin:0;padding:10px 16px;font-size:13px">📢 <span id="remind_all_lbl">Remind All Unpaid</span></button></div>
   <div class="chips" id="cchips">
     <button class="chip on-b" onclick="cf('all',this)">—</button>
     <button class="chip"      onclick="cf('pending',this)">—</button>
@@ -870,6 +894,12 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
       <button class="abtn a-ghost" onclick="closeSh('sh-scan')" id="scan_cancel">Cancel</button>
     </div>
   </div>
+</div>
+<!-- BULK ACTION BAR -->
+<div class="bulk-bar" id="bulk_bar">
+  <span class="bulk-count" id="bulk_count">0</span>
+  <button class="abtn a-blue" onclick="bulkMarkPaid()" style="margin:0;padding:8px 16px;font-size:13px" id="bulk_pay_btn">✅ Mark Paid</button>
+  <button class="abtn a-ghost" onclick="toggleSelectMode()" style="margin:0;padding:8px 12px;font-size:13px" id="bulk_cancel_btn">✕</button>
 </div>
 <!-- TOAST -->
 <div class="toast" id="toast"><div class="ti" id="t_i">✅</div><div><div class="tt" id="t_t"></div><div class="tm" id="t_m"></div></div></div>
@@ -1801,17 +1831,29 @@ function rC(){
     el.innerHTML=`<div class="empty"><div class="ei">🔍</div><div class="et">${T.empty_c_t}</div><div class="es">${T.empty_c_s}</div></div>`;
     return;
   }
-  const badgeMap={pending:`<span class="badge bp">${T.bp_t}</span>`,overdue:`<span class="badge bo">${T.bo_t}</span>`,paid:`<span class="badge bd">${T.bd_t}</span>`,none:`<span class="badge bn">${T.bn_t}</span>`};
   const stMap={pending:"sp",overdue:"so",paid:"sd",none:"sn"};
+  const badgeFor=(st,crit)=>{
+    if(crit)return `<span class="badge bc">🚨 ${L==="ar"?"متأخر جداً":"Critical"}</span>`;
+    return {pending:`<span class="badge bp">${T.bp_t}</span>`,overdue:`<span class="badge bo">${T.bo_t}</span>`,paid:`<span class="badge bd">${T.bd_t}</span>`,none:`<span class="badge bn">${T.bn_t}</span>`}[st]||"";
+  };
   el.innerHTML=list.map(c=>{
     const st=getSt(c.id),ut=unpaidT(c.id),bc=gB().filter(b=>b.clientId===c.id).length;
-    return `<div class="cc ${stMap[st]}" onclick="openDet('${c.id}')">
+    const crit=hasCritical(c.id),sel=__selectedIds.has(c.id);
+    const click=__selectMode?`toggleSelectClient('${c.id}')`:`openDet('${c.id}')`;
+    return `<div class="cc-wrap"><div class="cc-swipe-bg"><div class="cc-swipe-icon">✅</div><div class="cc-swipe-lbl">${L==="ar"?"تم الدفع":"Paid"}</div></div>
+    <div class="cc ${stMap[st]}${crit?" sc2":""}${sel?" selected":""}" data-id="${c.id}" onclick="${click}">
       <div class="cc-top"><div class="cc-name">${esc(c.name)}</div><div class="cc-meter">${esc(c.meter)}</div></div>
-      <div class="cc-row">${badgeMap[st]}${ut>0?`<span class="cc-amt">${getCurrency()}${fmt(ut)}</span>`:""}
+      <div class="cc-row">${badgeFor(st,crit)}${ut>0?`<span class="cc-amt">${getCurrency()}${fmt(ut)}</span>`:""}
       <span style="font-size:11px;color:var(--t3)">${bc} ${bc===1?T.bill_s:T.bills_s}</span></div>
       ${c.phone?`<div class="cc-phone">📲 ${esc(c.phone)}</div>`:`<div class="cc-nophone">${T.no_phone_c}</div>`}
-    </div>`;
+    </div></div>`;
   }).join("");
+  const rb=$("remind_bar");if(rb){
+    const hasUnpaidPhone=gC().some(c=>{const st=getSt(c.id);return (st==="pending"||st==="overdue")&&(c.phone||"").trim();});
+    rb.style.display=hasUnpaidPhone?"block":"none";
+    const rbl=$("remind_all_lbl");if(rbl)rbl.textContent=L==="ar"?"تذكير كل المتأخرين":"Remind All Unpaid";
+  }
+  if(!__selectMode)initSwipes();
 }
 
 /* ════ RENDER ALL BILLS ════ */
@@ -1864,6 +1906,7 @@ function openDet(id){
       return `<div class="bc ${cls}">
         <div class="bc-top"><div><div class="bc-period">${esc(b.month||"—")}</div><div style="margin-top:4px">${bg(b)}</div></div><div class="bc-amt">${getCurrency()}${fmt(b.amount)}</div></div>
         <div class="bc-dates">${T.due_lbl} ${fmtD(b.dueDate)}</div>
+        ${b.paid&&b.paidAt?`<div class="bc-paiddate">✅ ${L==="ar"?"تم الدفع بتاريخ":"Paid on"} ${fmtD(new Date(b.paidAt).toISOString().split("T")[0])}</div>`:""}
         ${b.desc?`<div class="bc-desc">💬 ${esc(b.desc)}</div>`:""}
         <div class="bc-acts">
           ${!b.paid&&hp?`<button class="bca bca-wa" data-action="wabill" data-id="${b.id}">${T.wa_btn}</button>`:""}
@@ -1910,6 +1953,8 @@ async function saveClient(){
   const phone=buildFullPhone("ac_cc","ac_phone");
   if(!name)return toast(...T.t_name_req);
   if(!meter)return toast(...T.t_meter_req);
+  const dupMeter=gC().find(c=>(c.meter||"").trim().toLowerCase()===(meter||"").trim().toLowerCase());
+  if(dupMeter){toast("⚠️",L==="ar"?"رقم عداد مكرر":"Duplicate Meter",L==="ar"?`العداد ${meter} موجود مسبقاً: ${dupMeter.name}`:`Meter ${meter} already exists: ${dupMeter.name}`);return;}
   try{
     await window.DB.addClient({name,meter,phone,address:addr});
     closeSh("sh-ac");
@@ -1935,6 +1980,8 @@ async function updClient(){
   const id=v("ec_id"),name=v("ec_name"),meter=v("ec_meter");
   if(!name||!meter)return toast(...T.t_name_req);
   const phone=buildFullPhone("ec_cc","ec_phone");
+  const dupMeter=gC().find(c=>c.id!==id&&(c.meter||"").trim().toLowerCase()===(meter||"").trim().toLowerCase());
+  if(dupMeter){toast("⚠️",L==="ar"?"رقم عداد مكرر":"Duplicate Meter",L==="ar"?`العداد ${meter} موجود مسبقاً: ${dupMeter.name}`:`Meter ${meter} already exists: ${dupMeter.name}`);return;}
   try{
     await window.DB.updateClient(id,{name,meter,phone,address:v("ec_addr")});
     closeSh("sh-ec");toast(...T.t_updated);
@@ -2308,6 +2355,132 @@ document.addEventListener("click", e => {
   if(action === "delbill") delBill(id);
   if(action === "wabill") waForBill(id);
 });
+/* ════ OVERDUE ESCALATION ════ */
+function getDaysOverdue(b){
+  if(!b.dueDate||b.paid)return 0;
+  const diff=Math.floor((Date.now()-new Date(b.dueDate))/86400000);
+  return diff>0?diff:0;
+}
+function hasCritical(cid){
+  return gB().filter(b=>b.clientId===cid&&!b.paid).some(b=>getDaysOverdue(b)>=7);
+}
+
+/* ════ BULK SELECT ════ */
+let __selectMode=false;
+const __selectedIds=new Set();
+function toggleSelectMode(){
+  __selectMode=!__selectMode;
+  if(!__selectMode)__selectedIds.clear();
+  const btn=$("select_btn");
+  if(btn){btn.classList.toggle("on",__selectMode);btn.textContent=__selectMode?"✕":"☑️";}
+  updateBulkBar();
+  rC();
+}
+function toggleSelectClient(id){
+  if(__selectedIds.has(id))__selectedIds.delete(id);
+  else __selectedIds.add(id);
+  updateBulkBar();
+  // Toggle selected class on card directly (no full re-render)
+  document.querySelectorAll(`.cc[data-id="${id}"]`).forEach(el=>{
+    el.classList.toggle("selected",__selectedIds.has(id));
+  });
+}
+function updateBulkBar(){
+  const bar=$("bulk_bar"),cnt=$("bulk_count"),btn=$("bulk_pay_btn"),cc=$("bulk_cancel_btn");
+  const n=__selectedIds.size;
+  const a=L==="ar";
+  if(bar)bar.classList.toggle("on",__selectMode);
+  if(cnt)cnt.textContent=a?`${n} ${n===1?"عميل":"عملاء"}`:` ${n} client${n===1?"":"s"}`;
+  if(btn)btn.textContent=a?`✅ تسجيل دفع (${n})`:`✅ Mark Paid (${n})`;
+  if(cc)cc.textContent="✕";
+}
+async function bulkMarkPaid(){
+  if(!__selectedIds.size)return;
+  const a=L==="ar";
+  const period=getPeriod();
+  const ids=[...__selectedIds];
+  let count=0;
+  for(const cid of ids){
+    const bills=gB().filter(b=>b.clientId===cid&&!b.paid&&(!period||(b.month||"")=== period));
+    for(const b of bills){await window.DB.updateBill(b.id,{paid:true,paidAt:Date.now()});count++;}
+  }
+  toast("✅",a?`تم تسجيل ${count} دفعة`:`${count} bill${count===1?"":"s"} marked paid`,"");
+  __selectedIds.clear();
+  __selectMode=false;
+  const sb=$("select_btn");if(sb){sb.classList.remove("on");sb.textContent="☑️";}
+  updateBulkBar();
+  renderAll();
+}
+
+/* ════ SWIPE TO MARK PAID ════ */
+function initSwipes(){
+  const THRESHOLD=85;
+  document.querySelectorAll(".cc-wrap").forEach(wrap=>{
+    const card=wrap.querySelector(".cc");
+    if(!card)return;
+    const cid=card.dataset.id;
+    let sx=0,dx=0,active=false;
+    card.addEventListener("touchstart",e=>{
+      sx=e.touches[0].clientX;dx=0;active=true;
+      card.style.transition="none";
+    },{passive:true});
+    card.addEventListener("touchmove",e=>{
+      if(!active)return;
+      dx=e.touches[0].clientX-sx;
+      if(dx>0&&dx<THRESHOLD*1.6)card.style.transform=`translateX(${dx}px)`;
+      else if(dx<=0)card.style.transform="";
+    },{passive:true});
+    card.addEventListener("touchend",()=>{
+      if(!active)return;active=false;
+      card.style.transition="transform .2s";
+      if(dx>=THRESHOLD){
+        card.style.transform=`translateX(110%)`;
+        setTimeout(async()=>{
+          card.style.transition="none";card.style.transform="";
+          const st=getSt(cid);
+          if(st==="pending"||st==="overdue"){
+            const period=getPeriod();
+            const bills=gB().filter(b=>b.clientId===cid&&!b.paid&&(!period||(b.month||"")=== period));
+            for(const b of bills)await window.DB.updateBill(b.id,{paid:true,paidAt:Date.now()});
+            toast("✅",L==="ar"?"تم تسجيل الدفع":"Marked Paid","");
+            renderAll();
+          }
+        },220);
+      } else {card.style.transform="";}
+    });
+  });
+}
+
+/* ════ BULK REMINDERS ════ */
+async function sendBulkReminders(){
+  const a=L==="ar";
+  const period=getPeriod();
+  const targets=gC().filter(c=>{
+    const st=getSt(c.id);
+    return (st==="pending"||st==="overdue")&&(c.phone||"").trim();
+  });
+  if(!targets.length){toast("ℹ️",a?"لا يوجد عملاء لتذكيرهم":"No clients to remind","");return;}
+  const conf=confirm(a?`سيتم إرسال تذكير لـ ${targets.length} عميل. هل تريد المتابعة؟`:`Send reminder to ${targets.length} client(s)?`);
+  if(!conf)return;
+  let sent=0;
+  for(const c of targets){
+    const unpaid=gB().filter(b=>b.clientId===c.id&&!b.paid&&(!period||(b.month||"")=== period));
+    if(!unpaid.length)continue;
+    const noteLines=unpaid.map(b=>`\n📅 ${b.month||"—"} — ${getCurrency()}${fmt(b.amount)}`).join("");
+    const noteBlock=noteLines?`\n${noteLines}`:"";
+    const tpl=getRemTemplate()
+      .replace(/\{name\}/g,c.name)
+      .replace(/\{meter\}/g,c.meter)
+      .replace(/\{note_block\}/g,noteBlock);
+    let phone=(c.phone||"").replace(/\D/g,"").replace(/^0+/,"");
+    if(phone.length<=8)phone="961"+phone;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(tpl)}`,"_blank");
+    sent++;
+    await new Promise(r=>setTimeout(r,800));
+  }
+  toast("📢",a?`تم إرسال ${sent} تذكير`:`${sent} reminder${sent===1?"":"s"} sent`,"");
+}
+
 /* ════ AI RECEIPT SCANNER ════ */
 function getAIKey(){return localStorage.getItem("eb_aikey")||"";}
 function saveAIKey(val){localStorage.setItem("eb_aikey",val);}
