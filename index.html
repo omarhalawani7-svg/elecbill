@@ -2274,11 +2274,17 @@ async function sendWAMsg(phone,msg){
         toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال رسالة واتساب تلقائياً":"WhatsApp message sent automatically");
         return true;
       }else{
-        const detail=data.message||data.error||JSON.stringify(data);
-        toast("❌","API Error",detail+" — Make sure phone has country code (e.g. 96170xxxxxxx)");
-        return false;
+        // API failed (likely new contact) — fallback to wa.me link
+        window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
+        toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"اضغط إرسال في واتساب":"Tap Send in WhatsApp (new contact)");
+        return true;
       }
-    }catch(err){toast("❌","Error",err.message);return false;}
+    }catch(err){
+      // Network error — fallback to wa.me link
+      window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
+      toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"اضغط إرسال في واتساب":"Tap Send in WhatsApp");
+      return true;
+    }
   }else{
     window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
     return true;
