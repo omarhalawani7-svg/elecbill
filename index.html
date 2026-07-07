@@ -2263,42 +2263,32 @@ async function sendWAMsg(phone,msg){
     toast("⚠️","Invalid Number",L==="ar"?"رقم الهاتف غير صحيح":"Invalid phone number — check client record.");
     return false;
   }
-  const waFallback=()=>{
+  const waFallback=(reason)=>{
     window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
-    toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"اضغط إرسال في واتساب":"Tap Send in WhatsApp");
+    toast("📲",L==="ar"?"فتح واتساب — اضغط إرسال":"Open WhatsApp — Tap Send",reason||"");
   };
   if(cfg.instanceId&&cfg.apiToken){
+    const chatId=clean+"@c.us";
+    const sendUrl="https://api.green-api.com/waInstance"+cfg.instanceId+"/sendMessage/"+cfg.apiToken;
     try{
-      // Step 1: check instance is authorized (connected to WhatsApp)
-      const stateUrl="https://api.green-api.com/waInstance"+cfg.instanceId+"/getStateInstance/"+cfg.apiToken;
-      const stateResp=await fetch(stateUrl);
-      const stateData=await stateResp.json();
-      if(stateData.stateInstance!=="authorized"){
-        // Not connected — open wa.me immediately
-        toast("⚠️",L==="ar"?"واتساب غير متصل":"WhatsApp disconnected",L==="ar"?"تحقق من إعدادات Green API":"Check Green API — scan QR to reconnect");
-        waFallback();
-        return true;
-      }
-      // Step 2: send the message
-      const chatId=clean+"@c.us";
-      const sendUrl="https://api.green-api.com/waInstance"+cfg.instanceId+"/sendMessage/"+cfg.apiToken;
       const resp=await fetch(sendUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,message:msg})});
       const data=await resp.json();
       if(data.idMessage){
         await window.incrementWACount();
-        toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال رسالة واتساب تلقائياً":"WhatsApp message sent automatically");
+        toast("✅",L==="ar"?"تم الإرسال تلقائياً ✓":"Auto-sent ✓","");
         return true;
       }else{
-        // API returned error (e.g. number not on WhatsApp) — fallback
-        waFallback();
+        // Green API rejected — first-time contact or number not on WA
+        const reason=data.message||data.error||"First contact — tap Send once";
+        waFallback(reason);
         return true;
       }
     }catch(err){
-      waFallback();
+      waFallback("Network error: "+err.message);
       return true;
     }
   }else{
-    waFallback();
+    waFallback("");
     return true;
   }
 }
