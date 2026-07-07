@@ -346,12 +346,8 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 .pkey:active{transform:scale(.9);background:var(--border);}
 .pkey-del{font-size:18px;color:var(--t2);}
 .pkey-x{font-size:13px;font-weight:700;color:var(--t2);}
-/* ── NUMPAD (bill entry) ── */
-.npkey{width:100%;padding:16px 0;background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--r);font-size:22px;font-weight:700;color:var(--text);transition:transform .1s,background .12s;}
-.npkey:active{transform:scale(.94);background:var(--border);}
-.npkey-del{color:var(--red);}
-.npkey-x2{font-size:14px;color:var(--t2);}
-#np_display{font-size:30px;font-weight:900;text-align:center;letter-spacing:1.5px;min-height:42px;margin:8px 0 14px;color:var(--text);border-bottom:2.5px solid var(--blue);padding-bottom:8px;word-break:break-all;}
+/* ── DASH BTN (period inputs) ── */
+.dash-btn{padding:9px 13px;border-radius:9px;border:1.5px solid var(--border2);background:var(--card2);color:var(--text);font-size:17px;font-weight:700;flex-shrink:0;line-height:1;}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .shake{animation:shake .42s ease;}
 /* ── CHANGE PIN ── */
@@ -576,13 +572,14 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="fg">
       <div class="fl" id="ab_ml">Period <span class="freq">*</span></div>
       <div style="display:flex;align-items:center;gap:8px">
-        <input class="fi" id="ab_month" type="text" readonly onclick="openNumpad('period')" autocomplete="off" style="flex:1;cursor:pointer;caret-color:transparent">
+        <input class="fi" id="ab_month" type="text" inputmode="numeric" oninput="rPrev()" autocomplete="off" placeholder="e.g. 3-4" style="flex:1">
+        <button type="button" class="dash-btn" onclick="insDash('ab_month')" title="Insert dash">—</button>
         <button type="button" style="padding:9px 11px;border-radius:9px;border:1.5px solid var(--border2);background:var(--bdim);color:var(--blue);font-size:12px;font-weight:800;white-space:nowrap;flex-shrink:0" onclick="usePeriod()" id="ab_use_per" title="Use active period">🗓️ Use</button>
       </div>
       <div class="fhint" id="ab_period_hint" style="color:var(--blue);font-weight:600"></div>
     </div>
     <div class="frow">
-      <div class="fg"><div class="fl" id="ab_al">Amount ($) <span class="freq">*</span></div><input class="fi" id="ab_amt" type="text" readonly onclick="openNumpad('amt')" style="cursor:pointer;caret-color:transparent"></div>
+      <div class="fg"><div class="fl" id="ab_al">Amount ($) <span class="freq">*</span></div><input class="fi" id="ab_amt" type="text" inputmode="decimal" oninput="rPrev()"></div>
       <!-- Due date auto-calculated: today + 30 days -->
       <input type="hidden" id="ab_due">
     </div>
@@ -595,29 +592,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <button class="abtn a-ghost" id="ab_cn"  onclick="closeSh('sh-ab')">Cancel</button>
   </div>
 </div>
-<!-- SHEET: NUMPAD (amount / period) -->
-<div class="ov" id="sh-numpad">
-  <div class="sheet">
-    <div class="sh"></div>
-    <div id="np_label" style="font-size:11px;font-weight:800;color:var(--t3);text-align:center;letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px">Amount</div>
-    <div id="np_display">0</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;direction:ltr">
-      <button class="npkey" onclick="npKey('1')">1</button>
-      <button class="npkey" onclick="npKey('2')">2</button>
-      <button class="npkey" onclick="npKey('3')">3</button>
-      <button class="npkey" onclick="npKey('4')">4</button>
-      <button class="npkey" onclick="npKey('5')">5</button>
-      <button class="npkey" onclick="npKey('6')">6</button>
-      <button class="npkey" onclick="npKey('7')">7</button>
-      <button class="npkey" onclick="npKey('8')">8</button>
-      <button class="npkey" onclick="npKey('9')">9</button>
-      <button class="npkey npkey-x2" id="np_extra" onclick="npExtra()">.</button>
-      <button class="npkey" onclick="npKey('0')">0</button>
-      <button class="npkey npkey-del" onclick="npBack()">&#9003;</button>
-    </div>
-    <button class="abtn a-blue" onclick="npDone()" style="margin-top:12px">&#10003; Done</button>
-  </div>
-</div>
+
 <!-- SHEET: WHATSAPP SEND -->
 <div class="ov" id="sh-wa">
   <div class="sheet">
@@ -767,7 +742,10 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     </div>
     <div class="fg" style="margin-bottom:10px">
       <div class="fl" id="per_lbl">New period</div>
-      <input class="fi" id="per_input" type="text" readonly onclick="openNumpad('per_input')" autocomplete="off" placeholder="e.g. 3-4 or 5-6" style="cursor:pointer;caret-color:transparent">
+      <div style="display:flex;align-items:center;gap:8px">
+        <input class="fi" id="per_input" type="text" inputmode="numeric" autocomplete="off" placeholder="e.g. 3-4 or 5-6" style="flex:1">
+        <button type="button" class="dash-btn" onclick="insDash('per_input')" title="Insert dash">—</button>
+      </div>
     </div>
     <button class="abtn a-blue" onclick="confirmPeriod()" style="margin-top:0" id="per_ok">✅ Confirm Period</button>
     <button class="abtn a-ghost" onclick="closeSh('sh-period')" id="per_skip">Skip</button>
@@ -916,8 +894,8 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
       <div id="scan_match_info" style="display:none;font-size:12px;font-weight:700;background:var(--bdim);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 12px;margin-bottom:12px;color:var(--blue)"></div>
       <div class="fg"><div class="fl" id="scan_name_l">Name</div><input class="fi" id="scan_name" type="text" autocomplete="off"></div>
       <div class="fg"><div class="fl" id="scan_meter_l">Meter No</div><input class="fi" id="scan_meter" type="text" autocomplete="off"></div>
-      <div class="fg"><div class="fl" id="scan_amount_l">Amount</div><input class="fi" id="scan_amount" type="text" readonly onclick="openNumpad('scan_amount')" style="cursor:pointer;caret-color:transparent"></div>
-      <div class="fg"><div class="fl" id="scan_period_l">Period</div><input class="fi" id="scan_period" type="text" readonly onclick="openNumpad('scan_period')" autocomplete="off" style="cursor:pointer;caret-color:transparent"></div>
+      <div class="fg"><div class="fl" id="scan_amount_l">Amount</div><input class="fi" id="scan_amount" type="text" inputmode="decimal" autocomplete="off"></div>
+      <div class="fg"><div class="fl" id="scan_period_l">Period</div><div style="display:flex;align-items:center;gap:8px"><input class="fi" id="scan_period" type="text" inputmode="numeric" autocomplete="off" style="flex:1"><button type="button" class="dash-btn" onclick="insDash('scan_period')" title="Insert dash">—</button></div></div>
       <div class="fg"><div class="fl" id="scan_phone_l">Phone (optional)</div><input class="fi" id="scan_phone" type="tel" autocomplete="off"></div>
       <button class="abtn a-blue" onclick="saveScanResult()" style="margin-top:4px" id="scan_save">💾 Save Client + Bill</button>
       <button class="abtn a-ghost" onclick="closeSh('sh-scan')" id="scan_cancel">Cancel</button>
@@ -2716,39 +2694,14 @@ document.addEventListener("keydown", e => {
   else if(e.key==="Backspace"){e.preventDefault();pinBack();}
   else if(e.key==="Escape"){e.preventDefault();cancelPin();}
 });
-/* ════ NUMPAD (bill entry) ════ */
-let __npField=null,__npVal='',__npType='amt';
-const __NP_AMT={amt:'ab_amt',scan_amount:'scan_amount'};
-const __NP_PER={period:'ab_month',per_input:'per_input',scan_period:'scan_period'};
-function openNumpad(field){
-  __npField=__NP_AMT[field]||__NP_PER[field]||field;
-  __npType=__NP_AMT[field]?'amt':'period';
-  const inp=$(__npField);
-  __npVal=inp?(inp.value||''):'';
-  const isAmt=__npType==='amt';
-  const lbl=$('np_label');
-  if(lbl)lbl.textContent=isAmt?(L==='ar'?'المبلغ':'Amount'):(L==='ar'?'الفترة':'Period');
-  const extra=$('np_extra');
-  if(extra)extra.textContent=isAmt?'.':'-';
-  updateNpDisplay();
-  openSh('sh-numpad');
+/* ════ PERIOD DASH INSERT ════ */
+function insDash(id){
+  const inp=$(id);if(!inp)return;
+  const s=inp.selectionStart!=null?inp.selectionStart:inp.value.length;
+  inp.value=inp.value.slice(0,s)+'-'+inp.value.slice(s);
+  inp.setSelectionRange(s+1,s+1);
+  inp.focus();
 }
-function npKey(d){
-  const isAmt=__npType==='amt';
-  if(d==='.'&&isAmt&&__npVal.includes('.'))return;
-  if(d==='-'&&!isAmt&&__npVal.includes('-'))return;
-  __npVal+=d;
-  updateNpDisplay();syncNpToField();
-}
-function npExtra(){npKey(__npType==='amt'?'.':'-');}
-function npBack(){__npVal=__npVal.slice(0,-1);updateNpDisplay();syncNpToField();}
-function updateNpDisplay(){const el=$('np_display');if(el)el.textContent=__npVal||'0';}
-function syncNpToField(){
-  const inp=$(__npField);if(!inp)return;
-  inp.value=__npVal;
-  if(__npField==='ab_amt'||__npField==='ab_month')rPrev();
-}
-function npDone(){closeSh('sh-numpad');}
 /* ════ TOAST ════ */
 let tTm;
 function toast(icon,title,msg){
