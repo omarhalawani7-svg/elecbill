@@ -703,6 +703,12 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     </div>
     <button class="abtn a-wa" onclick="saveWAConfig()" style="margin-top:0" id="waapi_sv">💾 Save</button>
     <button class="abtn a-ghost" onclick="clearWAConfig()" style="margin-top:0;font-size:13px" id="waapi_clr">🗑️ Remove API</button>
+    <div class="fg" style="margin-top:8px">
+      <div class="fl">🧪 Test — enter your own number</div>
+      <input class="fi" id="waapi_test_num" type="tel" placeholder="e.g. 96170000000" autocomplete="off">
+    </div>
+    <button class="abtn a-ghost" onclick="testWASend()" style="margin-top:0;font-size:13px" id="waapi_test_btn">🧪 Test Send</button>
+    <div id="waapi_test_result" style="display:none;margin:8px 0;padding:10px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:11px;font-family:monospace;word-break:break-all;color:var(--t2);line-height:1.6"></div>
     <button class="abtn a-ghost" onclick="closeSh('sh-waapi')" id="waapi_cn">Close</button>
   </div>
 </div>
@@ -1142,6 +1148,29 @@ async function loadWACfg(){
     window.updateWASendBtn && window.updateWASendBtn();
   }catch(e){ console.error("WA cfg err",e); }
 }
+window.testWASend = async function(){
+  const id=(document.getElementById("waapi_id").value||"").trim();
+  const tok=(document.getElementById("waapi_tok").value||"").trim();
+  const phone=(document.getElementById("waapi_test_num").value||"").trim().replace(/\D/g,"");
+  const res=document.getElementById("waapi_test_result");
+  if(!id||!tok){res.style.display="block";res.textContent="❌ Enter Instance ID and Token first";return;}
+  if(!phone){res.style.display="block";res.textContent="❌ Enter a test phone number";return;}
+  res.style.display="block";res.textContent="⏳ Testing connection...";
+  try{
+    // Step 1: check state
+    const stR=await fetch("https://api.green-api.com/waInstance"+id+"/getStateInstance/"+tok);
+    const stD=await stR.json();
+    res.textContent="State: "+JSON.stringify(stD)+"\n\nSending test message...";
+    if(stD.stateInstance!=="authorized"){res.textContent+="\n\n⚠️ Not authorized! Scan QR in Green API dashboard.";return;}
+    // Step 2: send test
+    const chatId=phone+"@c.us";
+    const sR=await fetch("https://api.green-api.com/waInstance"+id+"/sendMessage/"+tok,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,message:"✅ ElecBill Pro test message"})});
+    const sD=await sR.json();
+    res.textContent="State: "+JSON.stringify(stD)+"\n\nSend result: "+JSON.stringify(sD);
+    if(sD.idMessage){res.textContent+="\n\n✅ SUCCESS — API is working!";}
+    else{res.textContent+="\n\n❌ FAILED — check number format or contact saved";}
+  }catch(e){res.textContent="❌ Error: "+e.message+"\n\n(Possible CORS issue or wrong credentials)";}
+};
 window.saveWAConfig = async function(){
   const id=(document.getElementById("waapi_id").value||"").trim();
   const tok=(document.getElementById("waapi_tok").value||"").trim();
