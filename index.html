@@ -970,14 +970,17 @@ onSnapshot(doc(db,"config","whatsapp"), snap => {
   const d = snap.data();
   let needsRender = false;
   if(d.eb_period !== undefined && d.eb_period !== localStorage.getItem("eb_period")){
-    const p = d.eb_period || "";
-    localStorage.setItem("eb_period", p);
-    window.__period = p;
-    const chip = document.getElementById("h_period");
-    const txt  = document.getElementById("h_period_txt");
-    if(txt) txt.textContent = p || "—";
-    if(chip){ if(p) chip.classList.remove("no-period"); else chip.classList.add("no-period"); }
-    needsRender = true;
+    const justWrote = window.__periodLocalWrite && (Date.now() - window.__periodLocalWrite < 5000);
+    if(!justWrote){
+      const p = d.eb_period || "";
+      localStorage.setItem("eb_period", p);
+      window.__period = p;
+      const chip = document.getElementById("h_period");
+      const txt  = document.getElementById("h_period_txt");
+      if(txt) txt.textContent = p || "—";
+      if(chip){ if(p) chip.classList.remove("no-period"); else chip.classList.add("no-period"); }
+      needsRender = true;
+    }
   }
   if(d.eb_period_hist !== undefined){
     const rh = JSON.stringify(d.eb_period_hist || []);
@@ -1651,21 +1654,21 @@ function openPeriodPicker(){
   openSh("sh-period");
 }
 function quickPeriod(val){
+  window.__periodLocalWrite=Date.now();
   savePeriodHistory(val);
   setPeriod(val);
   closeSh("sh-period");
   renderAll();
-  toast("🗓️",L==="ar"?"تم تحديد الفترة":"Period set",val);
 }
 function confirmPeriod(){
   syncPerInput();
   const val=(($("per_input")||{}).value||"").trim();
   if(!val)return toast("⚠️",L==="ar"?"الفترة مطلوبة":"Period required",L==="ar"?"أدخل رقم البداية والنهاية":"Enter From and To numbers");
+  window.__periodLocalWrite=Date.now();
   savePeriodHistory(val);
   setPeriod(val);
   closeSh("sh-period");
   renderAll();
-  toast("🗓️",L==="ar"?"تم تحديد الفترة":"Period set",val);
 }
 /* ════ SETTINGS FUNCTIONS ════ */
 function getCurrency(){return localStorage.getItem("eb_cur")||"$";}
