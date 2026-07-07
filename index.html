@@ -447,7 +447,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
   </div>
   <input type="file" id="scan-input" accept="image/*" style="display:none;position:absolute" onchange="handleScanFile(this)">
   <!-- Bulk remind button (shown below chips when unpaid clients exist) -->
-  <div id="remind_bar" style="display:none;padding:0 12px 8px;"><button class="abtn a-wa" id="remind_all_btn" onclick="requireAdmin(sendBulkReminders)" style="margin:0;padding:10px 16px;font-size:13px">📢 <span id="remind_all_lbl">Remind All Unpaid</span></button></div>
+  <div id="remind_bar" style="display:none;padding:0 12px 8px;"><button class="abtn a-wa" id="remind_all_btn" onclick="requireAdmin(sendBulkReminders)" style="margin:0;padding:10px 16px;font-size:13px">📲 <span id="remind_all_lbl">Send Bill to All</span></button></div>
   <div class="chips" id="cchips">
     <button class="chip on-b" onclick="cf('all',this)">—</button>
     <button class="chip"      onclick="cf('pending',this)">—</button>
@@ -1866,7 +1866,7 @@ function rC(){
   const rb=$("remind_bar");if(rb){
     const hasUnpaidPhone=gC().some(c=>{const st=getSt(c.id);return (st==="pending"||st==="overdue")&&(c.phone||"").trim();});
     rb.style.display=hasUnpaidPhone?"block":"none";
-    const rbl=$("remind_all_lbl");if(rbl)rbl.textContent=L==="ar"?"تذكير كل المتأخرين":"Remind All Unpaid";
+    const rbl=$("remind_all_lbl");if(rbl)rbl.textContent=L==="ar"?"إرسال الفاتورة للكل":"Send Bill to All";
   }
   if(!__selectMode)initSwipes();
 }
@@ -2506,26 +2506,27 @@ async function sendBulkReminders(){
     const st=getSt(c.id);
     return (st==="pending"||st==="overdue")&&(c.phone||"").trim();
   });
-  if(!targets.length){toast("ℹ️",a?"لا يوجد عملاء لتذكيرهم":"No clients to remind","");return;}
-  const conf=confirm(a?`سيتم إرسال تذكير لـ ${targets.length} عميل. هل تريد المتابعة؟`:`Send reminder to ${targets.length} client(s)?`);
+  if(!targets.length){toast("ℹ️",a?"لا يوجد عملاء":"No clients to notify","");return;}
+  const conf=confirm(a?`سيتم إرسال فاتورة لـ ${targets.length} عميل. هل تريد المتابعة؟`:`Send bill message to ${targets.length} client(s)?`);
   if(!conf)return;
   let sent=0;
   for(const c of targets){
     const unpaid=gB().filter(b=>b.clientId===c.id&&!b.paid&&(!period||(b.month||"")=== period));
     if(!unpaid.length)continue;
-    const noteLines=unpaid.map(b=>`\n📅 ${b.month||"—"} — ${getCurrency()}${fmt(b.amount)}`).join("");
-    const noteBlock=noteLines?`\n${noteLines}`:"";
-    const tpl=getRemTemplate()
-      .replace(/\{name\}/g,c.name)
-      .replace(/\{meter\}/g,c.meter)
-      .replace(/\{note_block\}/g,noteBlock);
-    let phone=(c.phone||"").replace(/\D/g,"").replace(/^0+/,"");
-    if(phone.length<=8)phone="961"+phone;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(tpl)}`,"_blank");
+    const b=unpaid[0];
+    const msg=buildBillMsg(c,b);
+    const cfg=window.__waConfig||{};
+    if(cfg.instanceId&&cfg.apiToken){
+      await sendWAMsg(c.phone,msg);
+    } else {
+      let phone=(c.phone||"").replace(/\D/g,"").replace(/^0+/,"");
+      if(phone.length<=8)phone="961"+phone;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,"_blank");
+      await new Promise(r=>setTimeout(r,800));
+    }
     sent++;
-    await new Promise(r=>setTimeout(r,800));
   }
-  toast("📢",a?`تم إرسال ${sent} تذكير`:`${sent} reminder${sent===1?"":"s"} sent`,"");
+  toast("📲",a?`تم إرسال ${sent} فاتورة`:`${sent} bill${sent===1?"":"s"} sent`,"");
 }
 
 /* ════ AI RECEIPT SCANNER ════ */
