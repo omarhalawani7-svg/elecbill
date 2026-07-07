@@ -1161,7 +1161,16 @@ window.testWASend = async function(){
     const stR=await fetch("https://api.green-api.com/waInstance"+id+"/getStateInstance/"+tok);
     const stD=await stR.json();
     res.textContent="State: "+JSON.stringify(stD)+"\n\nSending test message...";
-    if(stD.stateInstance!=="authorized"){res.textContent+="\n\n⚠️ Not authorized! Scan QR in Green API dashboard.";return;}
+    const stateMessages={
+      "notAuthorized":"❌ Not connected — scan QR code in Green API dashboard",
+      "yellowCard":"⚠️ Yellow Card — WhatsApp flagged this account. Re-scan QR in Green API dashboard to reset. Avoid sending to unsaved contacts.",
+      "blocked":"🚫 Instance banned by WhatsApp. Create a new instance with a different number.",
+      "sleepMode":"😴 Phone is offline/sleeping. Wake up the phone linked to Green API."
+    };
+    if(stD.stateInstance!=="authorized"){
+      res.textContent+="\n\n"+(stateMessages[stD.stateInstance]||("⚠️ State: "+stD.stateInstance+" — check Green API dashboard"));
+      return;
+    }
     // Step 2: send test
     const chatId=phone+"@c.us";
     const sR=await fetch("https://api.green-api.com/waInstance"+id+"/sendMessage/"+tok,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,message:"✅ ElecBill Pro test message"})});
@@ -2319,9 +2328,12 @@ async function sendWAMsg(phone,msg){
         await window.incrementWACount();
         toast("✅",L==="ar"?"تم الإرسال تلقائياً ✓":"Auto-sent ✓","");
         return true;
+      }else if(data.code===401||data.statusCode===401){
+        toast("⚠️","Green API — Yellow Card",L==="ar"?"أعد مسح رمز QR في لوحة Green API":"Re-scan QR in Green API dashboard");
+        waFallback("");
+        return true;
       }else{
-        // Green API rejected — first-time contact or number not on WA
-        const reason=data.message||data.error||"First contact — tap Send once";
+        const reason=data.message||data.error||"";
         waFallback(reason);
         return true;
       }
