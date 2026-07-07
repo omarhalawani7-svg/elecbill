@@ -2263,50 +2263,42 @@ async function sendWAMsg(phone,msg){
     toast("⚠️","Invalid Number",L==="ar"?"رقم الهاتف غير صحيح":"Invalid phone number — check client record.");
     return false;
   }
+  const waFallback=()=>{
+    window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
+    toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"اضغط إرسال في واتساب":"Tap Send in WhatsApp");
+  };
   if(cfg.instanceId&&cfg.apiToken){
-    const chatId=clean+"@c.us";
-    const url="https://api.green-api.com/waInstance"+cfg.instanceId+"/sendMessage/"+cfg.apiToken;
     try{
-      const resp=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,message:msg})});
+      // Step 1: check instance is authorized (connected to WhatsApp)
+      const stateUrl="https://api.green-api.com/waInstance"+cfg.instanceId+"/getStateInstance/"+cfg.apiToken;
+      const stateResp=await fetch(stateUrl);
+      const stateData=await stateResp.json();
+      if(stateData.stateInstance!=="authorized"){
+        // Not connected — open wa.me immediately
+        toast("⚠️",L==="ar"?"واتساب غير متصل":"WhatsApp disconnected",L==="ar"?"تحقق من إعدادات Green API":"Check Green API — scan QR to reconnect");
+        waFallback();
+        return true;
+      }
+      // Step 2: send the message
+      const chatId=clean+"@c.us";
+      const sendUrl="https://api.green-api.com/waInstance"+cfg.instanceId+"/sendMessage/"+cfg.apiToken;
+      const resp=await fetch(sendUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,message:msg})});
       const data=await resp.json();
       if(data.idMessage){
-        // Wait 4s then verify delivery status
         await window.incrementWACount();
-        toast("⏳",L==="ar"?"جارٍ التحقق...":"Verifying...",L==="ar"?"يتم التحقق من وصول الرسالة":"Checking message delivery");
-        await new Promise(r=>setTimeout(r,4000));
-        try{
-          const statusUrl="https://api.green-api.com/waInstance"+cfg.instanceId+"/getMessageStatus/"+cfg.apiToken;
-          const sResp=await fetch(statusUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,idMessage:data.idMessage})});
-          const sData=await sResp.json();
-          const ok=["sent","delivered","read"].includes(sData.status);
-          if(ok){
-            toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال الرسالة بنجاح":"Message delivered successfully");
-            return true;
-          }else{
-            // Delivery failed — fallback to wa.me
-            window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
-            toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"لم تصل الرسالة — اضغط إرسال":"Not delivered — tap Send in WhatsApp");
-            return true;
-          }
-        }catch(e){
-          // Status check failed — assume sent
-          toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال رسالة واتساب":"WhatsApp message sent");
-          return true;
-        }
+        toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال رسالة واتساب تلقائياً":"WhatsApp message sent automatically");
+        return true;
       }else{
-        // API rejected — fallback to wa.me link
-        window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
-        toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"اضغط إرسال في واتساب":"Tap Send in WhatsApp");
+        // API returned error (e.g. number not on WhatsApp) — fallback
+        waFallback();
         return true;
       }
     }catch(err){
-      // Network error — fallback to wa.me link
-      window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
-      toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"اضغط إرسال في واتساب":"Tap Send in WhatsApp");
+      waFallback();
       return true;
     }
   }else{
-    window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
+    waFallback();
     return true;
   }
 }
