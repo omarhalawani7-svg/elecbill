@@ -2270,13 +2270,33 @@ async function sendWAMsg(phone,msg){
       const resp=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,message:msg})});
       const data=await resp.json();
       if(data.idMessage){
+        // Wait 4s then verify delivery status
         await window.incrementWACount();
-        toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال رسالة واتساب تلقائياً":"WhatsApp message sent automatically");
-        return true;
+        toast("⏳",L==="ar"?"جارٍ التحقق...":"Verifying...",L==="ar"?"يتم التحقق من وصول الرسالة":"Checking message delivery");
+        await new Promise(r=>setTimeout(r,4000));
+        try{
+          const statusUrl="https://api.green-api.com/waInstance"+cfg.instanceId+"/getMessageStatus/"+cfg.apiToken;
+          const sResp=await fetch(statusUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId,idMessage:data.idMessage})});
+          const sData=await sResp.json();
+          const ok=["sent","delivered","read"].includes(sData.status);
+          if(ok){
+            toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال الرسالة بنجاح":"Message delivered successfully");
+            return true;
+          }else{
+            // Delivery failed — fallback to wa.me
+            window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
+            toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"لم تصل الرسالة — اضغط إرسال":"Not delivered — tap Send in WhatsApp");
+            return true;
+          }
+        }catch(e){
+          // Status check failed — assume sent
+          toast("✅",L==="ar"?"تم الإرسال":"Sent!",L==="ar"?"تم إرسال رسالة واتساب":"WhatsApp message sent");
+          return true;
+        }
       }else{
-        // API failed (likely new contact) — fallback to wa.me link
+        // API rejected — fallback to wa.me link
         window.open("https://wa.me/"+clean+"?text="+encodeURIComponent(msg),"_blank");
-        toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"اضغط إرسال في واتساب":"Tap Send in WhatsApp (new contact)");
+        toast("📲",L==="ar"?"فتح واتساب":"Open WhatsApp",L==="ar"?"اضغط إرسال في واتساب":"Tap Send in WhatsApp");
         return true;
       }
     }catch(err){
