@@ -116,11 +116,11 @@ html[lang="ar"] .set-btn{text-align:right;}
 .hsub{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-top:1px;}
 html[lang="ar"] .hsub{text-transform:none;letter-spacing:0;font-size:10px;}
 .hright{display:flex;align-items:center;gap:7px;}
-.hlang{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--t2);}
+.hlang{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:3px 7px;font-size:11px;font-weight:700;color:var(--t2);}
 .hadm{border:none;cursor:pointer;transition:all .2s;filter:grayscale(1) brightness(.6);}
 .hadm.on{filter:none;}
 .hdb{font-size:11px;font-weight:700;}
-.hdate{font-size:11px;color:var(--t3);background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;}
+
 /* ── STATS ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 12px 0;}
 .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 6px;text-align:center;position:relative;overflow:hidden;}
@@ -426,13 +426,12 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 <header class="hdr">
   <div class="hbrand">
     <button class="hadm hicon" id="h_adm" onclick="toggleAdmin()" title="Admin">⚡</button>
-    <button class="hrefresh" onclick="location.reload()" title="Refresh">🔄</button>
+    <button class="hrefresh" onclick="location.reload()" title="Refresh">↺</button>
   </div>
   <div class="hright">
     <button class="hperiod no-period" id="h_period" onclick="openPeriodPicker()" title="Billing Period"><span class="hperiod-dot"></span><span id="h_period_txt">—</span></button>
     <button class="hlang" onclick="switchLang()" id="h_lang">عربي</button>
     <div class="hdb" id="h_db" style="color:var(--t3)">⏳</div>
-    <div class="hdate" id="h_date"></div>
     <div class="wa-counter" id="wa-counter" title="WhatsApp API Settings" style="display:none" onclick="requireAdmin(()=>{loadWAConfig();openSh('sh-waapi');})"></div>
     <div class="uavatar" id="h_avatar" onclick="gSignOut()" title="Sign out" style="cursor:pointer;display:none"></div>
   </div>
@@ -866,7 +865,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 
     <!-- System -->
     <div class="set-section" id="set_s_sys">🔄 System</div>
-    <button class="set-btn" onclick="closeSh('sh-settings');rebootApp()">🔄 <span id="set_reboot">Reboot App</span></button>
+    <button class="set-btn" onclick="closeSh('sh-settings');rebootApp()">↺ <span id="set_reboot">Reboot App</span></button>
     <div class="set-ver">ElecBill Pro • v2.0</div>
 
     <button class="abtn a-ghost" onclick="closeSh('sh-settings')" id="set_close" style="margin-top:4px">Close</button>
@@ -1190,7 +1189,7 @@ getRedirectResult(auth).then(result=>{
 /* ════ TRANSLATIONS ════ */
 const TX = {
 en: {
-  h_sub:"Billing Management", h_lang:"عربي",
+  h_sub:"Billing Management", h_lang:"ع",
   sl1:"Clients", sl2:"Pending", sl3:"Overdue", sl4:"Paid",
   nt1:"Clients", nt2:"Bills", nt3:"Summary",
   nb1:"Clients", nb2:"Bills", nb3:"Summary",
@@ -1271,7 +1270,7 @@ en: {
   conf_next:"✅ Sent to {n}.\n\nNext: {x}\n\nOpen WhatsApp for them?",
 },
 ar: {
-  h_sub:"إدارة الفواتير", h_lang:"English",
+  h_sub:"إدارة الفواتير", h_lang:"E",
   sl1:"العملاء", sl2:"معلق", sl3:"متأخر", sl4:"مدفوع",
   nt1:"العملاء", nt2:"الفواتير", nt3:"الملخص",
   nb1:"العملاء", nb2:"الفواتير", nb3:"الملخص",
@@ -1399,7 +1398,6 @@ window.addEventListener("DOMContentLoaded",()=>{
   // Apply saved theme immediately
   applyTheme(localStorage.getItem("eb_theme")||"light");
   applyFontSize(localStorage.getItem("eb_fsize")||"medium");
-  $("h_date").textContent=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
   $("ab_date").value=new Date().toISOString().split("T")[0];
   document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)closeSh(o.id);}));
   // Boot is now triggered by handleUser() after auth check
@@ -1568,7 +1566,7 @@ function setPeriod(p){
 }
 function renderPeriodChips(hist){
   const cur=getPeriod();
-  const a=L==="ar";
+  const a=true;
   const hw=$("per_hist_wrap"),hrow=$("per_hist");
   if(!hrow)return;
   if(hw)hw.style.display=hist.length?"block":"none";
@@ -1638,7 +1636,7 @@ function confirmDeletePeriod(){
   delete window.__delPeriod;
 }
 function openPeriodPicker(){
-  const a=L==="ar";
+  const a=true;
   const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
   s("per_title","Billing Period","فترة الفوترة");
   s("per_sub",
@@ -1796,14 +1794,15 @@ function isOD(b){
   return new Date(b.dueDate)<t;
 }
 function getSt(cid){
-  const cb=gB().filter(b=>b.clientId===cid);
+  const per=getPeriod();
+  const cb=gB().filter(b=>b.clientId===cid&&(!per||b.month===per));
   if(!cb.length)return "none";
   const up=cb.filter(b=>!b.paid);
   if(!up.length)return "paid";
   return up.some(b=>isOD(b))?"overdue":"pending";
 }
-const unpaidT=cid=>gB().filter(b=>b.clientId===cid&&!b.paid).reduce((s,b)=>s+(b.amount||0),0);
-const paidT=cid=>gB().filter(b=>b.clientId===cid&&b.paid).reduce((s,b)=>s+(b.amount||0),0);
+const unpaidT=cid=>{const per=getPeriod();return gB().filter(b=>b.clientId===cid&&!b.paid&&(!per||b.month===per)).reduce((s,b)=>s+(b.amount||0),0);};
+const paidT=cid=>{const per=getPeriod();return gB().filter(b=>b.clientId===cid&&b.paid&&(!per||b.month===per)).reduce((s,b)=>s+(b.amount||0),0);};
 
 /* ════ RENDER ALL ════ */
 function renderAll(){rChipCounts();rC();rB();if(curP==="s")rS();if(detId)openDet(detId);}
@@ -2048,7 +2047,7 @@ function usePeriod(){
 function updatePeriodHint(){
   const hint=$("ab_period_hint");
   const p=getPeriod();
-  if(hint)hint.textContent=p?(L==="ar"?"🗓️ الفترة الحالية: "+p:"🗓️ Active period: "+p):"";
+  if(hint)hint.textContent=p?"🗓️ الفترة الحالية: "+p:"";
 }
 function openAddBillFor(cid){
   populateSel(cid);
@@ -2208,11 +2207,11 @@ window.updateWACounter = function(){
     const count=cfg.sentMonth===month?(cfg.sentCount||0):0;
     const limit=cfg.limit||3000;
     el.style.display="flex";
-    el.textContent="📲 "+count+"/"+limit;
+    el.textContent=count;
     el.className="wa-counter"+(count>limit*.9?" danger":count>limit*.7?" warn":"");
   }else{
-    el.style.display="flex";
-    el.textContent="⚙️ WA";
+    el.style.display="none";
+    el.textContent="";
     el.className="wa-counter";
   }
 };
@@ -2752,4 +2751,4 @@ function toast(icon,title,msg){
 window.toast = toast;
 </script>
 </body>
-</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
