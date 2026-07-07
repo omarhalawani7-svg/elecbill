@@ -571,9 +571,11 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="dlbl" id="ab_vl">📝 Variable Info</div>
     <div class="fg">
       <div class="fl" id="ab_ml">Period <span class="freq">*</span></div>
+      <input type="hidden" id="ab_month">
       <div style="display:flex;align-items:center;gap:8px">
-        <input class="fi" id="ab_month" type="text" inputmode="numeric" oninput="rPrev()" autocomplete="off" placeholder="e.g. 3-4" style="flex:1">
-        <button type="button" class="dash-btn" onclick="insDash('ab_month')" title="Insert dash">—</button>
+        <input class="fi" id="ab_month_f" type="number" inputmode="numeric" oninput="syncAbMonth();rPrev()" autocomplete="off" placeholder="From" style="width:72px;text-align:center;min-width:0">
+        <span style="font-size:18px;font-weight:900;color:var(--t3)">—</span>
+        <input class="fi" id="ab_month_t" type="number" inputmode="numeric" oninput="syncAbMonth();rPrev()" autocomplete="off" placeholder="To" style="width:72px;text-align:center;min-width:0">
         <button type="button" style="padding:9px 11px;border-radius:9px;border:1.5px solid var(--border2);background:var(--bdim);color:var(--blue);font-size:12px;font-weight:800;white-space:nowrap;flex-shrink:0" onclick="usePeriod()" id="ab_use_per" title="Use active period">🗓️ Use</button>
       </div>
       <div class="fhint" id="ab_period_hint" style="color:var(--blue);font-weight:600"></div>
@@ -585,14 +587,13 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     </div>
     <input type="hidden" id="ab_date">
     <input type="hidden" id="ab_desc" value="">
-    <div class="dlbl" id="ab_pvl">📲 WhatsApp Preview</div>
-    <div class="wabox"><div class="wabox-hd">📱 <span id="ab_pvh">Message preview</span></div><div class="wabox-txt" id="ab_prev">—</div></div>
+    <div class="dlbl" id="ab_pvl" style="display:none">📲 WhatsApp Preview</div>
+    <div class="wabox" style="display:none"><div class="wabox-hd">📱 <span id="ab_pvh">Message preview</span></div><div class="wabox-txt" id="ab_prev">—</div></div>
     <button class="abtn a-blue" id="ab_sv"   onclick="saveBill(false)" style="margin-top:0">💾 Save Bill Only</button>
     <button class="abtn a-wa"   id="ab_svw"  onclick="saveBill(true)"><span>📲</span><span id="ab_svwl">Save &amp; Send WhatsApp</span></button>
     <button class="abtn a-ghost" id="ab_cn"  onclick="closeSh('sh-ab')">Cancel</button>
   </div>
 </div>
-
 <!-- SHEET: WHATSAPP SEND -->
 <div class="ov" id="sh-wa">
   <div class="sheet">
@@ -735,7 +736,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
   <div class="sheet">
     <div class="sh"></div>
     <div class="stitle">🗓️ <span id="per_title">Billing Period</span></div>
-    <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.6" id="per_sub">Choose the billing period for this session. All new bills will use this period automatically.</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.6" id="per_sub">Tap a previous period or enter From and To numbers.</div>
     <div id="per_hist_wrap" style="display:none;margin-bottom:6px">
       <div class="fl" id="per_hist_lbl" style="margin-bottom:8px">Previous periods</div>
       <div class="period-hist-row" id="per_hist"></div>
@@ -743,8 +744,10 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="fg" style="margin-bottom:10px">
       <div class="fl" id="per_lbl">New period</div>
       <div style="display:flex;align-items:center;gap:8px">
-        <input class="fi" id="per_input" type="text" inputmode="numeric" autocomplete="off" placeholder="e.g. 3-4 or 5-6" style="flex:1">
-        <button type="button" class="dash-btn" onclick="insDash('per_input')" title="Insert dash">—</button>
+        <input type="hidden" id="per_input">
+        <input class="fi" id="per_from" type="number" inputmode="numeric" oninput="syncPerInput()" autocomplete="off" placeholder="From" style="width:72px;text-align:center;min-width:0">
+        <span style="font-size:18px;font-weight:900;color:var(--t3)">—</span>
+        <input class="fi" id="per_to" type="number" inputmode="numeric" oninput="syncPerInput()" autocomplete="off" placeholder="To" style="width:72px;text-align:center;min-width:0">
       </div>
     </div>
     <button class="abtn a-blue" onclick="confirmPeriod()" style="margin-top:0" id="per_ok">✅ Confirm Period</button>
@@ -895,7 +898,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
       <div class="fg"><div class="fl" id="scan_name_l">Name</div><input class="fi" id="scan_name" type="text" autocomplete="off"></div>
       <div class="fg"><div class="fl" id="scan_meter_l">Meter No</div><input class="fi" id="scan_meter" type="text" autocomplete="off"></div>
       <div class="fg"><div class="fl" id="scan_amount_l">Amount</div><input class="fi" id="scan_amount" type="text" inputmode="decimal" autocomplete="off"></div>
-      <div class="fg"><div class="fl" id="scan_period_l">Period</div><div style="display:flex;align-items:center;gap:8px"><input class="fi" id="scan_period" type="text" inputmode="numeric" autocomplete="off" style="flex:1"><button type="button" class="dash-btn" onclick="insDash('scan_period')" title="Insert dash">—</button></div></div>
+      <div class="fg"><div class="fl" id="scan_period_l">Period</div><div style="display:flex;align-items:center;gap:8px"><input type="hidden" id="scan_period"><input class="fi" id="scan_per_f" type="number" inputmode="numeric" oninput="syncScanPeriod()" autocomplete="off" placeholder="From" style="width:72px;text-align:center;min-width:0"><span style="font-size:18px;font-weight:900;color:var(--t3)">—</span><input class="fi" id="scan_per_t" type="number" inputmode="numeric" oninput="syncScanPeriod()" autocomplete="off" placeholder="To" style="width:72px;text-align:center;min-width:0"></div></div>
       <div class="fg"><div class="fl" id="scan_phone_l">Phone (optional)</div><input class="fi" id="scan_phone" type="tel" autocomplete="off"></div>
       <button class="abtn a-blue" onclick="saveScanResult()" style="margin-top:4px" id="scan_save">💾 Save Client + Bill</button>
       <button class="abtn a-ghost" onclick="closeSh('sh-scan')" id="scan_cancel">Cancel</button>
@@ -1443,7 +1446,7 @@ function applyTx(){
   $("ac_meter").placeholder=T.ac_meter_ph;
   $("ac_phone").placeholder=T.ac_phone_ph;
   $("ac_addr").placeholder=T.ac_addr_ph;
-  $("ab_month").placeholder=T.ab_month_ph;
+  // ab_month is now a hidden field — placeholders are on ab_month_f / ab_month_t
   $("ab_desc").placeholder=T.ab_desc_ph;
   const ci=$("chpin_info");if(ci&&T.chpin_info)ci.innerHTML=T.chpin_info;
 }
@@ -1639,17 +1642,16 @@ function openPeriodPicker(){
   const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
   s("per_title","Billing Period","فترة الفوترة");
   s("per_sub",
-    "Tap a previous period or type a new one (e.g. 3-4 or 5-6).",
-    "اضغط على فترة سابقة أو أدخل فترة جديدة (مثل 3-4 أو 5-6).");
+    "Tap a previous period or enter From and To numbers.",
+    "اضغط على فترة سابقة أو أدخل رقم البداية والنهاية.");
   s("per_lbl",a?"فترة جديدة":"New period","فترة جديدة");
   s("per_ok","✅ Confirm Period","✅ تأكيد الفترة");
   s("per_skip","Skip","تخطي");
   // Show local history immediately
   renderPeriodChips(getPeriodHistory());
-  const inp=$("per_input");
-  if(inp){inp.value="";inp.placeholder=a?"مثال: 3-4 أو 5-6":"e.g. 3-4 or 5-6";}
+  setPerInput("");
   openSh("sh-period");
-  setTimeout(()=>{const inp=$("per_input");if(inp)inp.focus();},300);
+  setTimeout(()=>{const ef=$("per_from");if(ef)ef.focus();},300);
 }
 function quickPeriod(val){
   savePeriodHistory(val);
@@ -1659,8 +1661,9 @@ function quickPeriod(val){
   toast("🗓️",L==="ar"?"تم تحديد الفترة":"Period set",val);
 }
 function confirmPeriod(){
+  syncPerInput();
   const val=(($("per_input")||{}).value||"").trim();
-  if(!val)return toast("⚠️",L==="ar"?"الفترة مطلوبة":"Period required",L==="ar"?"أدخل أرقام الأشهر مثل 3-4":"Enter months e.g. 3-4");
+  if(!val)return toast("⚠️",L==="ar"?"الفترة مطلوبة":"Period required",L==="ar"?"أدخل رقم البداية والنهاية":"Enter From and To numbers");
   savePeriodHistory(val);
   setPeriod(val);
   closeSh("sh-period");
@@ -1846,12 +1849,16 @@ function rC(){
   el.innerHTML=list.map(c=>{
     const st=getSt(c.id),ut=unpaidT(c.id),bc=gB().filter(b=>b.clientId===c.id).length;
     const crit=hasCritical(c.id),sel=__selectedIds.has(c.id);
-    const click=__selectMode?`toggleSelectClient('${c.id}')`:`openDet('${c.id}')`;
+    const isNoneMode=cF==="none"&&!__selectMode;
+    const click=__selectMode?`toggleSelectClient('${c.id}')`:isNoneMode?`openAddBillFor('${c.id}')`:`openDet('${c.id}')`;
+    const midRow=isNoneMode
+      ?`<div class="cc-row"><span style="font-size:12px;font-weight:800;color:var(--blue)">➕ ${L==="ar"?"اضغط لإضافة فاتورة":"Tap to add bill"}</span></div>`
+      :`<div class="cc-row">${badgeFor(st,crit)}${ut>0?`<span class="cc-amt">${getCurrency()}${fmt(ut)}</span>`:""}
+      <span style="font-size:11px;color:var(--t3)">${bc} ${bc===1?T.bill_s:T.bills_s}</span></div>`;
     return `<div class="cc-wrap"><div class="cc-swipe-bg"><div class="cc-swipe-icon">✅</div><div class="cc-swipe-lbl">${L==="ar"?"تم الدفع":"Paid"}</div></div>
     <div class="cc ${stMap[st]}${crit?" sc2":""}${sel?" selected":""}" data-id="${c.id}" onclick="${click}">
       <div class="cc-top"><div class="cc-name">${esc(c.name)}</div><div class="cc-meter">${esc(c.meter)}</div></div>
-      <div class="cc-row">${badgeFor(st,crit)}${ut>0?`<span class="cc-amt">${getCurrency()}${fmt(ut)}</span>`:""}
-      <span style="font-size:11px;color:var(--t3)">${bc} ${bc===1?T.bill_s:T.bills_s}</span></div>
+      ${midRow}
       ${c.phone?`<div class="cc-phone">📲 ${esc(c.phone)}</div>`:`<div class="cc-nophone">${T.no_phone_c}</div>`}
     </div></div>`;
   }).join("");
@@ -2001,10 +2008,41 @@ async function delClient(id){
   catch(e){toast(T.t_err[0],T.t_err[1],e.message);}
 }
 
+/* ════ PERIOD SPLIT HELPERS ════ */
+function syncAbMonth(){
+  const f=(v("ab_month_f")||"").trim(),t=(v("ab_month_t")||"").trim();
+  const el=$("ab_month");if(el)el.value=f&&t?f+"-"+t:f||t||"";
+}
+function syncPerInput(){
+  const f=(v("per_from")||"").trim(),t=(v("per_to")||"").trim();
+  const el=$("per_input");if(el)el.value=f&&t?f+"-"+t:f||t||"";
+}
+function syncScanPeriod(){
+  const f=(v("scan_per_f")||"").trim(),t=(v("scan_per_t")||"").trim();
+  const el=$("scan_period");if(el)el.value=f&&t?f+"-"+t:f||t||"";
+}
+function setAbMonth(val){
+  const p=val||"",pts=p.split("-"),f=pts[0]||"",t=pts[1]||"";
+  const el=$("ab_month");if(el)el.value=p;
+  const ef=$("ab_month_f"),et=$("ab_month_t");
+  if(ef)ef.value=f;if(et)et.value=t;
+}
+function setScanPeriod(val){
+  const p=val||"",pts=p.split("-"),f=pts[0]||"",t=pts[1]||"";
+  const el=$("scan_period");if(el)el.value=p;
+  const ef=$("scan_per_f"),et=$("scan_per_t");
+  if(ef)ef.value=f;if(et)et.value=t;
+}
+function setPerInput(val){
+  const p=val||"",pts=p.split("-"),f=pts[0]||"",t=pts[1]||"";
+  const el=$("per_input");if(el)el.value=p;
+  const ef=$("per_from"),et=$("per_to");
+  if(ef)ef.value=f;if(et)et.value=t;
+}
 /* ════ ADD BILL ════ */
 function usePeriod(){
   const p=getPeriod();
-  const inp=$("ab_month");if(inp)inp.value=p;
+  setAbMonth(p);
   rPrev();
 }
 function updatePeriodHint(){
@@ -2015,18 +2053,19 @@ function updatePeriodHint(){
 function openAddBillFor(cid){
   populateSel(cid);
   // Auto-fill active period
-  const p=getPeriod();
-  const inp=$("ab_month");if(inp)inp.value=p||"";
+  setAbMonth(getPeriod()||"");
   updatePeriodHint();
   openSh("sh-ab");
 }
+let __selCacheHtml='',__selCacheLen=-1;
 function populateSel(preId){
   const sel=$("ab_client");
-  sel.innerHTML=`<option value="">${T.ab_sel_ph}</option>`;
-  [...gC()].sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(c=>{
-    const o=document.createElement("option");
-    o.value=c.id;o.textContent=`${c.name}  (${c.meter})`;sel.appendChild(o);
-  });
+  const cl=[...gC()].sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+  if(cl.length!==__selCacheLen){
+    __selCacheLen=cl.length;
+    __selCacheHtml=cl.map(c=>`<option value="${c.id}">${esc(c.name)}  (${esc(c.meter)})</option>`).join('');
+  }
+  sel.innerHTML=`<option value="">${T.ab_sel_ph}</option>`+__selCacheHtml;
   if(preId){sel.value=preId;onBC();}else rPrev();
 }
 function onBC(){
@@ -2064,7 +2103,7 @@ async function saveBill(sendWa){
   try{
     await window.DB.addBill(b);
     closeSh("sh-ab");
-    ["ab_amt","ab_month"].forEach(id=>{const el=$(id);if(el)el.value="";});
+    ["ab_amt","ab_month","ab_month_f","ab_month_t"].forEach(id=>{const el=$(id);if(el)el.value="";});;
     $("ab_fix").style.display="none";$("ab_client").value="";
     if(sendWa&&c.phone){await sendWAMsg(c.phone,buildBillMsg(c,b));}
     else if(sendWa&&!c.phone){toast(...T.t_no_ph);}
@@ -2563,7 +2602,7 @@ function showScanForm(ex){
   if($("scan_name"))$("scan_name").value=ex.name||"";
   if($("scan_meter"))$("scan_meter").value=ex.meter||"";
   if($("scan_amount"))$("scan_amount").value=ex.amount||"";
-  if($("scan_period"))$("scan_period").value=ex.period||getPeriod()||"";
+  setScanPeriod(ex.period||getPeriod()||"");
   if($("scan_phone"))$("scan_phone").value="";
   const meter=(ex.meter||"").trim();
   const existing=meter?gC().find(c=>(c.meter||"").trim()===meter):null;
