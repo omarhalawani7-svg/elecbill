@@ -1905,6 +1905,18 @@ function rB(){
 }
 
 /* ════ CLIENT DETAIL ════ */
+function saveContact(name,phone,meter){
+  let clean=(phone||"").replace(/\D/g,"").replace(/^0+/,"");
+  if(clean.length<=8)clean="961"+clean;
+  const vcf=`BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL;TYPE=CELL:+${clean}\nNOTE:Meter: ${meter}\nEND:VCARD`;
+  const blob=new Blob([vcf],{type:"text/vcard"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=(name||"contact").replace(/\s+/g,"_")+".vcf";
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast("👤",L==="ar"?"تم حفظ جهة الاتصال":"Contact saved",L==="ar"?"افتح الملف لإضافته للهاتف":"Open the file to add to your phone");
+}
 function openDet(id){
   detId=id;
   if(curP!=="d")prevP=curP;
@@ -1943,6 +1955,7 @@ function openDet(id){
       <button class="abtn a-blue" onclick="openAddBillFor('${c.id}')" style="margin-top:0">${T.add_bill}</button>
       ${hp&&ut>0?`<button class="abtn a-wa" onclick="sendRem('${c.id}')">${T.send_reminder}</button>`:""}
       <button class="abtn a-ghost" onclick="requireAdmin(()=>openEditC('${c.id}'))">${T.edit_client}</button>
+      ${hp?`<button class="abtn a-ghost" style="font-size:13px" onclick="saveContact('${esc(c.name)}','${esc(c.phone)}','${esc(c.meter)}')"">👤 ${L==="ar"?"حفظ في جهات الاتصال":"Save to Phone Contacts"}</button>`:""}
       <button class="abtn a-danger" onclick="requireAdmin(()=>delClient('${c.id}'))">${T.del_client}</button>
       ${__admin?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
         <button class="abtn a-ghost" style="font-size:13px" onclick="openSettings()">⚙️ ${L==="ar"?"الإعدادات":"Settings"}</button>
