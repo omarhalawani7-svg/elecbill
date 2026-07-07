@@ -767,7 +767,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     </div>
     <div class="fg" style="margin-bottom:10px">
       <div class="fl" id="per_lbl">New period</div>
-      <input class="fi" id="per_input" type="text" autocomplete="off" placeholder="e.g. 3-4 or 5-6">
+      <input class="fi" id="per_input" type="text" readonly onclick="openNumpad('per_input')" autocomplete="off" placeholder="e.g. 3-4 or 5-6" style="cursor:pointer;caret-color:transparent">
     </div>
     <button class="abtn a-blue" onclick="confirmPeriod()" style="margin-top:0" id="per_ok">✅ Confirm Period</button>
     <button class="abtn a-ghost" onclick="closeSh('sh-period')" id="per_skip">Skip</button>
@@ -916,8 +916,8 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
       <div id="scan_match_info" style="display:none;font-size:12px;font-weight:700;background:var(--bdim);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 12px;margin-bottom:12px;color:var(--blue)"></div>
       <div class="fg"><div class="fl" id="scan_name_l">Name</div><input class="fi" id="scan_name" type="text" autocomplete="off"></div>
       <div class="fg"><div class="fl" id="scan_meter_l">Meter No</div><input class="fi" id="scan_meter" type="text" autocomplete="off"></div>
-      <div class="fg"><div class="fl" id="scan_amount_l">Amount</div><input class="fi" id="scan_amount" type="number" min="0"></div>
-      <div class="fg"><div class="fl" id="scan_period_l">Period</div><input class="fi" id="scan_period" type="text" autocomplete="off"></div>
+      <div class="fg"><div class="fl" id="scan_amount_l">Amount</div><input class="fi" id="scan_amount" type="text" readonly onclick="openNumpad('scan_amount')" style="cursor:pointer;caret-color:transparent"></div>
+      <div class="fg"><div class="fl" id="scan_period_l">Period</div><input class="fi" id="scan_period" type="text" readonly onclick="openNumpad('scan_period')" autocomplete="off" style="cursor:pointer;caret-color:transparent"></div>
       <div class="fg"><div class="fl" id="scan_phone_l">Phone (optional)</div><input class="fi" id="scan_phone" type="tel" autocomplete="off"></div>
       <button class="abtn a-blue" onclick="saveScanResult()" style="margin-top:4px" id="scan_save">💾 Save Client + Bill</button>
       <button class="abtn a-ghost" onclick="closeSh('sh-scan')" id="scan_cancel">Cancel</button>
@@ -2717,12 +2717,15 @@ document.addEventListener("keydown", e => {
   else if(e.key==="Escape"){e.preventDefault();cancelPin();}
 });
 /* ════ NUMPAD (bill entry) ════ */
-let __npField=null,__npVal='';
+let __npField=null,__npVal='',__npType='amt';
+const __NP_AMT={amt:'ab_amt',scan_amount:'scan_amount'};
+const __NP_PER={period:'ab_month',per_input:'per_input',scan_period:'scan_period'};
 function openNumpad(field){
-  __npField=field;
-  const isAmt=field==='amt';
-  const inp=$(isAmt?'ab_amt':'ab_month');
+  __npField=__NP_AMT[field]||__NP_PER[field]||field;
+  __npType=__NP_AMT[field]?'amt':'period';
+  const inp=$(__npField);
   __npVal=inp?(inp.value||''):'';
+  const isAmt=__npType==='amt';
   const lbl=$('np_label');
   if(lbl)lbl.textContent=isAmt?(L==='ar'?'المبلغ':'Amount'):(L==='ar'?'الفترة':'Period');
   const extra=$('np_extra');
@@ -2731,20 +2734,19 @@ function openNumpad(field){
   openSh('sh-numpad');
 }
 function npKey(d){
-  const isAmt=__npField==='amt';
+  const isAmt=__npType==='amt';
   if(d==='.'&&isAmt&&__npVal.includes('.'))return;
   if(d==='-'&&!isAmt&&__npVal.includes('-'))return;
   __npVal+=d;
   updateNpDisplay();syncNpToField();
 }
-function npExtra(){npKey(__npField==='amt'?'.':'-');}
+function npExtra(){npKey(__npType==='amt'?'.':'-');}
 function npBack(){__npVal=__npVal.slice(0,-1);updateNpDisplay();syncNpToField();}
 function updateNpDisplay(){const el=$('np_display');if(el)el.textContent=__npVal||'0';}
 function syncNpToField(){
-  const id=__npField==='amt'?'ab_amt':'ab_month';
-  const inp=$(id);if(!inp)return;
+  const inp=$(__npField);if(!inp)return;
   inp.value=__npVal;
-  rPrev();
+  if(__npField==='ab_amt'||__npField==='ab_month')rPrev();
 }
 function npDone(){closeSh('sh-numpad');}
 /* ════ TOAST ════ */
