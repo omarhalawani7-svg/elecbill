@@ -1649,7 +1649,6 @@ function openPeriodPicker(){
   renderPeriodChips(getPeriodHistory());
   setPerInput("");
   openSh("sh-period");
-  setTimeout(()=>{const ef=$("per_from");if(ef)ef.focus();},300);
 }
 function quickPeriod(val){
   savePeriodHistory(val);
