@@ -361,11 +361,12 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 .period-hist-btn{padding:9px 16px;border-radius:10px;font-size:14px;font-weight:800;border:2px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;transition:all .15s;}
 .period-hist-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .period-hist-btn:active{opacity:.75;}
-.per-chips{display:flex;flex-wrap:wrap;align-items:center;gap:2px;margin-bottom:8px;min-height:0;}
-.per-chip{display:flex;align-items:center;gap:6px;background:var(--card2);border:1.5px solid var(--border2);border-radius:9px;padding:7px 10px;font-size:14px;font-weight:800;color:var(--text);}
-.per-chip-x{cursor:pointer;color:var(--t3);font-size:12px;font-weight:900;line-height:1;padding:2px;}
+.per-month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0;}
+.per-month-btn{padding:12px 0;border-radius:10px;font-size:15px;font-weight:800;border:2px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;transition:all .15s;}
+.per-month-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.per-month-btn:active{opacity:.75;}
+.per-preview{font-size:14px;font-weight:800;color:var(--text);min-height:20px;margin-top:2px;}
 .per-amp{font-size:11px;font-weight:700;color:var(--t3);padding:0 5px;}
-.per-add-btn{padding:9px 14px;border-radius:9px;border:1.5px solid var(--border2);background:var(--bdim);color:var(--blue);font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer;flex-shrink:0;}
 .period-hd{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-top:8px;}
 html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 .period-hd::after{content:'';flex:1;height:1px;background:var(--border);}
@@ -754,11 +755,8 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="fg" style="margin-bottom:10px">
       <div class="fl" id="per_lbl">New period</div>
       <input type="hidden" id="per_input">
-      <div class="per-chips" id="per_chips"></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input class="fi" id="per_num_new" type="number" inputmode="numeric" autocomplete="off" placeholder="1" style="width:72px;text-align:center;min-width:0" onkeydown="if(event.key==='Enter'){event.preventDefault();addPerNum();}">
-        <button type="button" class="per-add-btn" onclick="addPerNum()" id="per_add_btn">➕ Add</button>
-      </div>
+      <div class="per-month-grid" id="per_months"></div>
+      <div class="per-preview" id="per_preview"></div>
     </div>
     <button class="abtn a-blue" onclick="confirmPeriod()" style="margin-top:0" id="per_ok">✅ Confirm Period</button>
     <button class="abtn a-ghost" onclick="closeSh('sh-period')" id="per_skip">Skip</button>
@@ -1686,8 +1684,8 @@ function openPeriodPicker(){
   const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
   s("per_title","Billing Period","فترة الفوترة");
   s("per_sub",
-    "Tap a previous period or add month numbers, e.g. 1 & 2.",
-    "اضغط على فترة سابقة أو أضف أرقام الأشهر، مثال: 1 و 2.");
+    "Tap a previous period, or tap month numbers below to build a new one.",
+    "اضغط على فترة سابقة، أو اضغط على أرقام الأشهر بالأسفل لإنشاء فترة جديدة.");
   s("per_lbl",a?"فترة جديدة":"New period","فترة جديدة");
   s("per_ok","✅ Confirm Period","✅ تأكيد الفترة");
   s("per_skip","Skip","تخطي");
@@ -2073,29 +2071,21 @@ function syncAbMonth(){
 function syncPerInput(){
   const el=$("per_input");if(el)el.value=(window.__perNums||[]).join("&");
 }
-function renderPerNums(){
-  const el=$("per_chips");if(!el)return;
-  const nums=window.__perNums||[];
-  el.innerHTML=nums.map((n,i)=>
-    (i>0?'<span class="per-amp">&amp;</span>':'')+
-    `<span class="per-chip">${n}<span class="per-chip-x" onclick="removePerNum(${i})">✕</span></span>`
+function renderPerMonths(){
+  const el=$("per_months");if(!el)return;
+  const sel=window.__perNums||[];
+  el.innerHTML=Array.from({length:12},(_,i)=>i+1).map(n=>
+    `<button type="button" class="per-month-btn${sel.includes(String(n))?" active":""}" onclick="togglePerMonth(${n})">${n}</button>`
   ).join("");
+  const pv=$("per_preview");
+  if(pv)pv.innerHTML=sel.map((n,i)=>(i>0?'<span class="per-amp">&amp;</span>':'')+n).join("");
 }
-function addPerNum(){
-  const inp=$("per_num_new");
-  const val=(inp&&inp.value||"").trim();
-  if(!val)return;
+function togglePerMonth(n){
   if(!window.__perNums)window.__perNums=[];
-  window.__perNums.push(val);
-  if(inp)inp.value="";
-  renderPerNums();
-  syncPerInput();
-  if(inp)inp.focus();
-}
-function removePerNum(i){
-  if(!window.__perNums)return;
-  window.__perNums.splice(i,1);
-  renderPerNums();
+  const s=String(n),idx=window.__perNums.indexOf(s);
+  if(idx>-1)window.__perNums.splice(idx,1);
+  else{window.__perNums.push(s);window.__perNums.sort((a,b)=>parseInt(a)-parseInt(b));}
+  renderPerMonths();
   syncPerInput();
 }
 function syncScanPeriod(){
@@ -2119,7 +2109,7 @@ function setPerInput(val){
   const nums=p?p.split(p.includes("&")?"&":"-").map(x=>x.trim()).filter(Boolean):[];
   window.__perNums=nums;
   const el=$("per_input");if(el)el.value=nums.join("&");
-  renderPerNums();
+  renderPerMonths();
 }
 /* ════ ADD BILL ════ */
 function usePeriod(){
