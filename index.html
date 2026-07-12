@@ -366,7 +366,7 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 .per-month-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .per-month-btn:active{opacity:.75;}
 .per-preview{font-size:14px;font-weight:800;color:var(--text);min-height:20px;margin-top:2px;}
-.per-amp{font-size:11px;font-weight:700;color:var(--t3);padding:0 5px;}
+.per-amp{font-size:11px;font-weight:700;color:inherit;opacity:.6;padding:0 4px;}
 .period-hd{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-top:8px;}
 html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 .period-hd::after{content:'';flex:1;height:1px;background:var(--border);}
@@ -1596,12 +1596,16 @@ function savePeriodHistory(p){
   localStorage.setItem("eb_period_hist",JSON.stringify(h));
   window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_period_hist:h});
 }
+function perDisplay(p){
+  if(!p)return"—";
+  return String(p).split("&").map(x=>x.trim()).join('<span class="per-amp">&amp;</span>');
+}
 function setPeriod(p){
   localStorage.setItem("eb_period",p);
   window.__period=p;
   const chip=$("h_period");
   const txt=$("h_period_txt");
-  if(txt)txt.textContent=p||"—";
+  if(txt)txt.innerHTML=perDisplay(p);
   if(chip){
     if(p){chip.classList.remove("no-period");}
     else{chip.classList.add("no-period");}
@@ -1615,7 +1619,7 @@ function renderPeriodChips(hist){
   if(!hrow)return;
   if(hw)hw.style.display=hist.length?"block":"none";
   if($("per_hist_lbl"))$("per_hist_lbl").textContent=a?"فترات سابقة":"Previous periods";
-  hrow.innerHTML=hist.map(p=>`<button class="period-hist-btn${p===cur?" active":""}">📅 ${p}</button>`).join("");
+  hrow.innerHTML=hist.map(p=>`<button class="period-hist-btn${p===cur?" active":""}">📅 ${perDisplay(p)}</button>`).join("");
   // Long-press (800ms) to trigger hidden delete; short tap = select period
   hrow.querySelectorAll(".period-hist-btn").forEach((btn,i)=>{
     const p=hist[i];
@@ -2452,7 +2456,7 @@ function rS(){
     if(!periods.length){pcard.innerHTML=`<div style="color:var(--t3);font-size:13px;padding:12px 0;text-align:center">${L==="ar"?"لا توجد بيانات":"No data yet"}</div>`;return;}
     pcard.innerHTML=periods.map(([p,d])=>`
       <div class="period-sum-row" style="${period&&p===period?'background:var(--bdim);border-radius:8px;padding:9px 8px;':''}">
-        <div class="period-sum-name">📅 ${p} <span style="font-size:10px;color:var(--t3);font-weight:600">(${d.cnt})</span>${period&&p===period?`<span style="font-size:10px;background:var(--blue);color:#fff;border-radius:4px;padding:1px 5px;margin-left:5px">${L==="ar"?"الحالية":"active"}</span>`:""}</div>
+        <div class="period-sum-name">📅 ${perDisplay(p)} <span style="font-size:10px;color:var(--t3);font-weight:600">(${d.cnt})</span>${period&&p===period?`<span style="font-size:10px;background:var(--blue);color:#fff;border-radius:4px;padding:1px 5px;margin-left:5px">${L==="ar"?"الحالية":"active"}</span>`:""}</div>
         <div class="period-sum-vals">
           <span class="period-sum-paid">✅ ${cur}${fmt(d.paid)}</span>
           <span class="period-sum-unpaid">⏳ ${cur}${fmt(d.billed-d.paid)}</span>
