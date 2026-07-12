@@ -361,6 +361,11 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 .period-hist-btn{padding:9px 16px;border-radius:10px;font-size:14px;font-weight:800;border:2px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;transition:all .15s;}
 .period-hist-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .period-hist-btn:active{opacity:.75;}
+.per-chips{display:flex;flex-wrap:wrap;align-items:center;gap:2px;margin-bottom:8px;min-height:0;}
+.per-chip{display:flex;align-items:center;gap:6px;background:var(--card2);border:1.5px solid var(--border2);border-radius:9px;padding:7px 10px;font-size:14px;font-weight:800;color:var(--text);}
+.per-chip-x{cursor:pointer;color:var(--t3);font-size:12px;font-weight:900;line-height:1;padding:2px;}
+.per-amp{font-size:11px;font-weight:700;color:var(--t3);padding:0 5px;}
+.per-add-btn{padding:9px 14px;border-radius:9px;border:1.5px solid var(--border2);background:var(--bdim);color:var(--blue);font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer;flex-shrink:0;}
 .period-hd{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-top:8px;}
 html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
 .period-hd::after{content:'';flex:1;height:1px;background:var(--border);}
@@ -748,11 +753,11 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     </div>
     <div class="fg" style="margin-bottom:10px">
       <div class="fl" id="per_lbl">New period</div>
+      <input type="hidden" id="per_input">
+      <div class="per-chips" id="per_chips"></div>
       <div style="display:flex;align-items:center;gap:8px">
-        <input type="hidden" id="per_input">
-        <input class="fi" id="per_from" type="number" inputmode="numeric" oninput="syncPerInput()" autocomplete="off" placeholder="From" style="width:72px;text-align:center;min-width:0">
-        <span style="font-size:18px;font-weight:900;color:var(--t3)">—</span>
-        <input class="fi" id="per_to" type="number" inputmode="numeric" oninput="syncPerInput()" autocomplete="off" placeholder="To" style="width:72px;text-align:center;min-width:0">
+        <input class="fi" id="per_num_new" type="number" inputmode="numeric" autocomplete="off" placeholder="1" style="width:72px;text-align:center;min-width:0" onkeydown="if(event.key==='Enter'){event.preventDefault();addPerNum();}">
+        <button type="button" class="per-add-btn" onclick="addPerNum()" id="per_add_btn">➕ Add</button>
       </div>
     </div>
     <button class="abtn a-blue" onclick="confirmPeriod()" style="margin-top:0" id="per_ok">✅ Confirm Period</button>
@@ -1681,8 +1686,8 @@ function openPeriodPicker(){
   const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
   s("per_title","Billing Period","فترة الفوترة");
   s("per_sub",
-    "Tap a previous period or enter From and To numbers.",
-    "اضغط على فترة سابقة أو أدخل رقم البداية والنهاية.");
+    "Tap a previous period or add month numbers, e.g. 1 & 2.",
+    "اضغط على فترة سابقة أو أضف أرقام الأشهر، مثال: 1 و 2.");
   s("per_lbl",a?"فترة جديدة":"New period","فترة جديدة");
   s("per_ok","✅ Confirm Period","✅ تأكيد الفترة");
   s("per_skip","Skip","تخطي");
@@ -2066,8 +2071,32 @@ function syncAbMonth(){
   const el=$("ab_month");if(el)el.value=f&&t?f+"-"+t:f||t||"";
 }
 function syncPerInput(){
-  const f=(v("per_from")||"").trim(),t=(v("per_to")||"").trim();
-  const el=$("per_input");if(el)el.value=f&&t?f+"-"+t:f||t||"";
+  const el=$("per_input");if(el)el.value=(window.__perNums||[]).join("&");
+}
+function renderPerNums(){
+  const el=$("per_chips");if(!el)return;
+  const nums=window.__perNums||[];
+  el.innerHTML=nums.map((n,i)=>
+    (i>0?'<span class="per-amp">&amp;</span>':'')+
+    `<span class="per-chip">${n}<span class="per-chip-x" onclick="removePerNum(${i})">✕</span></span>`
+  ).join("");
+}
+function addPerNum(){
+  const inp=$("per_num_new");
+  const val=(inp&&inp.value||"").trim();
+  if(!val)return;
+  if(!window.__perNums)window.__perNums=[];
+  window.__perNums.push(val);
+  if(inp)inp.value="";
+  renderPerNums();
+  syncPerInput();
+  if(inp)inp.focus();
+}
+function removePerNum(i){
+  if(!window.__perNums)return;
+  window.__perNums.splice(i,1);
+  renderPerNums();
+  syncPerInput();
 }
 function syncScanPeriod(){
   const f=(v("scan_per_f")||"").trim(),t=(v("scan_per_t")||"").trim();
@@ -2086,10 +2115,11 @@ function setScanPeriod(val){
   if(ef)ef.value=f;if(et)et.value=t;
 }
 function setPerInput(val){
-  const p=val||"",pts=p.split("-"),f=pts[0]||"",t=pts[1]||"";
-  const el=$("per_input");if(el)el.value=p;
-  const ef=$("per_from"),et=$("per_to");
-  if(ef)ef.value=f;if(et)et.value=t;
+  const p=val||"";
+  const nums=p?p.split(p.includes("&")?"&":"-").map(x=>x.trim()).filter(Boolean):[];
+  window.__perNums=nums;
+  const el=$("per_input");if(el)el.value=nums.join("&");
+  renderPerNums();
 }
 /* ════ ADD BILL ════ */
 function usePeriod(){
