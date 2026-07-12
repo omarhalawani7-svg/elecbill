@@ -361,6 +361,10 @@ html[lang="ar"] .wabox-hd{text-transform:none;letter-spacing:0;font-size:11px;}
 .period-hist-btn{padding:9px 16px;border-radius:10px;font-size:14px;font-weight:800;border:2px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;transition:all .15s;}
 .period-hist-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .period-hist-btn:active{opacity:.75;}
+.per-year-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.per-year-btn{padding:9px 15px;border-radius:9px;font-size:14px;font-weight:800;border:2px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;transition:all .15s;}
+.per-year-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.per-year-btn:active{opacity:.75;}
 .per-month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0;}
 .per-month-btn{padding:12px 0;border-radius:10px;font-size:15px;font-weight:800;border:2px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;transition:all .15s;}
 .per-month-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
@@ -754,6 +758,8 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     </div>
     <div class="fg" style="margin-bottom:10px">
       <div class="fl" id="per_lbl">New period</div>
+      <div class="fl" id="per_yr_lbl" style="font-size:11px;color:var(--t3);margin-bottom:6px">Year</div>
+      <div class="per-year-row" id="per_years"></div>
       <input type="hidden" id="per_input">
       <div class="per-month-grid" id="per_months"></div>
       <div class="per-preview" id="per_preview"></div>
@@ -1598,7 +1604,12 @@ function savePeriodHistory(p){
 }
 function perDisplay(p){
   if(!p)return"—";
-  return String(p).split("&").map(x=>x.trim()).join('<span class="per-amp">&amp;</span>');
+  const s=String(p);
+  const slash=s.indexOf("/");
+  const yr=slash>-1?s.slice(0,slash):null;
+  const months=slash>-1?s.slice(slash+1):s;
+  const monthsHtml=months.split("&").map(x=>x.trim()).join('<span class="per-amp">&amp;</span>');
+  return yr?`${yr}<span class="per-amp">/</span>${monthsHtml}`:monthsHtml;
 }
 function setPeriod(p){
   localStorage.setItem("eb_period",p);
@@ -1688,9 +1699,10 @@ function openPeriodPicker(){
   const s=(id,en,ar)=>{const el=$(id);if(el)el.textContent=a?ar:en;};
   s("per_title","Billing Period","فترة الفوترة");
   s("per_sub",
-    "Tap a previous period, or tap month numbers below to build a new one.",
-    "اضغط على فترة سابقة، أو اضغط على أرقام الأشهر بالأسفل لإنشاء فترة جديدة.");
+    "Tap a previous period, or pick a year and month numbers below to build a new one.",
+    "اضغط على فترة سابقة، أو اختر السنة وأرقام الأشهر بالأسفل لإنشاء فترة جديدة.");
   s("per_lbl",a?"فترة جديدة":"New period","فترة جديدة");
+  s("per_yr_lbl",a?"السنة":"Year","السنة");
   s("per_ok","✅ Confirm Period","✅ تأكيد الفترة");
   s("per_skip","Skip","تخطي");
   // Show local history immediately
@@ -2073,7 +2085,24 @@ function syncAbMonth(){
   const el=$("ab_month");if(el)el.value=f&&t?f+"-"+t:f||t||"";
 }
 function syncPerInput(){
-  const el=$("per_input");if(el)el.value=(window.__perNums||[]).join("&");
+  const months=(window.__perNums||[]).join("&");
+  const val=months?(window.__perYear||new Date().getFullYear())+"/"+months:"";
+  const el=$("per_input");if(el)el.value=val;
+  const pv=$("per_preview");if(pv)pv.innerHTML=perDisplay(val);
+}
+function renderPerYears(){
+  const el=$("per_years");if(!el)return;
+  const cy=new Date().getFullYear();
+  const y=window.__perYear||cy;
+  const years=[cy-2,cy-1,cy,cy+1,cy+2];
+  el.innerHTML=years.map(n=>
+    `<button type="button" class="per-year-btn${n===y?" active":""}" onclick="setPerYear(${n})">${n}</button>`
+  ).join("");
+}
+function setPerYear(y){
+  window.__perYear=y;
+  renderPerYears();
+  syncPerInput();
 }
 function renderPerMonths(){
   const el=$("per_months");if(!el)return;
@@ -2081,8 +2110,6 @@ function renderPerMonths(){
   el.innerHTML=Array.from({length:12},(_,i)=>i+1).map(n=>
     `<button type="button" class="per-month-btn${sel.includes(String(n))?" active":""}" onclick="togglePerMonth(${n})">${n}</button>`
   ).join("");
-  const pv=$("per_preview");
-  if(pv)pv.innerHTML=sel.map((n,i)=>(i>0?'<span class="per-amp">&amp;</span>':'')+n).join("");
 }
 function togglePerMonth(n){
   if(!window.__perNums)window.__perNums=[];
@@ -2110,10 +2137,15 @@ function setScanPeriod(val){
 }
 function setPerInput(val){
   const p=val||"";
-  const nums=p?p.split(p.includes("&")?"&":"-").map(x=>x.trim()).filter(Boolean):[];
+  const slash=p.indexOf("/");
+  const yr=slash>-1?p.slice(0,slash):"";
+  const monthsStr=slash>-1?p.slice(slash+1):p;
+  const nums=monthsStr?monthsStr.split(monthsStr.includes("&")?"&":"-").map(x=>x.trim()).filter(Boolean):[];
   window.__perNums=nums;
-  const el=$("per_input");if(el)el.value=nums.join("&");
+  window.__perYear=yr?parseInt(yr,10):new Date().getFullYear();
+  renderPerYears();
   renderPerMonths();
+  syncPerInput();
 }
 /* ════ ADD BILL ════ */
 function usePeriod(){
