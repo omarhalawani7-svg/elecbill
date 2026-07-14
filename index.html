@@ -2437,6 +2437,8 @@ window.loadWAConfig = function(){
     :(L==="ar"?"⚪ غير مُكوَّن":"⚪ Not configured");
   if(hasApi){
     document.getElementById("waapi_id").value=cfg.instanceId||"";
+    document.getElementById("waapi_tok").value=cfg.apiToken||"";
+    document.getElementById("waapi_lim").value=cfg.limit||3000;
   }
   const wrap=document.getElementById("waapi_usage_wrap");
   if(hasApi){
