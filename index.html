@@ -860,6 +860,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
         <button class="seg-btn" id="set_al_60" onclick="setAutoLockSec(60)" style="padding:7px 10px;font-size:12px">1m</button>
         <button class="seg-btn" id="set_al_120" onclick="setAutoLockSec(120)" style="padding:7px 10px;font-size:12px">2m</button>
         <button class="seg-btn" id="set_al_300" onclick="setAutoLockSec(300)" style="padding:7px 10px;font-size:12px">5m</button>
+        <button class="seg-btn" id="set_al_never" onclick="setAutoLockSec(0)" style="padding:7px 10px;font-size:12px;display:none">Never</button>
       </div>
     </div>
     <button class="set-btn" onclick="closeSh('sh-settings');openSh('sh-chpin')">🔑 <span id="set_chpin">Change Admin PIN</span></button>
@@ -1619,21 +1620,32 @@ function updateDots(){
   el.innerHTML=[0,1,2,3].map(i=>`<span class="pdot ${i<__pinBuf.length?'filled':''}"></span>`).join('');
 }
 let __lockTimer=null;
-function getAutoLockSec(){return parseInt(localStorage.getItem("eb_autolock_sec")||"30",10);}
+function isSuperUser(){return !!(window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com");}
+function getAutoLockSec(){
+  const sec=parseInt(localStorage.getItem("eb_autolock_sec")||"30",10);
+  if(sec===0&&!isSuperUser())return 30;
+  return sec;
+}
 function setAutoLockSec(sec){
+  if(sec===0&&!isSuperUser())return;
   localStorage.setItem("eb_autolock_sec",String(sec));
   updateAutoLockBtns();
   startAutoLock();
 }
 function updateAutoLockBtns(){
   const cur=getAutoLockSec();
+  const neverBtn=$("set_al_never");
+  if(neverBtn)neverBtn.style.display=isSuperUser()?"":"none";
   [30,60,120,300].forEach(s=>{const b=$("set_al_"+s);if(b)b.classList.toggle("on",s===cur);});
+  if(neverBtn)neverBtn.classList.toggle("on",cur===0);
 }
 function startAutoLock(){
   clearTimeout(__lockTimer);
+  const sec=getAutoLockSec();
+  if(sec===0)return;
   __lockTimer=setTimeout(()=>{
     if(__admin){__admin=false;updateAdminBtn();toast("🔒",L==="ar"?"تم القفل تلقائياً":"Auto-locked","");}
-  },getAutoLockSec()*1000);
+  },sec*1000);
 }
 function checkPin(){
   if(__pinBuf===getPin()){
@@ -1868,8 +1880,7 @@ function lockAdminFromSettings(){
 function openSettings(){
   updateBioSettingBtn();
   // Show/hide admin-only section
-  const isSuper=window.__currentUser&&window.__currentUser.email.toLowerCase()==="omar.halawani.7@gmail.com";
-  const wrap=$("set_access_wrap");if(wrap)wrap.style.display=isSuper?"block":"none";
+  const wrap=$("set_access_wrap");if(wrap)wrap.style.display=isSuperUser()?"block":"none";
   // Sync theme buttons
   const theme=localStorage.getItem("eb_theme")||"light";
   const sl=$("set_light"),sd=$("set_dark");
@@ -1908,6 +1919,7 @@ function updateSettingsUI(){
   s("set_remtpl","Edit Reminder Template","تعديل رسالة التذكير");
   s("set_s_sec","🔒 Security","🔒 الأمان");
   s("set_alock_l","Auto-Lock Timer","مؤقت القفل التلقائي");
+  s("set_al_never","Never","أبداً");
   s("set_chpin","Change Admin PIN","تغيير رمز PIN");
   s("set_lock","Lock Admin Mode","قفل وضع المدير");
   s("set_signout","Sign Out","تسجيل الخروج");
