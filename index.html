@@ -2061,7 +2061,7 @@ function rB(){
       <div class="abl-foot">${bg(b)}${b.desc?`<span style="font-size:11px;color:var(--t3);font-style:italic">${esc(b.desc)}</span>`:""}${!b.paid&&hp?`<button class="abl-wa" onclick="waForBill('${b.id}')">${T.wa_btn}</button>`:""}${!b.paid?`<button class="abl-pay" data-action="paid" data-id="${b.id}">✅ ${T.mark_paid}</button>`:`<button class="abl-unpay" data-action="unpaid-confirm" data-id="${b.id}">↩ ${T.mark_unpaid}</button>`}</div>
     </div>`;
   };
-  const hdr=period?`<div class="period-hd">📅 ${esc(period)} <span class="period-cnt">${list.length}</span> <span style="margin-left:auto;font-size:11px;color:var(--t2);font-weight:700">${getCurrency()}${fmt(tot)}</span></div>`:"";
+  const hdr=period?`<div class="period-hd">📅 ${perDisplay(period)} <span class="period-cnt">${list.length}</span> <span style="margin-left:auto;font-size:11px;color:var(--t2);font-weight:700">${getCurrency()}${fmt(tot)}</span></div>`:"";
   el.innerHTML=hdr+list.map(renderBill).join("");
 }
 
@@ -2395,7 +2395,7 @@ function buildBillMsg(c,b){
   return tpl
     .replace(/\{name\}/g,c.name||"")
     .replace(/\{meter\}/g,c.meter||"")
-    .replace(/\{period\}/g,b.month||"—")
+    .replace(/\{period\}/g,perDisplayText(b.month))
     .replace(/\{amount\}/g,`${cur}${fmt(b.amount)}`)
     .replace(/\{due\}/g,fmtD(b.dueDate));
 }
@@ -2403,7 +2403,7 @@ function buildRemMsg(c,up,note){
   const cur=getCurrency();
   const tpl=getRemTemplate().replace(/\\n/g,"\n");
   const noteBlock=note
-    ?`\n📝 *ملاحظة:* ${note}\n\n━━━━━━━━━━━\n📋 *الفواتير غير المسددة (${up.length}):*\n`+up.map(b=>`  • ${b.month||"؟"}: *${cur}${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n")+"\n"
+    ?`\n📝 *ملاحظة:* ${note}\n\n━━━━━━━━━━━\n📋 *الفواتير غير المسددة (${up.length}):*\n`+up.map(b=>`  • ${b.month?perDisplayText(b.month):"؟"}: *${cur}${fmt(b.amount)}* (الاستحقاق ${fmtD(b.dueDate)})`).join("\n")+"\n"
     :"";
   return tpl
     .replace(/\{name\}/g,c.name||"")
@@ -2619,8 +2619,8 @@ document.addEventListener("click", e => {
     const b=gB().find(x=>x.id===id);
     const cur=getCurrency();
     const msg=L==="ar"
-      ?`⚠️ تأكيد\n\nهل تريد إلغاء الدفع لهذه الفاتورة؟\nالفترة: ${b?.month||"—"}\nالمبلغ: ${cur}${fmt(b?.amount)}\n\nسيتم إعادتها إلى قائمة غير المدفوعة.`
-      :`⚠️ Confirm\n\nMark this bill as UNPAID?\nPeriod: ${b?.month||"—"}\nAmount: ${cur}${fmt(b?.amount)}\n\nIt will move back to unpaid.`;
+      ?`⚠️ تأكيد\n\nهل تريد إلغاء الدفع لهذه الفاتورة؟\nالفترة: ${perDisplayText(b?.month)}\nالمبلغ: ${cur}${fmt(b?.amount)}\n\nسيتم إعادتها إلى قائمة غير المدفوعة.`
+      :`⚠️ Confirm\n\nMark this bill as UNPAID?\nPeriod: ${perDisplayText(b?.month)}\nAmount: ${cur}${fmt(b?.amount)}\n\nIt will move back to unpaid.`;
     if(confirm(msg)) markUnpaid(id);
   }
   if(action === "delbill") delBill(id);
