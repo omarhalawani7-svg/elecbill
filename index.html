@@ -1464,8 +1464,31 @@ window.addEventListener("DOMContentLoaded",()=>{
   document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)closeSh(o.id);}));
   initSheetSwipeClose();
   initLatinDigitFields();
+  initDetailSwipeBack();
   // Boot is now triggered by handleUser() after auth check
 });
+function initDetailSwipeBack(){
+  const pg=document.getElementById("pg-d");
+  if(!pg)return;
+  let startX=0,startY=0,tracking=false;
+  pg.addEventListener("touchstart",e=>{
+    const t=e.touches[0];
+    if(t.clientX>40)return;
+    startX=t.clientX;startY=t.clientY;tracking=true;
+  },{passive:true});
+  pg.addEventListener("touchmove",e=>{
+    if(!tracking)return;
+    const t=e.touches[0];
+    if(Math.abs(t.clientY-startY)>Math.abs(t.clientX-startX)*1.2)tracking=false;
+  },{passive:true});
+  pg.addEventListener("touchend",e=>{
+    if(!tracking)return;
+    tracking=false;
+    const t=e.changedTouches[0];
+    const dx=t.clientX-startX,dy=t.clientY-startY;
+    if(dx>80&&Math.abs(dy)<60)goBack();
+  });
+}
 function initSheetSwipeClose(){
   document.querySelectorAll(".ov").forEach(ov=>{
     const sheet=ov.querySelector(".sheet");
