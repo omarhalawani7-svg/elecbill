@@ -105,7 +105,7 @@ html[lang="ar"] .set-btn{text-align:right;}
 .sp-ar .sp-lname{color:var(--text);font-family:'Cairo',sans-serif;}
 .sp-hint{font-size:11px;color:var(--t3);}
 /* ── HEADER ── */
-.hdr{position:sticky;top:0;z-index:80;background:rgba(237,238,227,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.hdr{position:sticky;top:0;z-index:80;background:rgba(237,238,227,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;direction:ltr;}
 .hbrand{display:flex;align-items:center;gap:6px;}
 .hrefresh{background:transparent;border:none;font-size:16px;padding:4px 5px;border-radius:8px;color:var(--t3);transition:all .18s;opacity:.6;}
 .hrefresh:active{opacity:1;transform:rotate(180deg);}
@@ -525,12 +525,12 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="stitle" id="ac_t">Add <span>Client</span></div>
     <div class="dlbl" id="ac_fl">🔒 Fixed Info — saved permanently</div>
     <div class="fg"><div class="fl" id="ac_nl">Name <span class="freq">*</span></div><input class="fi" id="ac_name" type="text" autocomplete="off"></div>
-    <div class="fg"><div class="fl" id="ac_ml">Meter Serial # <span class="freq">*</span></div><input class="fi" id="ac_meter" type="text" autocomplete="off"></div>
+    <div class="fg"><div class="fl" id="ac_ml">Meter Serial # <span class="freq">*</span></div><input class="fi" id="ac_meter" type="text" autocomplete="off" dir="ltr" style="text-align:left"></div>
     <div class="fg">
       <div class="fl" id="ac_pl">📱 WhatsApp # <span class="freq">*</span></div>
-      <div style="display:flex;gap:8px">
-        <input class="fi" id="ac_cc" type="tel" value="961" style="width:72px;flex-shrink:0" placeholder="961" title="Country code">
-        <input class="fi" id="ac_phone" type="tel" autocomplete="off" placeholder="70123456" style="flex:1">
+      <div style="display:flex;gap:8px" dir="ltr">
+        <input class="fi" id="ac_cc" type="tel" inputmode="numeric" pattern="[0-9]*" value="961" style="width:72px;flex-shrink:0;text-align:left" placeholder="961" title="Country code" dir="ltr">
+        <input class="fi" id="ac_phone" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="70123456" style="flex:1;text-align:left" dir="ltr">
       </div>
       <div class="fhint" id="ac_ph">Country code + local number (without leading 0)</div>
     </div>
@@ -547,12 +547,12 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div class="stitle" id="ec_t">Edit <span>Client</span></div>
     <div class="dlbl" id="ec_fl">🔒 Fixed Info</div>
     <div class="fg"><div class="fl" id="ec_nl">Name <span class="freq">*</span></div><input class="fi" id="ec_name" type="text" autocomplete="off"></div>
-    <div class="fg"><div class="fl" id="ec_ml">Meter Serial # <span class="freq">*</span></div><input class="fi" id="ec_meter" type="text" autocomplete="off"></div>
+    <div class="fg"><div class="fl" id="ec_ml">Meter Serial # <span class="freq">*</span></div><input class="fi" id="ec_meter" type="text" autocomplete="off" dir="ltr" style="text-align:left"></div>
     <div class="fg">
       <div class="fl" id="ec_pl">📱 WhatsApp #</div>
-      <div style="display:flex;gap:8px">
-        <input class="fi" id="ec_cc" type="tel" value="961" style="width:72px;flex-shrink:0" placeholder="961" title="Country code">
-        <input class="fi" id="ec_phone" type="tel" autocomplete="off" placeholder="70123456" style="flex:1">
+      <div style="display:flex;gap:8px" dir="ltr">
+        <input class="fi" id="ec_cc" type="tel" inputmode="numeric" pattern="[0-9]*" value="961" style="width:72px;flex-shrink:0;text-align:left" placeholder="961" title="Country code" dir="ltr">
+        <input class="fi" id="ec_phone" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="70123456" style="flex:1;text-align:left" dir="ltr">
       </div>
       <div class="fhint">Country code + local number (without leading 0)</div>
     </div>
@@ -616,7 +616,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     </div>
     <div class="fg">
       <div class="fl" id="wa_pl">Phone Number</div>
-      <input class="fi" id="wa_phone" type="tel" placeholder="213XXXXXXXXX">
+      <input class="fi" id="wa_phone" type="tel" inputmode="numeric" pattern="[0-9]*" dir="ltr" style="text-align:left" placeholder="213XXXXXXXXX">
       <div class="fhint" id="wa_hint">You can edit before sending.</div>
     </div>
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:12px;font-size:12px;color:var(--t2);line-height:1.6" id="wa_info">ℹ️ WhatsApp opens with the message ready. Just tap <strong>Send</strong>.</div>
@@ -692,7 +692,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <div style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.6" id="waapi_sub">Use <strong>Green API</strong> to send messages automatically — no manual tap needed. <a href="https://green-api.com" target="_blank" style="color:var(--blue)">green-api.com</a> (free 3,000 msg/month).</div>
     <div class="fg">
       <div class="fl" id="waapi_idl">Instance ID</div>
-      <input class="fi" id="waapi_id" type="text" placeholder="e.g. 7103XXXXXXXX" autocomplete="off" autocorrect="off" autocapitalize="off">
+      <input class="fi" id="waapi_id" type="text" dir="ltr" style="text-align:left" placeholder="e.g. 7103XXXXXXXX" autocomplete="off" autocorrect="off" autocapitalize="off">
     </div>
     <div class="fg">
       <div class="fl" id="waapi_tokl">API Token</div>
@@ -715,7 +715,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
     <button class="abtn a-ghost" onclick="clearWAConfig()" style="margin-top:0;font-size:13px" id="waapi_clr">🗑️ Remove API</button>
     <div class="fg" style="margin-top:8px">
       <div class="fl">🧪 Test — enter your own number</div>
-      <input class="fi" id="waapi_test_num" type="tel" placeholder="e.g. 96170000000" autocomplete="off">
+      <input class="fi" id="waapi_test_num" type="tel" inputmode="numeric" pattern="[0-9]*" dir="ltr" style="text-align:left" placeholder="e.g. 96170000000" autocomplete="off">
     </div>
     <button class="abtn a-ghost" onclick="testWASend()" style="margin-top:0;font-size:13px" id="waapi_test_btn">🧪 Test Send</button>
     <div id="waapi_test_result" style="display:none;margin:8px 0;padding:10px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:11px;font-family:monospace;word-break:break-all;color:var(--t2);line-height:1.6"></div>
@@ -922,7 +922,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
       <div class="fg"><div class="fl" id="scan_meter_l">Meter No</div><input class="fi" id="scan_meter" type="text" autocomplete="off"></div>
       <div class="fg"><div class="fl" id="scan_amount_l">Amount</div><input class="fi" id="scan_amount" type="text" inputmode="decimal" autocomplete="off"></div>
       <div class="fg"><div class="fl" id="scan_period_l">Period</div><div style="display:flex;align-items:center;gap:8px"><input type="hidden" id="scan_period"><input class="fi" id="scan_per_f" type="number" inputmode="numeric" oninput="syncScanPeriod()" autocomplete="off" placeholder="From" style="width:72px;text-align:center;min-width:0"><span style="font-size:18px;font-weight:900;color:var(--t3)">—</span><input class="fi" id="scan_per_t" type="number" inputmode="numeric" oninput="syncScanPeriod()" autocomplete="off" placeholder="To" style="width:72px;text-align:center;min-width:0"></div></div>
-      <div class="fg"><div class="fl" id="scan_phone_l">Phone (optional)</div><input class="fi" id="scan_phone" type="tel" autocomplete="off"></div>
+      <div class="fg"><div class="fl" id="scan_phone_l">Phone (optional)</div><input class="fi" id="scan_phone" type="tel" inputmode="numeric" pattern="[0-9]*" dir="ltr" style="text-align:left" autocomplete="off"></div>
       <button class="abtn a-blue" onclick="saveScanResult()" style="margin-top:4px" id="scan_save">💾 Save Client + Bill</button>
       <button class="abtn a-ghost" onclick="closeSh('sh-scan')" id="scan_cancel">Cancel</button>
     </div>
@@ -1460,6 +1460,7 @@ window.addEventListener("DOMContentLoaded",()=>{
   $("ab_date").value=new Date().toISOString().split("T")[0];
   document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)closeSh(o.id);}));
   initSheetSwipeClose();
+  initLatinDigitFields();
   // Boot is now triggered by handleUser() after auth check
 });
 function initSheetSwipeClose(){
@@ -1497,6 +1498,25 @@ function initSheetSwipeClose(){
     sheet.addEventListener("touchmove",onMove,{passive:true});
     sheet.addEventListener("touchend",onEnd);
     sheet.addEventListener("touchcancel",onEnd);
+  });
+}
+function toLatinDigits(s){
+  return String(s||"")
+    .replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-0x0660))
+    .replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-0x06F0));
+}
+const LATIN_DIGIT_FIELD_IDS=["ac_meter","ec_meter","ac_cc","ac_phone","ec_cc","ec_phone","wa_phone","waapi_test_num","scan_phone","waapi_id"];
+function initLatinDigitFields(){
+  LATIN_DIGIT_FIELD_IDS.forEach(id=>{
+    const el=$(id);if(!el)return;
+    el.addEventListener("input",()=>{
+      const v=el.value,nv=toLatinDigits(v);
+      if(nv!==v){
+        const pos=el.selectionStart;
+        el.value=nv;
+        try{el.setSelectionRange(pos,pos);}catch(e){}
+      }
+    });
   });
 }
 function bootAfterAuth(){
@@ -1659,14 +1679,24 @@ function savePeriodHistory(p){
   localStorage.setItem("eb_period_hist",JSON.stringify(h));
   window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_period_hist:h});
 }
-function perDisplay(p){
-  if(!p)return"—";
-  const s=String(p);
+function perParts(p){
+  const s=String(p||"");
   const slash=s.indexOf("/");
   const yr=slash>-1?s.slice(0,slash):null;
   const months=slash>-1?s.slice(slash+1):s;
-  const monthsHtml=months.split("&").map(x=>x.trim()).join('<span class="per-amp">&amp;</span>');
-  return yr?`${yr}<span class="per-amp">/</span>${monthsHtml}`:monthsHtml;
+  return{yr,months};
+}
+function perDisplay(p){
+  if(!p)return"—";
+  const{yr,months}=perParts(p);
+  const monthsHtml=months.split("&").map(x=>esc(x.trim())).join('<span class="per-amp">&amp;</span>');
+  const html=yr?`${monthsHtml} <span class="per-amp">/</span>${esc(yr)}`:monthsHtml;
+  return`<span dir="ltr" style="unicode-bidi:isolate">${html}</span>`;
+}
+function perDisplayText(p){
+  if(!p)return"—";
+  const{yr,months}=perParts(p);
+  return yr?`${months} /${yr}`:months;
 }
 function setPeriod(p){
   localStorage.setItem("eb_period",p);
@@ -1706,17 +1736,18 @@ function renderPeriodChips(hist){
 function openDeletePeriod(p){
   const a=L==="ar";
   window.__delPeriod=p;
+  window.__delPeriodDisplay=perDisplayText(p);
   const bills=(window.__B||[]).filter(b=>(b.month||"")===p);
   const nw=$("dper_name_wrap"),inp=$("dper_confirm_input"),bc=$("dper_billcount"),btn=$("dper_confirm_btn");
-  if(nw)nw.textContent=p;
-  if(inp){inp.value="";inp.placeholder=p;}
+  if(nw)nw.textContent=window.__delPeriodDisplay;
+  if(inp){inp.value="";inp.placeholder=window.__delPeriodDisplay;}
   if(bc)bc.textContent=a?`${bills.length} فاتورة في هذه الفترة`:`${bills.length} bill(s) in this period`;
   if(btn){btn.disabled=true;btn.style.opacity=".5";btn.style.background="var(--rdim)";btn.style.color="var(--red)";}
   if($("dper_title"))$("dper_title").textContent=a?"حذف الفترة":"Delete Period";
   if($("dper_warn1"))$("dper_warn1").textContent=a?"⛔ سيتم حذف ما يلي نهائياً:":"⛔ This will permanently delete:";
   if($("dper_warn2"))$("dper_warn2").textContent=a?"هذا الإجراء لا يمكن التراجع عنه. سيتم مسح جميع الفواتير من قاعدة البيانات على جميع الأجهزة.":"This cannot be undone. All bill records will be erased from the database on all devices.";
   if($("dper_input_lbl"))$("dper_input_lbl").textContent=a?"اكتب الفترة للتأكيد:":"Type the period name to confirm:";
-  if($("dper_input_hint"))$("dper_input_hint").textContent=p;
+  if($("dper_input_hint"))$("dper_input_hint").textContent=window.__delPeriodDisplay;
   if($("dper_btn_txt"))$("dper_btn_txt").textContent=a?"حذف الفترة":"Delete Period";
   if($("dper_cancel"))$("dper_cancel").textContent=a?"إلغاء":"Cancel";
   openSh("sh-del-period");
@@ -1724,7 +1755,7 @@ function openDeletePeriod(p){
 function checkDelPeriodInput(){
   const inp=$("dper_confirm_input"),btn=$("dper_confirm_btn");
   if(!inp||!btn)return;
-  const match=inp.value.trim()===window.__delPeriod;
+  const match=inp.value.trim()===window.__delPeriodDisplay;
   btn.disabled=!match;
   btn.style.opacity=match?"1":".5";
   btn.style.background=match?"var(--red)":"var(--rdim)";
@@ -1733,7 +1764,7 @@ function checkDelPeriodInput(){
 function confirmDeletePeriod(){
   const p=window.__delPeriod;
   const inp=$("dper_confirm_input");
-  if(!p||!inp||inp.value.trim()!==p)return;
+  if(!p||!inp||inp.value.trim()!==window.__delPeriodDisplay)return;
   const bills=(window.__B||[]).filter(b=>(b.month||"")===p);
   let h=getPeriodHistory().filter(x=>x!==p);
   localStorage.setItem("eb_period_hist",JSON.stringify(h));
@@ -1750,6 +1781,7 @@ function confirmDeletePeriod(){
     toast("🗑️",a?"تم الحذف":"Deleted",`${p} — ${bills.length} ${a?"فاتورة":"bill(s)"}`);
   });
   delete window.__delPeriod;
+  delete window.__delPeriodDisplay;
 }
 function openPeriodPicker(){
   const a=true;
@@ -2048,7 +2080,7 @@ function openDet(id){
     bH=cB.map(b=>{
       const cls=b.paid?"bcp":isOD(b)?"bco":"bcn";
       return `<div class="bc ${cls}">
-        <div class="bc-top"><div><div class="bc-period">${esc(b.month||"—")}</div><div style="margin-top:4px">${bg(b)}</div></div><div class="bc-amt">${getCurrency()}${fmt(b.amount)}</div></div>
+        <div class="bc-top"><div><div class="bc-period">${perDisplay(b.month)}</div><div style="margin-top:4px">${bg(b)}</div></div><div class="bc-amt">${getCurrency()}${fmt(b.amount)}</div></div>
         <div class="bc-dates">${T.due_lbl} ${fmtD(b.dueDate)}</div>
         ${b.paid&&b.paidAt?`<div class="bc-paiddate">✅ ${L==="ar"?"تم الدفع بتاريخ":"Paid on"} ${fmtD(new Date(b.paidAt).toISOString().split("T")[0])}</div>`:""}
         ${b.desc?`<div class="bc-desc">💬 ${esc(b.desc)}</div>`:""}
@@ -2216,7 +2248,7 @@ function usePeriod(){
 function updatePeriodHint(){
   const hint=$("ab_period_hint");
   const p=getPeriod();
-  if(hint)hint.textContent=p?"🗓️ الفترة الحالية: "+p:"";
+  if(hint)hint.textContent=p?"🗓️ الفترة الحالية: "+perDisplayText(p):"";
 }
 function openAddBillFor(cid){
   populateSel(cid);
