@@ -841,6 +841,7 @@ html[lang="ar"] .period-hd{text-transform:none;letter-spacing:0;font-size:12px;}
       <div class="set-toggle">
         <button class="seg-btn" id="set_light" onclick="setTheme('light')">☀️ Light</button>
         <button class="seg-btn" id="set_dark" onclick="setTheme('dark')">🌙 Dark</button>
+        <button class="seg-btn" id="set_system" onclick="setTheme('system')">🖥️ System</button>
       </div>
     </div>
 
@@ -1019,7 +1020,8 @@ onSnapshot(doc(db,"config","whatsapp"), snap => {
   }
   if(d.eb_theme !== undefined && d.eb_theme !== localStorage.getItem("eb_theme")){
     localStorage.setItem("eb_theme", d.eb_theme);
-    document.documentElement.setAttribute("data-theme", d.eb_theme==="dark"?"dark":"light");
+    if(window.applyTheme)window.applyTheme(d.eb_theme);
+    else document.documentElement.setAttribute("data-theme", d.eb_theme==="dark"?"dark":"light");
     needsRender = true;
   }
   if(d.eb_adm !== undefined && d.eb_adm !== localStorage.getItem("eb_adm")){
@@ -1842,16 +1844,26 @@ function saveDueDays(val){
   localStorage.setItem("eb_due",d);
   window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_due:d});
 }
+function resolveTheme(t){
+  if(t==="system")return(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";
+  return t==="dark"?"dark":"light";
+}
 function applyTheme(t){
-  document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");
+  document.documentElement.setAttribute("data-theme",resolveTheme(t));
 }
 function setTheme(t){
   applyTheme(t);
   localStorage.setItem("eb_theme",t);
   window.DB&&window.DB.saveSettings&&window.DB.saveSettings({eb_theme:t});
-  const l=$("set_light"),d=$("set_dark");
+  const l=$("set_light"),d=$("set_dark"),s=$("set_system");
   if(l)l.classList.toggle("on",t==="light");
   if(d)d.classList.toggle("on",t==="dark");
+  if(s)s.classList.toggle("on",t==="system");
+}
+if(window.matchMedia){
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{
+    if((localStorage.getItem("eb_theme")||"light")==="system")applyTheme("system");
+  });
 }
 function applyFontSize(s){
   const z=s==="small"?1.05:s==="large"?1.32:1.18;
@@ -1883,9 +1895,10 @@ function openSettings(){
   const wrap=$("set_access_wrap");if(wrap)wrap.style.display=isSuperUser()?"block":"none";
   // Sync theme buttons
   const theme=localStorage.getItem("eb_theme")||"light";
-  const sl=$("set_light"),sd=$("set_dark");
+  const sl=$("set_light"),sd=$("set_dark"),ssy=$("set_system");
   if(sl)sl.classList.toggle("on",theme==="light");
   if(sd)sd.classList.toggle("on",theme==="dark");
+  if(ssy)ssy.classList.toggle("on",theme==="system");
   // Sync font size buttons
   const fsize=localStorage.getItem("eb_fsize")||"medium";
   ["small","medium","large"].forEach(k=>{const b=$("set_fs_"+k[0]);if(b)b.classList.toggle("on",k===fsize);});
@@ -1913,6 +1926,7 @@ function updateSettingsUI(){
   s("set_theme_l","Theme","وضع العرض");
   s("set_light","☀️ Light","☀️ فاتح");
   s("set_dark","🌙 Dark","🌙 داكن");
+  s("set_system","🖥️ System","🖥️ النظام");
   s("set_s_bil","💱 Billing","💱 الفوترة");
   s("set_cur_l","Currency Symbol","رمز العملة");
   s("set_msgtpl","Edit Bill Message Template","تعديل رسالة الفاتورة");
