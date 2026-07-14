@@ -1459,8 +1459,46 @@ window.addEventListener("DOMContentLoaded",()=>{
   applyFontSize(localStorage.getItem("eb_fsize")||"medium");
   $("ab_date").value=new Date().toISOString().split("T")[0];
   document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)closeSh(o.id);}));
+  initSheetSwipeClose();
   // Boot is now triggered by handleUser() after auth check
 });
+function initSheetSwipeClose(){
+  document.querySelectorAll(".ov").forEach(ov=>{
+    const sheet=ov.querySelector(".sheet");
+    if(!sheet)return;
+    let startY=0,dy=0,dragging=false,fromHandle=false;
+    const onStart=e=>{
+      const t=e.touches[0];
+      fromHandle=!!t.target.closest(".sh");
+      if(!fromHandle&&sheet.scrollTop>0)return;
+      startY=t.clientY;dy=0;dragging=true;
+      sheet.style.transition="none";
+    };
+    const onMove=e=>{
+      if(!dragging)return;
+      const t=e.touches[0];
+      dy=t.clientY-startY;
+      if(dy<0){dy=0;return;}
+      sheet.style.transform=`translateY(${dy}px)`;
+    };
+    const onEnd=()=>{
+      if(!dragging)return;
+      dragging=false;
+      sheet.style.transition="transform .22s cubic-bezier(.22,1,.36,1)";
+      if(dy>90){
+        sheet.style.transform="translateY(100%)";
+        setTimeout(()=>{ov.classList.remove("on");sheet.style.transition="";sheet.style.transform="";},200);
+      } else {
+        sheet.style.transform="";
+        setTimeout(()=>{sheet.style.transition="";},220);
+      }
+    };
+    sheet.addEventListener("touchstart",onStart,{passive:true});
+    sheet.addEventListener("touchmove",onMove,{passive:true});
+    sheet.addEventListener("touchend",onEnd);
+    sheet.addEventListener("touchcancel",onEnd);
+  });
+}
 function bootAfterAuth(){
   if(window.__appStarted) return;
   window.__appStarted = true;
